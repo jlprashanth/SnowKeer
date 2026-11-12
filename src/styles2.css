@@ -230,3 +230,9 @@
 :root[data-theme="dark"] .app.themed .why.no { background: var(--tint-warn); }
 :root[data-theme="dark"] .app.themed .skip:hover { color: var(--text); }
 :root[data-theme="dark"] .app.themed .tab.on { background: var(--surface); color: var(--text); }
+
+/* Astryx prose styles set colour directly on h1/h2/h3/p, so text on the coloured hero / open stage cards
+   no longer inherits white from its container — force inheritance there (.muted etc. still win). */
+.app.themed .hub-hero :is(h1, h2, h3, p, span, b, strong),
+.app.themed .stage-card.open :is(h1, h2, h3, p, span, b, strong),
+.app.themed .coach-bar :is(h1, h2, h3, p, span, b, strong) { color: inherit; }
