@@ -38,8 +38,12 @@ export default function JsLesson({ lesson, progress, onBack, onQuizFinish, onExe
           ))}
           <div className="learn-card">
             <h3>🧪 Scratchpad — nuvve try chey</h3>
-            <p>Edaina rasi Run click cheyyi. Ikkada gs, GlideRecord, incident data anni untayi. (Em marchina save avvadu.)</p>
-            <ScriptRunner starter={"var gr = new GlideRecord('incident');\ngr.get('number', 'INC0010002');\ngs.info(gr.getValue('short_description'));"} />
+            <p>Edaina rasi Run click cheyyi. {lesson.scratch?.client ? 'Ikkada g_form, g_user anni untayi — Run chesaka kinda form lo marpulu kanipistayi, form lo field marchite onChange kuda run avtundi.' : 'Ikkada gs, GlideRecord, incident data anni untayi.'} (Em marchina save avvadu.)</p>
+            <ScriptRunner
+              starter={lesson.scratch?.starter || "var gr = new GlideRecord('incident');\ngr.get('number', 'INC0010002');\ngs.info(gr.getValue('short_description'));"}
+              scenario={lesson.scratch?.scenario}
+              client={lesson.scratch?.client}
+            />
           </div>
           <button className="btn primary big" onClick={() => setTab('quiz')}>Quiz ki veldam →</button>
         </div>

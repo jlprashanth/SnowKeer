@@ -248,3 +248,20 @@
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
 .btn.danger { background: var(--bad); border-color: var(--bad); color: #fff; font-weight: 600; }
 .btn.danger:hover { background: #a02f23; border-color: #a02f23; }
+
+/* Stage 3: live mock incident form */
+.cf { margin-top: 10px; border: 1px solid #c9d3da; border-radius: 8px; background: #fff; overflow: hidden; }
+.cf-title { padding: 8px 12px; background: #eef3f6; font-weight: 600; cursor: pointer; color: #1f2d36; }
+.cf-msg { margin: 8px 12px 0; padding: 6px 10px; border-radius: 6px; font-size: 13px; }
+.cf-msg.info { background: #e6f2fb; color: #174c78; }
+.cf-msg.error { background: #fde8e6; color: #8a1c14; }
+.cf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px 14px; padding: 12px; }
+.cf-field { display: flex; flex-direction: column; gap: 3px; font-size: 13px; color: #1f2d36; }
+.cf-field.wide { grid-column: 1 / -1; }
+.cf-label { font-weight: 600; }
+.cf-req { color: #c62828; margin-right: 3px; }
+.cf-field input, .cf-field select, .cf-field textarea { padding: 5px 7px; border: 1px solid #aab7c0; border-radius: 4px; font: inherit; background: #fff; color: #1f2d36; }
+.cf-field input:disabled, .cf-field select:disabled, .cf-field textarea:disabled { background: #eceff1; color: #6b7a84; }
+.cf-fmsg { font-size: 12px; }
+.cf-fmsg.info { color: #174c78; }
+.cf-fmsg.error { color: #c62828; }

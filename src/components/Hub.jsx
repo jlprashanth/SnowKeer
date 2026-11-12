@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { LESSONS } from '../data/lessons.js'
 import { EXERCISES, exercisesFor } from '../data/exercises.js'
 import { JS_LESSONS } from '../data/lessons-js.js'
+import { CS_LESSONS } from '../data/lessons-cs.js'
 
 // Reusable collapsible stage header — use one per stage (Stage 3+ too)
 function StageHeader({ num, icon, title, subtitle, done, total, open, onToggle }) {
@@ -24,7 +25,7 @@ function StageHeader({ num, icon, title, subtitle, done, total, open, onToggle }
 }
 
 export default function Hub({ progress, onStart, onFreePlay, onExercises, onOpenJs }) {
-  const [open, setOpen] = useState({ s1: false, s2: false })
+  const [open, setOpen] = useState({ s1: false, s2: false, s3: false })
   const toggle = (k) => setOpen((o) => ({ ...o, [k]: !o[k] }))
   const jsDone = progress.jsDone || {}
   const exDone = progress.exercises || {}
@@ -97,6 +98,35 @@ export default function Hub({ progress, onStart, onFreePlay, onExercises, onOpen
           return (
             <div key={l.id} className="lesson-card">
               <div className={'lesson-num' + (codeDone === l.exercises.length ? ' done' : '')}>{codeDone === l.exercises.length ? '✓' : n + 1}</div>
+              <div className="lesson-main">
+                <h3>{l.title}</h3>
+                <p>{l.blurb}</p>
+                <div className="muted small">
+                  🎬 Video: <b>{l.video}</b>
+                  {p?.score != null && <> · Quiz: {p.score}/{l.quiz.length}</>} · 💻 Code: {codeDone}/{l.exercises.length}
+                </div>
+              </div>
+              <div className="lesson-btns">
+                <button className="btn primary" onClick={() => onOpenJs(l.id)}>{p?.done || codeDone ? 'Continue' : 'Start'}</button>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      </div>}
+
+      <StageHeader num={3} icon="🖱️" title="Client scripting" subtitle="g_form, g_user, Client Scripts, UI Actions — form react avtundi" done={CS_LESSONS.filter((l) => l.exercises.every((e) => jsDone[e.id])).length} total={CS_LESSONS.length} open={open.s3} onToggle={() => toggle('s3')} />
+      {open.s3 && <div className="stage-body">
+      <div className="muted small" style={{ marginBottom: 8 }}>
+        Client scripts browser lo run avtayi. Ikkada code rasi Run cheste kinda unna mock Incident form lo marpulu live ga kanipistayi. Course lo 26 lectures — client-side lessons ready. SN Utils, CRUD, debugging, macros, best practices, UI Pages & Macros inka vastayi.
+      </div>
+      <div className="lesson-grid">
+        {CS_LESSONS.map((l) => {
+          const p = progress[l.id]
+          const codeDone = l.exercises.filter((e) => jsDone[e.id]).length
+          return (
+            <div key={l.id} className="lesson-card">
+              <div className={'lesson-num' + (codeDone === l.exercises.length ? ' done' : '')}>{codeDone === l.exercises.length ? '✓' : l.no}</div>
               <div className="lesson-main">
                 <h3>{l.title}</h3>
                 <p>{l.blurb}</p>

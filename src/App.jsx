@@ -15,6 +15,7 @@ import Exercises from './components/Exercises.jsx'
 // Stage 2 pulls in the CodeMirror editor (big) — only load it when a JS lesson is opened
 const JsLesson = lazy(() => import('./components/JsLesson.jsx'))
 import { JS_LESSONS } from './data/lessons-js.js'
+import { CS_LESSONS } from './data/lessons-cs.js'
 import RecordList from './components/RecordList.jsx'
 import RecordForm from './components/RecordForm.jsx'
 import { DictList, DictForm, FormLayout } from './components/AdminPages.jsx'
@@ -28,7 +29,7 @@ export default function App() {
   const [lessonId, setLessonId] = useState(null)
   const [exFilter, setExFilter] = useState(null) // lesson id, or null = all exercises
   const [jsId, setJsId] = useState(null) // Stage 2 (JavaScript) lesson being viewed
-  const jsLesson = JS_LESSONS.find((l) => l.id === jsId) || null
+  const jsLesson = [...JS_LESSONS, ...CS_LESSONS].find((l) => l.id === jsId) || null
   const [stepIdx, setStepIdx] = useState(0)
   const [progress, setProgress] = useState(loadProgress)
   const [helpOn, setHelpOn] = useState(true)
