@@ -33,6 +33,12 @@ export default function App() {
   const [progress, setProgress] = useState(loadProgress)
   const [helpOn, setHelpOn] = useState(true)
   const [themeMode, setThemeMode] = useState(loadThemeMode) // 'light' | 'dark' — stages only, never the ServiceNow mock
+  const [confirmReset, setConfirmReset] = useState(false)
+  const resetProgress = () => {
+    setProgress({})
+    saveProgress({})
+    setConfirmReset(false)
+  }
   const toggleTheme = () =>
     setThemeMode((m) => {
       const n = m === 'dark' ? 'light' : 'dark'
@@ -217,6 +223,11 @@ export default function App() {
         {view === 'sim' && !lesson && <span className="coach-lesson">🧪 Free Play</span>}
         <div className="sn-spacer" />
         {themed && (
+          <button className="btn small" onClick={() => setConfirmReset(true)} title="Progress motham clear chestundi">
+            ↺ Reset progress
+          </button>
+        )}
+        {themed && (
           <button className="btn small" onClick={toggleTheme} title="Light / dark mode">
             {themeMode === 'dark' ? '☀ Light' : '🌙 Dark'}
           </button>
@@ -232,6 +243,19 @@ export default function App() {
           </>
         )}
       </div>
+
+      {confirmReset && themed && (
+        <div className="modal-back" onClick={() => setConfirmReset(false)}>
+          <div className="modal" role="alertdialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+            <h3>⚠ Reset all progress?</h3>
+            <p>Lessons, quizzes, exercises anni clear avtayi. <b>Idi undo cheyyadam kudaradu.</b></p>
+            <div className="modal-actions">
+              <button className="btn" onClick={() => setConfirmReset(false)}>No</button>
+              <button className="btn danger" onClick={resetProgress}>Yes, reset</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {view === 'hub' && <Hub progress={progress} onStart={startLesson} onFreePlay={freePlay} onExercises={openExercises} onOpenJs={openJs} />}
       {view === 'js' && jsLesson && (

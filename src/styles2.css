@@ -239,3 +239,12 @@
 :root[data-theme="dark"] .app.themed .stage-card:not(.open) { background: var(--surface); }
 :root[data-theme="dark"] .app.themed .stage-card:not(.open) .stage-bar { background: rgba(255,255,255,.14); }
 :root[data-theme="dark"] .app.themed .chip { background: var(--surface); }
+
+/* reset-progress confirmation */
+.modal-back { position: fixed; inset: 0; z-index: 5000; background: rgba(0,0,0,.5); display: grid; place-items: center; padding: 16px; }
+.modal { background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: 12px; padding: 20px 24px; max-width: 420px; width: 100%; box-shadow: 0 12px 40px rgba(0,0,0,.35); }
+.modal h3 { margin: 0 0 8px; font-size: 18px; }
+.modal p { margin: 0 0 18px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.btn.danger { background: var(--bad); border-color: var(--bad); color: #fff; font-weight: 600; }
+.btn.danger:hover { background: #a02f23; border-color: #a02f23; }
