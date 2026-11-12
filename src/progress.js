@@ -17,3 +17,22 @@ export function saveProgress(p) {
     /* ignore */
   }
 }
+
+// Light/dark preference for the stage pages (the ServiceNow mock is never themed). Default: light.
+const THEME_KEY = 'snowkeer-theme-mode'
+
+export function loadThemeMode() {
+  try {
+    return localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light'
+  } catch {
+    return 'light'
+  }
+}
+
+export function saveThemeMode(m) {
+  try {
+    localStorage.setItem(THEME_KEY, m)
+  } catch {
+    /* ignore */
+  }
+}
