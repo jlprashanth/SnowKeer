@@ -1,8 +1,31 @@
+import { useState } from 'react'
 import { LESSONS } from '../data/lessons.js'
 import { EXERCISES, exercisesFor } from '../data/exercises.js'
 import { JS_LESSONS } from '../data/lessons-js.js'
 
+// Reusable collapsible stage header — use one per stage (Stage 3+ too)
+function StageHeader({ num, icon, title, subtitle, done, total, open, onToggle }) {
+  const pct = total ? Math.round((done / total) * 100) : 0
+  return (
+    <button className={'stage-card' + (open ? ' open' : '')} onClick={onToggle} aria-expanded={open}>
+      <span className="stage-badge">{icon}</span>
+      <span className="stage-info">
+        <span className="stage-kicker">STAGE {num}</span>
+        <span className="stage-title">{title}</span>
+        <span className="stage-sub">{subtitle}</span>
+      </span>
+      <span className="stage-progress">
+        <span className="stage-count">{done}/{total} done</span>
+        <span className="stage-bar"><span style={{ width: pct + '%' }} /></span>
+      </span>
+      <span className="stage-chev">▾</span>
+    </button>
+  )
+}
+
 export default function Hub({ progress, onStart, onFreePlay, onExercises, onOpenJs }) {
+  const [open, setOpen] = useState({ s1: false, s2: false })
+  const toggle = (k) => setOpen((o) => ({ ...o, [k]: !o[k] }))
   const jsDone = progress.jsDone || {}
   const exDone = progress.exercises || {}
   const exDoneCount = EXERCISES.filter((e) => exDone[e.id]).length
@@ -32,8 +55,8 @@ export default function Hub({ progress, onStart, onFreePlay, onExercises, onOpen
         </div>
       </div>
 
-      <h2>Stage 1 · Introduction</h2>
-      <div className="lesson-grid">
+      <StageHeader num={1} icon="🧭" title="Introduction" subtitle="Account, UI tour, tables, forms, update sets" done={doneCount} total={LESSONS.length} open={open.s1} onToggle={() => toggle('s1')} />
+      {open.s1 && <div className="lesson-grid stage-body">
         {LESSONS.map((l, n) => {
           const p = progress[l.id]
           return (
@@ -60,9 +83,10 @@ export default function Hub({ progress, onStart, onFreePlay, onExercises, onOpen
             </div>
           )
         })}
-      </div>
+      </div>}
 
-      <h2 style={{ marginTop: 28 }}>Stage 2 · JavaScript (ServiceNow style)</h2>
+      <StageHeader num={2} icon="💻" title="JavaScript (ServiceNow style)" subtitle="gs, GlideRecord, incident — code ikkade run cheyyi" done={JS_LESSONS.filter((l) => l.exercises.every((e) => jsDone[e.id])).length} total={JS_LESSONS.length} open={open.s2} onToggle={() => toggle('s2')} />
+      {open.s2 && <div className="stage-body">
       <div className="muted small" style={{ marginBottom: 8 }}>
         Idi generic JavaScript kaadu — anni examples ServiceNow lo (gs, GlideRecord, incident) nunchi. Code ikkade rayi run cheyochu.
       </div>
@@ -88,6 +112,7 @@ export default function Hub({ progress, onStart, onFreePlay, onExercises, onOpen
           )
         })}
       </div>
+      </div>}
     </div>
   )
 }
