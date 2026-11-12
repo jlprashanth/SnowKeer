@@ -236,3 +236,6 @@
 .app.themed .hub-hero :is(h1, h2, h3, p, span, b, strong),
 .app.themed .stage-card.open :is(h1, h2, h3, p, span, b, strong),
 .app.themed .coach-bar :is(h1, h2, h3, p, span, b, strong) { color: inherit; }
+:root[data-theme="dark"] .app.themed .stage-card:not(.open) { background: var(--surface); }
+:root[data-theme="dark"] .app.themed .stage-card:not(.open) .stage-bar { background: rgba(255,255,255,.14); }
+:root[data-theme="dark"] .app.themed .chip { background: var(--surface); }
