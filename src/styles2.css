@@ -187,3 +187,46 @@
 .stage-card.open .stage-chev { transform: rotate(180deg); }
 .stage-body { margin-top: 12px; }
 @media (max-width: 600px) { .stage-progress { display: none; } }
+
+/* ===== Astryx theme (stage pages only) =====
+   .app.themed exists only outside the ServiceNow mock. It maps SnowKeer's own variables onto Astryx tokens,
+   so the existing stage CSS picks up the theme (and dark mode) without rewriting every rule. */
+#root > [data-astryx-theme] { height: 100%; }
+.app.themed {
+  --bg: var(--color-background-body);
+  --surface: var(--color-background-card);
+  --text: var(--color-text-primary);
+  --muted: var(--color-text-secondary);
+  --line: var(--color-border);
+  font-family: var(--font-family-body);
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* dark mode: stage-page rules that hardcode light colours */
+:root[data-theme="dark"] .app.themed {
+  --tint-ok: #15332a;
+  --tint-ok-line: #2c6b53;
+  --tint-warn: #3a3217;
+  --tint-warn-line: #6b5b24;
+  --tint-bad: #3d1f1b;
+}
+:root[data-theme="dark"] .app.themed .tabs { border-bottom-color: var(--line); }
+:root[data-theme="dark"] .app.themed .tab { color: var(--muted); }
+:root[data-theme="dark"] .app.themed .learn-card,
+:root[data-theme="dark"] .app.themed .ex-card { background: var(--surface); border-color: var(--line); }
+:root[data-theme="dark"] .app.themed .ex-card.done { background: var(--tint-ok); }
+:root[data-theme="dark"] .app.themed .ex-hint { background: var(--tint-warn); border-color: var(--tint-warn-line); }
+:root[data-theme="dark"] .app.themed .ex-answer,
+:root[data-theme="dark"] .app.themed .test-win { background: var(--tint-ok); border-color: var(--tint-ok-line); }
+:root[data-theme="dark"] .app.themed .test.ok { color: #6fd1a6; }
+:root[data-theme="dark"] .app.themed .test.no { color: #ff8f84; }
+:root[data-theme="dark"] .app.themed .test-diff { color: var(--muted); }
+:root[data-theme="dark"] .app.themed .test-diff code { background: var(--bg); }
+:root[data-theme="dark"] .app.themed .badge.ok,
+:root[data-theme="dark"] .app.themed .opt.right { background: var(--tint-ok); color: #8fe0bd; }
+:root[data-theme="dark"] .app.themed .opt.wrong { background: var(--tint-bad); color: #ffb3aa; }
+:root[data-theme="dark"] .app.themed .why.ok { background: var(--tint-ok); }
+:root[data-theme="dark"] .app.themed .why.no { background: var(--tint-warn); }
+:root[data-theme="dark"] .app.themed .skip:hover { color: var(--text); }
+:root[data-theme="dark"] .app.themed .tab.on { background: var(--surface); color: var(--text); }

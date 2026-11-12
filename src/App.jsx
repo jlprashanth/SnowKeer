@@ -2,7 +2,9 @@ import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { LESSONS } from './data/lessons.js'
 import { buildSeed } from './engine/schema.js'
 import * as ops from './engine/ops.js'
-import { loadProgress, saveProgress } from './progress.js'
+import { loadProgress, saveProgress, loadThemeMode, saveThemeMode } from './progress.js'
+import { Theme } from '@astryxdesign/core/theme'
+import { neutralTheme } from '@astryxdesign/theme-neutral/built'
 import Header from './components/Header.jsx'
 import Navigator from './components/Navigator.jsx'
 import Tooltip from './components/Tooltip.jsx'
@@ -30,6 +32,13 @@ export default function App() {
   const [stepIdx, setStepIdx] = useState(0)
   const [progress, setProgress] = useState(loadProgress)
   const [helpOn, setHelpOn] = useState(true)
+  const [themeMode, setThemeMode] = useState(loadThemeMode) // 'light' | 'dark' — stages only, never the ServiceNow mock
+  const toggleTheme = () =>
+    setThemeMode((m) => {
+      const n = m === 'dark' ? 'light' : 'dark'
+      saveThemeMode(n)
+      return n
+    })
 
   const [db, setDb] = useState(() => buildSeed())
   const dbRef = useRef(db)
@@ -195,8 +204,9 @@ export default function App() {
 
   const bare = route.name === 'page' && route.id === 'devportal'
 
-  return (
-    <div className="app">
+  const themed = view !== 'sim'
+  const app = (
+    <div className={'app' + (themed ? ' themed' : '')}>
       <div className="coach-bar">
         <button className="brand" onClick={toHub}>❄ SnowKeer</button>
         {view === 'sim' && lesson && (
@@ -206,6 +216,11 @@ export default function App() {
         )}
         {view === 'sim' && !lesson && <span className="coach-lesson">🧪 Free Play</span>}
         <div className="sn-spacer" />
+        {themed && (
+          <button className="btn small" onClick={toggleTheme} title="Light / dark mode">
+            {themeMode === 'dark' ? '☀ Light' : '🌙 Dark'}
+          </button>
+        )}
         {view === 'sim' && (
           <>
             <label className="toggle" title="Hover chesthe explanation vastundi">
@@ -244,4 +259,7 @@ export default function App() {
       )}
     </div>
   )
+  // The Astryx theme wraps every stage page but NOT the ServiceNow mock ('sim'): unmounting it there
+  // also removes its attributes from <html>, so the mock renders exactly as before.
+  return themed ? <Theme theme={neutralTheme} mode={themeMode}>{app}</Theme> : app
 }
