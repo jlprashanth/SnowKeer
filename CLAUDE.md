@@ -24,7 +24,7 @@ title, in the course's order. Stage 1 and Stage 2 titles are already in the code
 |---|---|---|
 | 1 | Introduction (18 lessons: account, users, UI tour, tables, forms, views, dictionary, update sets, UI/data policies...) | DONE — guided mock lessons + quiz, plus 54 real-PDI exercises |
 | 2 | JavaScript, ServiceNow style (8 lessons) | DONE — learn cards + quiz + 32 coding exercises (only lesson 1 clicked through in a browser) |
-| 3 | Client scripting & UI (26 lectures, titles below) | IN PROGRESS — client runner + 17 lessons done (lectures 2–8, 11, 12, 15–22) in `src/data/lessons-cs*.js`, 68 exercises; PENDING: 1 SN Utils, 9–10 CRUD GlideRecord (reuse Stage 2 runner), 13 debugging, 14 macros, 23 best practices, 24–26 UI Pages/Macros (learn + quiz + real-PDI exercises) |
+| 3 | Client scripting & UI (26 lectures, titles below) | DONE — all 26 lectures in `src/data/lessons-cs*.js` (101 exercises: client runner, server runner, and `mode: 'pdi'` real-PDI lessons). Not clicked through in a browser except a few exercises |
 | 4 | Server scripting (Business Rules, Script Includes, GlideRecord deeper, GlideAggregate, scheduled jobs) | planned |
 | 5 | Service Catalog and Flow Designer | planned |
 | 6 | ITSM and Now Assist | planned |
@@ -71,7 +71,7 @@ React 18 + Vite 5, plain JS/JSX, no router, no backend, no CSS framework. Progre
 11 Glide Ajax & on change client script use cases (Part 1) · 12 same title (Part 2) · 13 Client and Server side Debugging · 14 Syntax Editor Macros ·
 15 On Submit Client Scripts and Use cases · 16 Client Script Use cases · 17 On Cell Edit Client scripts · 18–21 UI Actions (parts 1–4) · 22 UI Actions on Table List ·
 23 Client Side Scripting best Practices · 24 UI Pages · 25 UI Pages continuation · 26 UI Macros.
-Plan: client runner lessons (g_user/g_form/g_list/Client Scripts/onLoad/onChange/GlideAjax/onSubmit/onCellEdit/UI Actions) use the client runner;
+Status: all written. `mode: 'pdi'` lessons (1, 13, 14, 24–26) use `Card` from Exercises.jsx with scenario/hint/steps/answer/cleanup. Original plan: client runner lessons (g_user/g_form/g_list/Client Scripts/onLoad/onChange/GlideAjax/onSubmit/onCellEdit/UI Actions) use the client runner;
 CRUD lessons 9–10 reuse the Stage 2 server runner; SN Utils, debugging, macros, best practices, UI Pages, UI Macros (Jelly) = learn cards + quiz + real-PDI exercises.
 Client runner: exercise has `client: { trigger: { type: 'onLoad'|'onChange'|'onSubmit'|'onCellEdit', ... } }`; tests use `__f.<field>.{value,mandatory,readOnly,visible,choices,msgs}`, `__msgs`, `__submit`.
 Lesson ids prefix `cs-`; check with `node dev-tools/check-cs.mjs`. GlideAjax runs `scenario.scriptInclude {name, code}` on the server mock. Flag uncertain API details (gsftSubmit pattern, onCellEdit signature, g_list methods) for her to confirm in her PDI.

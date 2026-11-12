@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import Quiz from './Quiz.jsx'
 import ScriptRunner from './ScriptRunner.jsx'
+import { Card as PdiCard } from './Exercises.jsx'
 
 const RANK = { easy: 0, medium: 1, hard: 2 }
 const LEVEL = { easy: '🟢 Easy', medium: '🟡 Medium', hard: '🔴 Hard' }
 
-export default function JsLesson({ lesson, progress, onBack, onQuizFinish, onExerciseDone }) {
+export default function JsLesson({ lesson, progress, onBack, onQuizFinish, onExerciseDone, onExerciseToggle }) {
+  const pdi = lesson.mode === 'pdi'
   const [tab, setTab] = useState('learn')
   const [open, setOpen] = useState(null)
   const doneMap = progress.jsDone || {}
@@ -24,7 +26,7 @@ export default function JsLesson({ lesson, progress, onBack, onQuizFinish, onExe
       <div className="tabs">
         {tabBtn('learn', '📖 Learn')}
         {tabBtn('quiz', '❓ Quiz' + (progress[lesson.id]?.score != null ? ` (${progress[lesson.id].score}/${lesson.quiz.length})` : ''))}
-        {tabBtn('code', `💻 Code (${doneCount}/${exs.length})`)}
+        {tabBtn('code', `${pdi ? '🛠 PDI Practice' : '💻 Code'} (${doneCount}/${exs.length})`)}
       </div>
 
       {tab === 'learn' && (
@@ -36,7 +38,7 @@ export default function JsLesson({ lesson, progress, onBack, onQuizFinish, onExe
               {c.code && <pre className="code-sample">{c.code}</pre>}
             </div>
           ))}
-          <div className="learn-card">
+          {!pdi && <div className="learn-card">
             <h3>🧪 Scratchpad — nuvve try chey</h3>
             <p>Edaina rasi Run click cheyyi. {lesson.scratch?.client ? 'Ikkada g_form, g_user anni untayi — Run chesaka kinda form lo marpulu kanipistayi, form lo field marchite onChange kuda run avtundi.' : 'Ikkada gs, GlideRecord, incident data anni untayi.'} (Em marchina save avvadu.)</p>
             <ScriptRunner
@@ -44,7 +46,7 @@ export default function JsLesson({ lesson, progress, onBack, onQuizFinish, onExe
               scenario={lesson.scratch?.scenario}
               client={lesson.scratch?.client}
             />
-          </div>
+          </div>}
           <button className="btn primary big" onClick={() => setTab('quiz')}>Quiz ki veldam →</button>
         </div>
       )}
@@ -53,7 +55,7 @@ export default function JsLesson({ lesson, progress, onBack, onQuizFinish, onExe
         <Quiz
           key="quiz"
           lesson={lesson}
-          finishLabel="Code exercises ki →"
+          finishLabel={pdi ? 'PDI practice ki →' : 'Code exercises ki →'}
           tip="Next: Code tab lo ServiceNow scripts rayi practice chey."
           onFinish={(score) => {
             onQuizFinish(lesson.id, score)
@@ -62,7 +64,14 @@ export default function JsLesson({ lesson, progress, onBack, onQuizFinish, onExe
         />
       )}
 
-      {tab === 'code' && (
+      {tab === 'code' && pdi && (
+        <div>
+          <p className="muted">Ivi nee <b>real PDI</b> lo cheyyali — steps / answer / cleanup ikkada chudochu. Cleanup marchipoku!</p>
+          {exs.map((e) => <PdiCard key={e.id} e={e} done={!!doneMap[e.id]} onToggle={onExerciseToggle} />)}
+        </div>
+      )}
+
+      {tab === 'code' && !pdi && (
         <div>
           <p className="muted">
             Prathi exercise ki code rayyi → <b>Run</b> → tests pass avvali. Struck ayithe Hint, last lo Solution.

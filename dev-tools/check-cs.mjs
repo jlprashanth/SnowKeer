@@ -10,10 +10,18 @@ const ids = new Set()
 for (const l of CS_LESSONS) {
   if (!l.learn?.length) fail(l.id + ': no learn cards')
   if (l.quiz?.length !== 5) fail(l.id + ': quiz should have 5 questions')
-  if (l.exercises.length < 4) fail(l.id + ': fewer than 4 exercises')
+  if (l.exercises.length < (l.mode === 'pdi' ? 3 : 4)) fail(l.id + ': too few exercises')
   l.quiz.forEach((x, i) => { if (!(x.answer >= 0 && x.answer < x.options.length)) fail(`${l.id} quiz ${i}: bad answer index`) })
   for (const e of l.exercises) {
     n++
+    if (l.mode === 'pdi') {
+      if (ids.has(e.id)) fail('duplicate id ' + e.id)
+      ids.add(e.id)
+      for (const k of ['title', 'scenario', 'hint', 'answer', 'cleanup']) if (!String(e[k] || '').trim()) fail(`${e.id}: empty ${k}`)
+      if (!e.steps?.length) fail(`${e.id}: no steps`)
+      if (/Prerequisite/i.test(e.scenario + e.hint + e.steps.join(' ')) === false && /prerequisite/i.test(e.title)) fail(`${e.id}: bad prereq`)
+      continue
+    }
     if (ids.has(e.id)) fail('duplicate id ' + e.id)
     ids.add(e.id)
     for (const k of ['title', 'task', 'starter', 'solution', 'hint', 'explain']) if (!String(e[k] || '').trim()) fail(`${e.id}: empty ${k}`)

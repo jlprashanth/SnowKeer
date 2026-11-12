@@ -118,7 +118,7 @@ export default function Hub({ progress, onStart, onFreePlay, onExercises, onOpen
       <StageHeader num={3} icon="🖱️" title="Client scripting" subtitle="g_form, g_user, Client Scripts, UI Actions — form react avtundi" done={CS_LESSONS.filter((l) => l.exercises.every((e) => jsDone[e.id])).length} total={CS_LESSONS.length} open={open.s3} onToggle={() => toggle('s3')} />
       {open.s3 && <div className="stage-body">
       <div className="muted small" style={{ marginBottom: 8 }}>
-        Client scripts browser lo run avtayi. Ikkada code rasi Run cheste kinda unna mock Incident form lo marpulu live ga kanipistayi. Course lo 26 lectures — client-side lessons ready. SN Utils, CRUD, debugging, macros, best practices, UI Pages & Macros inka vastayi.
+        Client scripts browser lo run avtayi. Ikkada code rasi Run cheste kinda unna mock Incident form lo marpulu live ga kanipistayi. Course lo 26 lectures anni ikkada unnayi. Konni lessons lo code ikkade run avtundi, konni (SN Utils, debugging, macros, UI Pages, UI Macros) nee real PDI lo cheyyali.
       </div>
       <div className="lesson-grid">
         {CS_LESSONS.map((l) => {

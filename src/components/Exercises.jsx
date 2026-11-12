@@ -5,7 +5,7 @@ import { EXERCISES } from '../data/exercises.js'
 const RANK = { easy: 0, medium: 1, hard: 2 }
 const LEVEL = { easy: '🟢 Easy', medium: '🟡 Medium', hard: '🔴 Hard' }
 
-function Card({ e, done, onToggle }) {
+export function Card({ e, done, onToggle }) {
   const [hint, setHint] = useState(false)
   const [shown, setShown] = useState(0) // how many steps revealed
   const [answer, setAnswer] = useState(false)

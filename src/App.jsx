@@ -140,6 +140,13 @@ export default function App() {
   const finishJsQuiz = (id, score) =>
     updateProgress((p) => ({ ...p, [id]: { ...p[id], done: true, score: Math.max(score, p[id]?.score ?? 0) } }))
   const markJsDone = (exId) => updateProgress((p) => ({ ...p, jsDone: { ...(p.jsDone || {}), [exId]: true } }))
+  const toggleJsDone = (exId) =>
+    updateProgress((p) => {
+      const cur = { ...(p.jsDone || {}) }
+      if (cur[exId]) delete cur[exId]
+      else cur[exId] = true
+      return { ...p, jsDone: cur }
+    })
   const toggleExercise = (exId) => {
     const cur = progress.exercises || {}
     const ex = { ...cur, [exId]: !cur[exId] }
@@ -261,7 +268,7 @@ export default function App() {
       {view === 'hub' && <Hub progress={progress} onStart={startLesson} onFreePlay={freePlay} onExercises={openExercises} onOpenJs={openJs} />}
       {view === 'js' && jsLesson && (
         <Suspense fallback={<div className="js-page muted">Editor load avtundi…</div>}>
-          <JsLesson key={jsLesson.id} lesson={jsLesson} progress={progress} onBack={toHub} onQuizFinish={finishJsQuiz} onExerciseDone={markJsDone} />
+          <JsLesson key={jsLesson.id} lesson={jsLesson} progress={progress} onBack={toHub} onQuizFinish={finishJsQuiz} onExerciseDone={markJsDone} onExerciseToggle={toggleJsDone} />
         </Suspense>
       )}
       {view === 'exercises' && <Exercises lessonId={exFilter} progress={progress} onToggle={toggleExercise} onBack={toHub} />}
