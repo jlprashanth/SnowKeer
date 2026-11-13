@@ -53,6 +53,7 @@ React 18 + Vite 5, plain JS/JSX, no router, no backend, no CSS framework. Progre
 
 ## How to test
 - `node dev-tools/check-js.mjs` — every Stage 2 reference solution must pass all tests and every starter must FAIL. Run after any change to `src/js/` or JS lessons.
+- `node dev-tools/check-mock.mjs` — mock API checks (dot-walking `gr.caller_id.email`, `changes()/changesTo()/changesFrom()` vs `previous`, `gs.getUser()`, setVisible vs setDisplay space). Run after editing `src/js/*Mock.js`.
 - `node dev-tools/check-exercises.mjs` — Stage 1 exercise data sanity (ids, lessonIds, prerequisite notes on Practice Task exercises).
 - `dev-tools/test-driver.js` — auto-plays Stage 1 guided lessons (sets `window.__run`). Not loaded by the app: with the dev server running,
   load it in the page (e.g. `await import('/dev-tools/test-driver.js')` in the console), then `await __run('<lessonId>')`. It does not play
@@ -74,4 +75,4 @@ React 18 + Vite 5, plain JS/JSX, no router, no backend, no CSS framework. Progre
 Status: all written. `mode: 'pdi'` lessons (1, 13, 14, 24–26) use `Card` from Exercises.jsx with scenario/hint/steps/answer/cleanup. Original plan: client runner lessons (g_user/g_form/g_list/Client Scripts/onLoad/onChange/GlideAjax/onSubmit/onCellEdit/UI Actions) use the client runner;
 CRUD lessons 9–10 reuse the Stage 2 server runner; SN Utils, debugging, macros, best practices, UI Pages, UI Macros (Jelly) = learn cards + quiz + real-PDI exercises.
 Client runner: exercise has `client: { trigger: { type: 'onLoad'|'onChange'|'onSubmit'|'onCellEdit', ... } }`; tests use `__f.<field>.{value,mandatory,readOnly,visible,choices,msgs}`, `__msgs`, `__submit`.
-Lesson ids prefix `cs-`; check with `node dev-tools/check-cs.mjs`. GlideAjax runs `scenario.scriptInclude {name, code}` on the server mock. Flag uncertain API details (gsftSubmit pattern, onCellEdit signature, g_list methods) for her to confirm in her PDI.
+Lesson ids prefix `cs-`; check with `node dev-tools/check-cs.mjs`. Extra test runs: `src/data/variants-cs.js` (keyed by exercise id; same code re-run under another scenario so else-branches are tested; `runScript` takes optional `variants`). Quiz options are shuffled at render time in `Quiz.jsx`. GlideAjax runs `scenario.scriptInclude {name, code}` on the server mock. Flag uncertain API details (gsftSubmit pattern, onCellEdit signature, g_list methods) for her to confirm in her PDI.

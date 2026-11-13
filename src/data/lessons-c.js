@@ -41,8 +41,8 @@ const filters = {
   ],
   quiz: [
     q('Filter condition builder open cheyyadaniki?', ['Funnel icon', 'New button', 'Header', 'Star'], 0, 'List paina funnel icon.'),
-    q('Rendu conditions kuda true avvali ante?', ['AND', 'OR', 'NOT', 'LIKE'], 0, 'AND.'),
-    q('Encoded query lo OR ela rastaru?', ['^OR', '&', '||', 'OR'], 0, '^OR.'),
+    q('Rendu conditions kuda true avvali ante?', ['AND', 'OR', 'NOT', 'LIKE'], 0, 'AND — rendu conditions kuda true ayithe matrame record list lo vastundi.'),
+    q('Encoded query lo OR ela rastaru?', ['^OR', '&', '||', 'OR'], 0, 'Encoded query lo ^OR = OR condition, ^ = AND.'),
     q('Filter run chesaka breadcrumb lo em kanipistundi?', ['Applied conditions', 'Roles', 'Tables', 'Nothing'], 0, 'Applied conditions.'),
   ],
 }
@@ -74,8 +74,8 @@ const saveSubmit = {
   ],
   quiz: [
     q('Save chesaka form lone undali ante?', ['Save', 'Submit', 'Update', 'Delete'], 0, 'Save — form lone untav.'),
-    q('Existing record changes save chesi list ki vellali?', ['Update', 'Insert & Stay', 'Save', 'New'], 0, 'Update.'),
-    q('Kotha record insert chesi form lone undali?', ['Insert & Stay', 'Submit', 'Update', 'Back'], 0, 'Insert & Stay.'),
+    q('Existing record changes save chesi list ki vellali?', ['Update', 'Insert & Stay', 'Save', 'New'], 0, 'Update — existing record save chesi list ki veltav.'),
+    q('Kotha record insert chesi form lone undali?', ['Insert & Stay', 'Submit', 'Update', 'Back'], 0, 'Insert & Stay — kotha record insert chesi form lone untav.'),
     q('Kotha record save chesi list ki vellali?', ['Submit', 'Save', 'Update', 'Reload'], 0, 'Submit (Insert).'),
   ],
 }
@@ -107,10 +107,10 @@ const childTables = {
     info('Child form lo Status default ippudu "Ongoing" — parent (Training Request) lo "Planned" ne. Override child ki matrame ✅ Number kuda parent nundi vachindi (TRQ...).', 'f-u_status'),
   ],
   quiz: [
-    q('Child table ante?', ['Inkoka table ni extend chese table', 'Hidden table', 'Temp table', 'View'], 0, 'Parent ni extend chese table.'),
-    q('Parent columns child ki raavadam ni em antaru?', ['Inheritance', 'Mapping', 'Lookup', 'Filter'], 0, 'Inheritance.'),
+    q('Child table ante?', ['Inkoka table ni extend chese table', 'Hidden ga unde system table', 'Temporary data ki vaade table', 'Oka table yokka alternate view'], 0, 'Parent ni extend chese table.'),
+    q('Parent columns child ki raavadam ni em antaru?', ['Inheritance', 'Mapping', 'Lookup', 'Filter'], 0, 'Inheritance — child table parent columns ni automatic ga teesukuntundi.'),
     q('Child table lo matrame default/mandatory marchalante?', ['Dictionary Override', 'UI Action', 'Role', 'Menu'], 0, 'Dictionary Override.'),
-    q('Incident, Problem, Change e table ni extend chestayi?', ['Task', 'User', 'Group', 'Role'], 0, 'Task table.'),
+    q('Incident, Problem, Change e table ni extend chestayi?', ['Task', 'User', 'Group', 'Role'], 0, 'Task table — Incident, Problem, Change anni Task ni extend chestayi (number, state, assignment group common).'),
   ],
 }
 
@@ -150,8 +150,8 @@ const dataLookup = {
   quiz: [
     q('Impact + Urgency nundi Priority ela vastundi?', ['Data Lookup rule', 'Role', 'View', 'Favorite'], 0, 'Data Lookup rule (Priority lookup).'),
     q('Condition batti group ki auto assign cheyyadaniki?', ['Assignment Rule', 'Update Set', 'Dashboard', 'Menu'], 0, 'Assignment Rule.'),
-    q('Priority auto-calculate aapali ante?', ['Data Lookup Definition Active untick', 'Table delete', 'Role remove', 'Module hide'], 0, 'Definition ni inactive cheyyali.'),
-    q('Lookup rule marchithe effect e records ki?', ['Kotha/update ayye records ki', 'Delete ayina vaatiki', 'Em kaadu', 'Users ki'], 0, 'Priority calculate ayye records ki.'),
+    q('Priority auto-calculate aapali ante?', ['Data Lookup Definition Active untick', 'Priority table ni delete cheyyadam', 'User nundi role remove cheyyadam', 'Module ni navigator lo hide cheyyadam'], 0, 'Definition ni inactive cheyyali.'),
+    q('Lookup rule marchithe effect e records ki?', ['Kotha/update ayye records ki', 'Already delete ayina records ki kuda', 'Eppudu em effect undadu', 'Users table records ki matrame'], 0, 'Priority calculate ayye records ki.'),
   ],
 }
 
@@ -185,10 +185,10 @@ const updateSets = {
     info('Gurtu pettuko: 1) Eppudu own update set create chesi Current ga pettu 2) Default lo changes petta 3) Complete chesaka export/commit. Update Sets ayipoyayi ✅'),
   ],
   quiz: [
-    q('Update Set em capture chestundi?', ['Configuration changes', 'Anni incident records', 'Passwords', 'Emails'], 0, 'Configuration (tables, policies, menus...).'),
-    q('Changes capture avvalante set state?', ['In progress', 'Complete', 'Ignore', 'Deleted'], 0, 'In progress.'),
-    q('Default update set lo changes pettala?', ['Pettakudadu — own set vaadali', 'Ela ayina parledu', 'Pettali', 'Delete cheyyali'], 0, 'Own update set create chesi vaadali.'),
-    q('Target instance lo set ni teesukunnaka order?', ['Preview → Commit', 'Commit → Preview', 'Delete → Commit', 'Export → Export'], 0, 'Preview (conflicts) → Commit.'),
+    q('Update Set em capture chestundi?', ['Configuration changes (tables, policies, scripts)', 'Anni incident records ni', 'User passwords ni', 'Pampina emails ni'], 0, 'Configuration (tables, policies, menus...).'),
+    q('Changes capture avvalante set state?', ['In progress', 'Complete', 'Ignore', 'Deleted'], 0, 'In progress set lone changes capture avtayi; Complete chesthe capture aagipotundi.'),
+    q('Default update set lo changes pettala?', ['Pettakudadu — own set vaadali', 'Ela ayina parledu, default lo pettochu', 'Pettali, adi safest option', 'Default set ni delete chesi pettali'], 0, 'Own update set create chesi vaadali.'),
+    q('Target instance lo set ni teesukunnaka order?', ['Preview → Commit', 'Commit → Preview', 'Delete → Commit', 'Export → Commit'], 0, 'Preview (conflicts) → Commit.'),
   ],
 }
 
@@ -224,10 +224,10 @@ const uiPolicies = {
     info('∗ poyindi — "Reverse if false" valla ✅ UI Policy client-side (browser lo) matrame panichestundi — server side enforce cheyyadu (adi Data Policy, next lesson).', 'f-description'),
   ],
   quiz: [
-    q('UI Policy em marchagalidi?', ['Mandatory / Visible / Read-only', 'Table name', 'User roles', 'Database'], 0, 'Field mandatory/visible/read-only.'),
-    q('"Reverse if false" ante?', ['Condition false ayithe actions reverse', 'Policy delete', 'Error', 'Hide'], 0, 'Actions reverse avtayi.'),
-    q('UI Policy ekkada run avtundi?', ['Browser (client)', 'Database only', 'MID server', 'Update set'], 0, 'Client-side.'),
-    q('Policy lo fields meeda actions ekkada add chestam?', ['UI Policy Actions related list', 'Dictionary', 'Roles', 'Views'], 0, 'UI Policy Actions.'),
+    q('UI Policy em marchagalidi?', ['Mandatory / Visible / Read-only', 'Table name ni marchagalidi', 'User roles ni marchagalidi', 'Database structure ni marchagalidi'], 0, 'Field mandatory/visible/read-only.'),
+    q('"Reverse if false" ante?', ['Condition false ayithe actions reverse', 'Policy ni automatic ga delete chestundi', 'Condition false ayithe error istundi', 'Condition false ayithe form hide chestundi'], 0, 'Actions reverse avtayi.'),
+    q('UI Policy ekkada run avtundi?', ['Browser (client)', 'Database only', 'MID server', 'Update set'], 0, 'UI Policy client-side (browser) lo run avtundi, anduke server APIs vaadalem.'),
+    q('Policy lo fields meeda actions ekkada add chestam?', ['UI Policy Actions related list', 'Dictionary record lo oka column', 'Roles related list lo', 'Form Layout / Views lo'], 0, 'UI Policy Actions.'),
   ],
 }
 
@@ -263,10 +263,10 @@ const dataPolicies = {
     info('Error: "Data Policy Exception: Description is mandatory". Form lo ∗ lekapoyina server reject chesindi ✅ Anduke Data Policy import/web service data ki kuda protect chestundi.', 'form-err'),
   ],
   quiz: [
-    q('Data Policy ekkada enforce avtundi?', ['Server-side (+ optional client)', 'Browser only', 'MID only', 'Navigator'], 0, 'Server-side; "Use as UI Policy" tho client lo kuda.'),
+    q('Data Policy ekkada enforce avtundi?', ['Server-side (+ optional client)', 'Browser lo matrame, server lo kaadu', 'MID Server lo matrame', 'Application Navigator lo matrame'], 0, 'Server-side; "Use as UI Policy" tho client lo kuda.'),
     q('Import sets lo kuda rule apply avvalante?', ['Data Policy', 'UI Policy', 'View', 'Favorite'], 0, 'Data Policy (Apply to import sets).'),
-    q('UI Policy vs Data Policy — server enforce chese edi?', ['Data Policy', 'UI Policy', 'Rendu', 'Rendu kaadu'], 0, 'Data Policy.'),
-    q('"Use as UI Policy on client" untick chesthe?', ['Server lo matrame enforce', 'Policy delete', 'Inactive', 'Em maradu'], 0, 'Server-side matrame.'),
+    q('UI Policy vs Data Policy — server enforce chese edi?', ['Data Policy', 'UI Policy', 'Rendu', 'Rendu kaadu'], 0, 'Data Policy server-side enforce chestundi — import sets, web services ki kuda apply avtundi.'),
+    q('"Use as UI Policy on client" untick chesthe?', ['Server lo matrame enforce', 'Policy delete ayipothundi', 'Policy inactive avtundi', 'Emi marchadu, same ga untundi'], 0, 'Server-side matrame.'),
   ],
 }
 

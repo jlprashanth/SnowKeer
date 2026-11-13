@@ -43,11 +43,11 @@ const snutils = {
     },
   ],
   quiz: [
-    q('SN Utils ante?', ['ServiceNow official module', 'Free browser extension (community tool)', 'Update Set', 'Plugin store app'], 1, 'Browser extension — community tool.'),
+    q('SN Utils ante?', ['ServiceNow official platform module', 'Free browser extension (community tool)', 'Update Set lo oka type', 'Plugin Store lo app'], 1, 'Browser extension — community tool.'),
     q('Slash commands ela start avtayi?', ['"/" type chesi', 'Ctrl+S', '"#" tho', 'F5'], 0, '"/" tho — list vastundi.'),
-    q('Script rayadaniki field label kaadu, enti kavali?', ['Column name (e.g. short_description)', 'Table label', 'Sys ID', 'View name'], 0, 'Script lo column name vaadali.'),
+    q('Script rayadaniki field label kaadu, enti kavali?', ['Column name (e.g. short_description)', 'Field yokka Table label', 'Record yokka Sys ID', 'Form View peru'], 0, 'Script lo column name vaadali.'),
     q('Background Script ela vaadali?', ['PDI lo safe ga test chesi', 'Production lo ellappudu', 'Client script lo', 'Update set lo'], 0, 'PDI lo test; production lo jagratta.'),
-    q('Command names marite ela telusukuntam?', ['"/" tho vachhe list chudu', 'Guess', 'Reinstall', 'Em cheyyaleru'], 0, 'Extension lo list ye truth.'),
+    q('Command names marite ela telusukuntam?', ['"/" tho vachhe list chudu', 'Guess chesi try cheyyadam', 'Extension ni reinstall cheyyadam', 'Telusukovadam sadhyam kaadu'], 0, 'Extension lo list ye truth.'),
   ],
   exercises: [
     jx('cs-snutils', 1, 'Extension install chesi "/" try chey', 'easy', {
@@ -128,11 +128,11 @@ while (gr.next()) {
     },
   ],
   quiz: [
-    q('Kotha record create cheyyadaniki?', ['initialize() + fields + insert()', 'gr.create()', 'gr.add()', 'gr.update() only'], 0, 'initialize, set fields, insert().'),
+    q('Kotha record create cheyyadaniki?', ['initialize() + fields + insert()', 'gr.create() call chesi save', 'gr.add() tho kotha row', 'gr.update() matrame'], 0, 'initialize, set fields, insert().'),
     q('insert() em return chestundi?', ['sys_id', 'true', 'Record number', 'Nothing'], 0, 'New record sys_id.'),
-    q('Multiple records read cheyyadaniki?', ['query() + while (gr.next())', 'get() only', 'insert()', 'getRowCount'], 0, 'query() tarvata next() loop.'),
-    q('gr.get("number", "INC0010004") ki?', ['Oka record load chestundi', 'All records', 'Delete', 'Create'], 0, 'Oka record (first match).'),
-    q('Client script lo GlideRecord create cheyyala?', ['Yes always', 'Vaddu — server code lo (Business Rule / Script Include) cheyyali', 'Only admin', 'Only onLoad'], 1, 'Server-side API.'),
+    q('Multiple records read cheyyadaniki?', ['query() + while (gr.next())', 'get() matrame vaadi', 'insert() tho', 'getRowCount() matrame'], 0, 'query() tarvata next() loop.'),
+    q('gr.get("number", "INC0010004") ki?', ['Oka record load chestundi', 'Anni records ni load chestundi', 'Aa record ni delete chestundi', 'Kotha record create chestundi'], 0, 'Oka record (first match).'),
+    q('Client script lo GlideRecord create cheyyala?', ['Avunu, client lo ellappudu cheyyochu', 'Vaddu — server lo (Business Rule / Script Include)', 'Admin role unte matrame cheyyochu', 'onLoad script lo matrame cheyyochu'], 1, 'Server-side API.'),
   ],
   exercises: [
     jx('cs-crud1', 1, 'Incident create chey', 'easy', {
@@ -221,11 +221,11 @@ while (gr.next()) {
     },
   ],
   quiz: [
-    q('Record marchaka save cheyyadaniki?', ['gr.update()', 'gr.save()', 'gr.commit()', 'gr.set()'], 0, 'update().'),
-    q('Multiple records update ki?', ['query + while(next) + update', 'get + update', 'insert', 'Em ledu'], 0, 'Loop lo prathi record ki update().'),
-    q('Delete mundu manchi habit?', ['Dry run — numbers log chesi chudu', 'Direct delete', 'Ignore', 'Reboot'], 0, 'Mundu log chesi verify.'),
-    q('deleteMultiple() ki?', ['Query ki match ayye anni delete — danger', 'Oka record', 'Safe always', 'Only inactive'], 0, 'Anni delete avtayi — jagratta.'),
-    q('setWorkflow(false) em chestundi?', ['Business Rules run avvakunda update', 'Workflow add chestundi', 'Record lock', 'Nothing'], 0, 'Business Rules/workflows skip avtayi — careful.'),
+    q('Record marchaka save cheyyadaniki?', ['gr.update()', 'gr.save()', 'gr.commit()', 'gr.set()'], 0, 'update() — field values marchina tarvata gr.update() pilavakapothe database lo save avvavu.'),
+    q('Multiple records update ki?', ['query + while(next) + update', 'get() + update() okka saari', 'insert() tho marchali', 'Multiple update cheyyalem'], 0, 'Loop lo prathi record ki update().'),
+    q('Delete mundu manchi habit?', ['Dry run — numbers log chesi chudu', 'Direct ga delete cheyyadam', 'Warnings ni ignore cheyyadam', 'Instance ni reboot cheyyadam'], 0, 'Mundu log chesi verify.'),
+    q('deleteMultiple() ki?', ['Query ki match ayye anni delete — danger', 'Oka record matrame delete chestundi', 'Ellappudu safe, em jaragadu', 'Inactive records matrame delete chestundi'], 0, 'Anni delete avtayi — jagratta.'),
+    q('setWorkflow(false) em chestundi?', ['Business Rules run avvakunda update', 'Workflow ni add chestundi', 'Record ni lock chestundi', 'Em cheyyadu, no effect'], 0, 'Business Rules/workflows skip avtayi — careful.'),
   ],
   exercises: [
     jx('cs-crud2', 1, 'Oka record update', 'easy', {
@@ -310,11 +310,11 @@ gs.error('Something failed for ' + current.number);`,
     },
   ],
   quiz: [
-    q('Client script debug ki?', ['jslog / console.log + browser Console', 'gs.info', 'Update Set', 'System Properties'], 0, 'jslog/console.log, F12 Console.'),
-    q('gs.info() output ekkada chudali?', ['System Logs → Script Log Statements', 'Browser console', 'Form lo', 'Email'], 0, 'System Log → Script Log Statements.'),
-    q('Business Rules debug ki?', ['Session Debug → Debug Business Rule', 'Client Scripts', 'UI Policies', 'Dictionary'], 0, 'Session Debug.'),
+    q('Client script debug ki?', ['jslog / console.log + browser Console', 'gs.info + Script Log Statements', 'Update Set lo log chudadam', 'System Properties lo log chudadam'], 0, 'jslog/console.log, F12 Console.'),
+    q('gs.info() output ekkada chudali?', ['System Logs → Script Log Statements', 'Browser console lo', 'Form lo message ga', 'Email ga vastundi'], 0, 'System Log → Script Log Statements.'),
+    q('Business Rules debug ki?', ['Session Debug → Debug Business Rule', 'Client Scripts list lo', 'UI Policies list lo', 'Dictionary lo'], 0, 'Session Debug → Debug Business Rule — ee session lo run ayina Business Rules, order, time chupistundi.'),
     q('Step-by-step server debug?', ['Script Debugger', 'jslog', 'gs.print', 'Update Set'], 0, 'Script Debugger breakpoints.'),
-    q('Debug logs tarvata?', ['Teeseyyali (noise)', 'Anni ikkade vadileyali', 'Production lo pettali', 'Em kaadu'], 0, 'Cleanup chey.'),
+    q('Debug logs tarvata?', ['Teeseyyali (noise)', 'Anni ikkade vadileyali', 'Production lo pettali', 'Em kaadu'], 0, 'Debug logs production lo noise create chestayi, performance ki kuda effect — kaabatti teeseyyali.'),
   ],
   exercises: [
     jx('cs-debug', 1, 'Background script log', 'easy', {
@@ -378,11 +378,11 @@ while (gr.next()) {
     },
   ],
   quiz: [
-    q('Macro expand cheyyadaniki?', ['Word type chesi Tab', 'Ctrl+S', 'F5', 'Right click'], 0, 'vargr + Tab.'),
-    q('vargr em generate chestundi?', ['GlideRecord query template', 'Client script', 'UI Action', 'Comment'], 0, 'GlideRecord snippet.'),
+    q('Macro expand cheyyadaniki?', ['Word type chesi Tab', 'Ctrl+S', 'F5', 'Right click'], 0, 'Macro peru type chesi Tab press chesthe full code snippet expand avtundi.'),
+    q('vargr em generate chestundi?', ['GlideRecord query template', 'Client script template', 'UI Action template', 'Comment block matrame'], 0, 'GlideRecord snippet.'),
     q('Macros list chudataniki?', ['help + Tab', 'ls', 'Ctrl+H', 'Settings'], 0, 'Editor lo help + Tab (confirm chesuko).'),
-    q('Macros valla benefit?', ['Typing + typos takkuva', 'Speed of server', 'Security', 'Nothing'], 0, 'Fast & accurate.'),
-    q('Auto-complete shortcut?', ['Ctrl+Space', 'Ctrl+Z', 'Alt+F4', 'Esc'], 0, 'Ctrl+Space.'),
+    q('Macros valla benefit?', ['Typing + typos takkuva', 'Server speed perugutundi', 'Security perugutundi', 'Em benefit ledu'], 0, 'Fast & accurate.'),
+    q('Auto-complete shortcut?', ['Ctrl+Space', 'Ctrl+Z', 'Alt+F4', 'Esc'], 0, 'Ctrl+Space — editor lo auto-complete suggestions (API names, methods) chupistundi.'),
   ],
   exercises: [
     jx('cs-macros', 1, 'vargr macro', 'easy', {
@@ -434,6 +434,7 @@ const best = {
       h: '🚫 Don\'t',
       body: [
         'DOM manipulation (document.getElementById, jQuery, window.) vaddu — upgrades lo break avtayi, Service Portal / Workspace lo work avvadu. Synchronous server calls (getReference without callback) vaddu — browser freeze.',
+        'ℹ️ Brazil lo kotha Client Script form chuste oka blue banner untundi: new client scripts strict mode lo run avtayi — direct DOM access, jQuery, prototype, window object disable. (Isolate script field tho per-script ga marchochu.) Ante DOM vaddu ane rule ippudu platform ye enforce chestundi.',
         'Client script lo GlideRecord vaddu (adi ippudu deprecated/blocked in many contexts; GlideAjax vaadu). Security ki client scripts avvu — ACLs / Business Rules vaadu. Same logic multiple scripts lo copy cheyyaku.',
       ],
       code: `// 🚫 Bad
@@ -445,10 +446,10 @@ g_form.setReadOnly('short_description', true);`,
   ],
   quiz: [
     q('Show/hide/mandatory simple cases ki?', ['UI Policy', 'Client Script always', 'Business Rule', 'Flow'], 0, 'UI Policy first.'),
-    q('DOM manipulation enduku vaddu?', ['Upgrades / Workspace lo break avtundi', 'Slow kaadu', 'Illegal', 'Server lo work'], 0, 'Unsupported & fragile.'),
-    q('Server data client ki?', ['g_scratchpad / GlideAjax (callback)', 'Synchronous GlideRecord', 'DOM', 'alert'], 0, 'Async patterns.'),
-    q('getReference ki?', ['Callback vaadu', 'Callback vaddu', 'Loop', 'gs'], 0, 'Callback ellappudu.'),
-    q('Security ki?', ['ACL / Business Rule (server)', 'Client script', 'UI Policy', 'Hide field'], 0, 'Client side bypass cheyochu.'),
+    q('DOM manipulation enduku vaddu?', ['Upgrades / Workspace lo break avtundi', 'Chala slow ga untundi', 'Idi illegal', 'Server lo kuda work avvadu'], 0, 'Unsupported & fragile.'),
+    q('Server data client ki?', ['g_scratchpad / GlideAjax (callback)', 'Synchronous GlideRecord client lo', 'DOM nundi data teesukovadam', 'alert() tho'], 0, 'Async patterns.'),
+    q('getReference ni ela vaadali?', ['Callback function tho', 'Callback lekunda (synchronous)', 'Loop lo', 'gs tho'], 0, 'Callback ellappudu — lekapothe browser freeze.'),
+    q('Security ki?', ['ACL / Business Rule (server)', 'Client Script tho hide cheyyadam', 'UI Policy tho', 'Field ni form lo hide cheyyadam'], 0, 'Client side bypass cheyochu.'),
   ],
   exercises: [
     jx('cs-best', 1, 'Guard add chey', 'easy', {
@@ -527,11 +528,11 @@ const uipages = {
     },
   ],
   quiz: [
-    q('UI Page URL ela untundi?', ['<instance>/<name>.do', '<instance>/ui/<name>', '/page/<name>', '/<name>.html'], 0, '<name>.do.'),
-    q('UI Page lo server values ela vaadatam?', ['${gs.getUserDisplayName()} (Jelly)', 'g_form', 'current only', 'Em ledu'], 0, 'Jelly ${...}.'),
+    q('UI Page URL ela untundi?', ['<instance>/<name>.do', '<instance>/ui/<name>', '/page/<name>', '/<name>.html'], 0, 'UI Page URL: <instance>/<page name>.do — page name ye URL lo untundi.'),
+    q('UI Page lo server values ela vaadatam?', ['${gs.getUserDisplayName()} (Jelly)', 'g_form', 'current only', 'Em ledu'], 0, 'Jelly lo ${...} tho server-side values (gs APIs) HTML lo print chestam.'),
     q('Form submit ayinappudu server script?', ['Processing script', 'Client script', 'HTML', 'Condition'], 0, 'Processing script.'),
     q('UI Page lo browser JS ekkada?', ['Client script field', 'HTML field matrame', 'Processing script', 'Dictionary'], 0, 'Client script field.'),
-    q('UI Page name "hello" ayithe test URL?', ['/hello.do', '/hello', '/ui/hello', '/page/hello'], 0, '/hello.do.'),
+    q('UI Page name "hello" ayithe test URL?', ['/hello.do', '/hello', '/ui/hello', '/page/hello'], 0, 'UI Page name "hello" ayithe /hello.do tho open avtundi.'),
   ],
   exercises: [
     jx('cs-uipages', 1, 'Hello page', 'easy', {
@@ -608,9 +609,9 @@ gr.insert();`,
   quiz: [
     q('Form values processing script lo?', ['g_request.getParameter("name")', 'g_form.getValue', 'current', 'gs.getParam'], 0, 'g_request.getParameter (confirm chesuko).'),
     q('OK click mundu client validation?', ['ok="return validate()"', 'onsubmit server', 'Business Rule', 'Condition'], 0, 'dialog_buttons ok attribute lo validate().'),
-    q('Validate() false return chesthe?', ['Submit aagipotundi', 'Submit avtundi', 'Error page', 'Reload'], 0, 'Aagipotundi.'),
-    q('Processing script ekkada run?', ['Server', 'Browser', 'Both', 'Mobile'], 0, 'Server.'),
-    q('Records create chesaka PDI lo?', ['Cleanup (delete) chey', 'Vadileyyi', 'Export', 'Nothing'], 0, 'Test data cleanup.'),
+    q('Validate() false return chesthe?', ['Submit aagipotundi', 'Submit avtundi', 'Error page', 'Reload'], 0, 'validate() false return chesthe OK button submit aagipotundi — user form lone untadu.'),
+    q('Processing script ekkada run?', ['Server', 'Browser', 'Both', 'Mobile'], 0, 'Processing script server lo run avtundi — records create/update ikkade chestam.'),
+    q('Records create chesaka PDI lo?', ['Cleanup (delete) chey', 'Alage vadileyyi', 'Export chesi pettuko', 'Em cheyyakkarledu'], 0, 'Test data cleanup.'),
   ],
   exercises: [
     jx('cs-uipages2', 1, 'Incident create form', 'medium', {
@@ -651,17 +652,13 @@ const uimacros = {
       h: '🧱 UI Macro ante?',
       body: [
         'UI Macro = reusable Jelly snippet (System UI → UI Macros). Oka sari rasi, UI Pages lo (leda forms lo) tag laaga pilavochu. Udaharana: custom badge, formatted block, repeated header.',
-        'Macro name "snowkeer_badge" ayithe UI Page lo <g:snowkeer_badge /> ani vaadatam (namespace g: tho, macro peru tag peru). Parameters attributes ga pampochu, macro lo ${jvar_...} / ${...} tho chaduvutam.',
+        'Paina code ni UI Macro lo XML field ki paste chey (motham — <?xml ...> nundi </j:jelly> varaku). Macro name "snowkeer_badge" ayithe UI Page lo <g:snowkeer_badge /> ani vaadatam (namespace g: tho, macro peru tag peru). Parameters attributes ga pampochu, macro lo ${jvar_...} / ${...} tho chaduvutam.',
         '⚠️ Parameter passing syntax memory nunchi — nee PDI lo out-of-box UI Macro chusi confirm chesuko.',
       ],
-      code: `<!-- UI Macro: snowkeer_badge -->
-<?xml version="1.0" encoding="utf-8" ?>
+      code: `<?xml version="1.0" encoding="utf-8" ?>
 <j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide">
   <span style="background:#2a7; color:#fff; padding:2px 8px; border-radius:8px;">SnowKeer</span>
-</j:jelly>
-
-<!-- UI Page lo -->
-<g:snowkeer_badge />`,
+</j:jelly>`,
     },
     {
       h: '🆚 UI Page vs UI Macro',
@@ -671,8 +668,8 @@ const uimacros = {
   quiz: [
     q('UI Macro ante?', ['Reusable Jelly snippet', 'Full page with URL', 'Business Rule', 'Script Include'], 0, 'Reusable snippet.'),
     q('"snowkeer_badge" macro UI Page lo ela pilustam?', ['<g:snowkeer_badge />', '<snowkeer_badge>', 'gs.macro()', 'include()'], 0, 'g: namespace tho.'),
-    q('UI Macro ki URL untundaa?', ['Ledu — page lo piece', 'Avunu .do', 'Avunu .html', 'Optional'], 0, 'Macros ki direct URL ledu.'),
-    q('Reuse enduku?', ['Same snippet multiple places', 'Speed', 'Security', 'Theme'], 0, 'DRY.'),
+    q('UI Macro ki URL untundaa?', ['Ledu — page lo piece', 'Avunu, .do URL untundi', 'Avunu, .html URL untundi', 'Optional ga URL pettochu'], 0, 'Macros ki direct URL ledu.'),
+    q('Reuse enduku?', ['Same snippet multiple places', 'Server speed penchadaniki', 'Security penchadaniki', 'Theme marchadaniki'], 0, 'UI Macro tho same snippet ni multiple pages lo reuse chestam — okachota marchithe anni chotla marutundi.'),
     q('UI Macro ekkada create?', ['System UI → UI Macros', 'System Definition → Tables', 'Flow Designer', 'Update Sets'], 0, 'System UI → UI Macros.'),
   ],
   exercises: [

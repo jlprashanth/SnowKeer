@@ -14,12 +14,25 @@ class GlideElement {
     this._name = name
     this._v = str(gr._row?.[name])
     this._type = SCHEMA[gr._table].fields[name]
+    // dot-walking: gr.caller_id.email / current.assigned_to.name — on a reference field, unknown properties read the referenced record
+    return new Proxy(this, {
+      get: (t, p, r) => {
+        if (typeof p === 'symbol' || p in t) return Reflect.get(t, p, r)
+        const refTable = SCHEMA[t._gr._table].refs[t._name]
+        if (refTable && typeof p === 'string' && p in SCHEMA[refTable].fields) return t.getRefRecord()[p]
+        return undefined
+      },
+    })
   }
   toString() { return this._v }
   valueOf() { return this._type === 'boolean' ? this._v === 'true' : this._v }
   getValue() { return this._v }
   nil() { return this._v === '' }
-  changes() { return false }
+  // changes()/changesTo()/changesFrom() compare against `previous` (set by runScript for current/previous scenarios)
+  _prev() { const p = this._gr._previous; return p ? str(p._row?.[this._name]) : null }
+  changes() { const p = this._prev(); return p !== null && p !== this._v }
+  changesTo(v) { return this.changes() && this._v === str(v) }
+  changesFrom(v) { const p = this._prev(); return this.changes() && p === str(v) }
   getDisplayValue() { return displayValue(this._gr._db, this._gr._table, this._name, this._v) }
   getRefRecord() {
     const t = SCHEMA[this._gr._table].refs[this._name]
@@ -80,9 +93,13 @@ function parseEncoded(q) {
     if (raw.startsWith('ORDERBY')) { out.order.push({ f: raw.slice(7), desc: false }); continue }
     const isOr = raw.startsWith('OR')
     const body = isOr ? raw.slice(2) : raw
-    const op = OPS.find((o) => body.includes(o))
+    // operator = the one that appears EARLIEST (field names never contain operators); on a tie the longer one wins
+    let op = null, i = -1
+    for (const o of OPS) {
+      const k = body.indexOf(o)
+      if (k >= 0 && (i < 0 || k < i || (k === i && o.length > op.length))) { op = o; i = k }
+    }
     if (!op) continue
-    const i = body.indexOf(op)
     const cond = { field: body.slice(0, i), op, value: body.slice(i + op.length) }
     if (isOr && out.groups.length) out.groups[out.groups.length - 1].push(cond)
     else out.groups.push([cond])
@@ -199,6 +216,10 @@ export class GlideRecord {
   isValidField(f) { return f in SCHEMA[this._table].fields }
   isValidRecord() { return !!this._row && this._db[this._table].some((r) => r.sys_id === this._row.sys_id) }
   isNewRecord() { return !!this._row && !this.isValidRecord() }
+  changes() {
+    const p = this._previous
+    return !!p && !!this._row && Object.keys(this._row).some((k) => str(this._row[k]) !== str(p._row?.[k]))
+  }
   setWorkflow() {}
   autoSysFields() {}
   setAbortAction() {}
@@ -256,6 +277,12 @@ export function makeGs(logs) {
     nowDateTime: () => NOW, now: () => NOW.slice(0, 10),
     getProperty: (n, d) => (n in PROPS ? PROPS[n] : d === undefined ? null : d),
     isInteractive: () => false,
+    // minimal GlideUser: the practice user is "System Administrator" (u_admin)
+    getUser: () => ({
+      getID: () => 'u_admin', getFullName: () => 'System Administrator', getDisplayName: () => 'System Administrator',
+      getFirstName: () => 'System', getLastName: () => 'Administrator', getEmail: () => 'admin@example.com',
+      hasRole: (r) => ['admin', 'itil'].includes(r),
+    }),
   }
 }
 

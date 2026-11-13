@@ -46,6 +46,7 @@ export function makeClient({ form = {}, user = {}, scratchpad = {}, list = {}, c
       mandatory: (form.mandatory || []).includes(f.name),
       readOnly: !!f.readOnly || (form.readOnly || []).includes(f.name),
       visible: !(form.hidden || []).includes(f.name),
+      space: false,
       choices, msgs: [],
     }
   }
@@ -70,8 +71,9 @@ export function makeClient({ form = {}, user = {}, scratchpad = {}, list = {}, c
     isMandatory: (n) => F(n).mandatory,
     setReadOnly: (n, b) => { F(n).readOnly = !!b },
     setDisabled: (n, b) => { F(n).readOnly = !!b },
-    setVisible: (n, b) => { F(n).visible = !!b },
-    setDisplay: (n, b) => { F(n).visible = !!b },
+    // setVisible(false) hides the field but KEEPS its space (blank gap); setDisplay(false) hides it and removes the space
+    setVisible: (n, b) => { F(n).visible = !!b; F(n).space = !b },
+    setDisplay: (n, b) => { F(n).visible = !!b; F(n).space = false },
     hasField: (n) => has(n),
     getLabelOf: (n) => F(n).label,
     setLabelOf: (n, l) => { F(n).label = str(l) },

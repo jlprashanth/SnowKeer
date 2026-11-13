@@ -17,7 +17,23 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b)
 // scenario: { current: {table, values}, previous: {table, values} }  (optional)
 // tests: [{ label, logs: [..] }  |  { label, expr, expect }]
 //   expr is evaluated AFTER the script, in the script's own scope (so it can read her variables / call her functions)
-export function runScript({ code, scenario = {}, tests = [], client }) {
+// variants (optional): [{ name, scenario?, client?, tests }] — the SAME code is run again under a different scenario
+// (e.g. "condition is false") so a solution that ignores the condition cannot pass. Each variant's tests are added to the
+// results, labelled "[name] ...". scenario keys are replaced (shallow merge); client replaces the whole client config.
+export function runScript({ code, scenario = {}, tests = [], client, variants }) {
+  const main = runOnce({ code, scenario, tests, client })
+  if (!variants || !variants.length || !tests.length) return main
+  const results = [...main.results]
+  for (const v of variants) {
+    const r = runOnce({ code, scenario: { ...scenario, ...(v.scenario || {}) }, tests: v.tests || [], client: v.client || client })
+    const label = v.name || 'variant'
+    if (r.error) results.push({ label: `[${label}] script run avvaledu`, pass: false, note: r.error })
+    else results.push(...r.results.map((x) => ({ ...x, label: `[${label}] ${x.label}` })))
+  }
+  return { ...main, results, passed: !main.error && results.length > 0 && results.every((x) => x.pass) }
+}
+
+function runOnce({ code, scenario = {}, tests = [], client }) {
   if (client) return runClientScript({ code, scenario, tests, client })
   const logs = []
   const db = freshDb()
@@ -28,6 +44,7 @@ export function runScript({ code, scenario = {}, tests = [], client }) {
   const mk = (s) => (s ? makeRecord(s.table || 'incident', s.values, db) : undefined)
   const current = mk(scenario.current)
   const previous = scenario.previous ? mk(scenario.previous) : current ? makeRecord(scenario.current.table || 'incident', scenario.current.values, db) : undefined
+  if (current && previous) current._previous = previous // lets current.field.changes() compare with previous
 
   let evaluate = null
   let error = null

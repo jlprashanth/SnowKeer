@@ -40,16 +40,16 @@ action.setRedirectURL(current);`,
     {
       h: '⚠️ Gurtupettukovali',
       body: [
-        'Server-side UI Action click chesinappudu form save avtundi mundu (form values server ki veltayi) — tarvata nee script run avtundi.',
+        'Server-side UI Action click chesinappudu form values server ki veltayi, aa values current lo untayi — kani record automatic ga save avvadu (nenu anukuntunnadi: nee script lo current.update() pilichinappude save avtundi). Nee PDI lo oka test UI Action tho confirm chesuko.',
         'Ee exercises lo "current" ivvabadindi. Real lo mandatory fields fail ayithe script run avvadu. Memory nunchi rasina details — nee PDI lo oka test UI Action tho confirm chesuko (nee PDI lo marpulu reverse cheyyi!).',
       ],
     },
   ],
   quiz: [
-    q('UI Action ante?', ['Business Rule', 'Form button / link / context menu', 'Scheduled Job', 'Table'], 1, 'Form lo button, link, context menu.'),
-    q('Client checkbox tick cheyyakapothe script ekkada run avtundi?', ['Browser', 'Server', 'MID', 'Mobile'], 1, 'Server.'),
+    q('UI Action ante?', ['Server lo run ayye Business Rule type', 'Form button / link / context menu', 'Time batti run ayye Scheduled Job', 'Data store chese Table'], 1, 'Form lo button, link, context menu.'),
+    q('Client checkbox tick cheyyakapothe script ekkada run avtundi?', ['Browser', 'Server', 'MID', 'Mobile'], 1, 'Client tick cheyyakapothe UI Action script server lo run avtundi (current, gs vaadochu).'),
     q('Script tarvata user ni record ki ela pampali?', ['action.setRedirectURL(current)', 'gs.redirect', 'g_form.reload', 'current.redirect'], 0, 'action.setRedirectURL(current).'),
-    q('Action name enduku?', ['Unique id (gsftSubmit etc. ki)', 'Button colour', 'Table peru', 'Roles'], 0, 'Unique identifier — client nunchi pilavadaniki.'),
+    q('Action name enduku?', ['Unique id (gsftSubmit etc. ki)', 'Button yokka colour', 'Table yokka peru', 'Roles list'], 0, 'Unique identifier — client nunchi pilavadaniki.'),
     q('Button eppudu kanipinchali ani control cheyyadam?', ['Condition field', 'Order', 'Hint', 'Active'], 0, 'Condition (e.g. current.state != 6).'),
   ],
   exercises: [
@@ -60,7 +60,7 @@ action.setRedirectURL(current);`,
       starter: '// UI Action: Resolve (server)\n// TODO',
       hint: "current.setValue('state', 6); current.setValue('description', 'Resolved by UI Action'); current.update(); action.setRedirectURL(current);",
       solution: "current.setValue('state', 6);\ncurrent.setValue('description', 'Resolved by UI Action');\ncurrent.update();\naction.setRedirectURL(current);",
-      explain: 'current = form lo record. update() tho save, redirect tho form malli open.',
+      explain: 'current = form lo record. update() tho save, redirect tho form malli open. (Real PDI lo Resolved ki Resolution code + notes kuda mandatory — ee practice lo simple ga unchamu; nee PDI lo try chesetappudu avi kuda set chey.)',
       tests: [
         { label: 'state = 6', expr: "current.getValue('state')", expect: '6' },
         { label: 'description', expr: "current.getValue('description')", expect: 'Resolved by UI Action' },
@@ -150,10 +150,10 @@ function markP1() {
   ],
   quiz: [
     q('Client UI Action lo vaadochu?', ['g_form', 'current', 'gs.update', 'GlideRecord server'], 0, 'g_form (client API).'),
-    q('Onclick field lo emi rastam?', ['Function peru (markP1())', 'Table peru', 'Role', 'Script'], 0, 'Script lo define chesina function pilustam.'),
+    q('Onclick field lo emi rastam?', ['Function peru (markP1())', 'Table peru', 'Role peru', 'Pedda script'], 0, 'Script lo define chesina function pilustam.'),
     q('Client script nunchi server UI Action run cheyyadaniki?', ['gsftSubmit(...)', 'gs.run()', 'g_form.run()', 'GlideAjax matrame'], 0, 'gsftSubmit(null, g_form.getFormElement(), actionName).'),
     q('Client UI Action lo current vaadochaa?', ['Avunu', 'Ledu', 'Admin ki', 'Mobile lo'], 1, 'current server only.'),
-    q('Confirm mundu adagadaniki?', ['confirm()', 'prompt()', 'gs.confirm', 'g_form.confirm'], 0, 'confirm().'),
+    q('Confirm mundu adagadaniki?', ['confirm()', 'prompt()', 'gs.confirm', 'g_form.confirm'], 0, 'confirm() browser dialog lo OK/Cancel istundi — true/false return chestundi, adi check chesi continue avvachu.'),
   ],
   exercises: [
     jx('cs-ua2', 1, 'Mark P1', 'easy', {
@@ -260,11 +260,11 @@ function serverResolve() {
     },
   ],
   quiz: [
-    q('gsftSubmit(null, g_form.getFormElement(), "x") em chestundi?', ['Client ni aapestundi', 'Action name "x" UI Action ni server lo run chestundi', 'Page reload', 'Alert'], 1, 'Server side script run avtundi.'),
+    q('gsftSubmit(null, g_form.getFormElement(), "x") em chestundi?', ['Client script ni aapestundi', 'Server lo "x" UI Action ni run chestundi', 'Page ni reload matrame chestundi', 'Alert chupistundi'], 1, 'Server side script run avtundi.'),
     q('typeof window == "undefined" enduku?', ['Server lo unnama check', 'Browser check', 'Security', 'Speed'], 0, 'Server lo window ledu → true.'),
-    q('Action name enduku match avvali?', ['gsftSubmit lo ichina peru tho exact', 'Optional', 'Table peru', 'Role peru'], 0, 'Exact match lekapothe server part run avvadu.'),
-    q('Server function lo vaadochu?', ['current, gs', 'g_form', 'g_user', 'alert'], 0, 'Server APIs.'),
-    q('Client function lo validation ekkada pettali?', ['gsftSubmit mundu', 'gsftSubmit tarvata', 'Server lo matrame', 'Emi vaddu'], 0, 'Submit mundu.'),
+    q('Action name enduku match avvali?', ['gsftSubmit lo ichina peru tho exact', 'Optional, match avvakapoyina parledu', 'Table peru tho match avvali', 'Role peru tho match avvali'], 0, 'Exact match lekapothe server part run avvadu.'),
+    q('Server function lo vaadochu?', ['current, gs', 'g_form', 'g_user', 'alert'], 0, 'Server function lo current, gs vaadochu — g_form, g_user client APIs kabatti vaadalem.'),
+    q('Client function lo validation ekkada pettali?', ['gsftSubmit mundu', 'gsftSubmit tarvata', 'Server lo matrame', 'Emi vaddu'], 0, 'Client validation gsftSubmit mundu cheyyali — tarvata server ki velli pothundi, appudu aapalem.'),
   ],
   exercises: [
     jx('cs-ua3', 1, 'Client part: submit', 'easy', {
@@ -345,11 +345,11 @@ current.priority == 1 && current.assigned_to.nil()`,
     },
   ],
   quiz: [
-    q('Condition lo emi rastam?', ['Oka JavaScript expression (true/false)', 'Pedda script', 'SQL', 'Table peru'], 0, 'One-line expression.'),
-    q('Condition ekkada evaluate avtundi?', ['Server lo, form load time', 'Browser lo live', 'Email lo', 'List lo'], 0, 'Server lo form load time lo.'),
-    q('Role unnavaalake button chupinchali?', ['Roles field leda gs.hasRole condition', 'Order', 'Hint', 'Client tick'], 0, 'Roles field / condition.'),
-    q('Existing record lo matrame button?', ['Show update tick, Show insert untick', 'Show insert tick', 'Client tick', 'Order 0'], 0, 'Show insert/update options.'),
-    q('Condition lo g_form vaadochaa?', ['Avunu', 'Ledu — server expression', 'Sometimes', 'Admin ki'], 1, 'Condition server side.'),
+    q('Condition lo emi rastam?', ['Oka JavaScript expression (true/false)', 'Pedda multi-line script', 'SQL query', 'Table peru'], 0, 'One-line expression.'),
+    q('Condition ekkada evaluate avtundi?', ['Server lo, form load time', 'Browser lo live ga prathi click ki', 'Email lo', 'List lo'], 0, 'Server lo form load time lo.'),
+    q('Role unnavaalake button chupinchali?', ['Roles field leda gs.hasRole condition', 'Order field set cheyyadam', 'Hint field rayadam', 'Client checkbox tick cheyyadam'], 0, 'Roles field / condition.'),
+    q('Existing record lo matrame button?', ['Show update tick, Show insert untick', 'Show insert tick, Show update untick', 'Client tick cheyyadam', 'Order 0 pettadam'], 0, 'Show insert/update options.'),
+    q('Condition lo g_form vaadochaa?', ['Avunu, ellappudu vaadochu', 'Ledu — server expression', 'Konni sarlu matrame', 'Admin ki matrame'], 1, 'Condition server side.'),
   ],
   exercises: [
     jx('cs-ua4', 1, 'Resolve button condition', 'easy', {
@@ -409,9 +409,9 @@ const ua5 = {
       body: [
         'List lo 3 types: List banner button (list paina button), List choice ("Actions on selected rows" dropdown), List context menu (row right-click). Same UI Action record lo checkbox tho enable chestam.',
         'List choice / context menu server script lo current = prathi selected record (script prathi row ki oka sari run avtundi anukuntunna). ⚠️ Memory nunchi — nee PDI lo test chesi confirm chesuko.',
-        'List banner button (client) lo g_list.getChecked() vaadi, gsftSubmit tho server ki pampi, server lo GlideRecord tho sys_idIN query vaadatam.',
+        'List banner button (client) lo g_list.getChecked() vaadi selected ids teesukovachu; server ki ela pampalo (gsftSubmit leda GlideAjax) nee PDI lo confirm chesuko. Server lo ids tho GlideRecord sys_id IN query vaadatam.',
       ],
-      code: `// List banner button (server): selected ids unnayi anukundam
+      code: `// Server: selectedIds = 'id1,id2' (ee site lo already ivvabadindi — real lo ela vastayo PDI lo confirm chesuko)
 var gr = new GlideRecord('incident');
 gr.addQuery('sys_id', 'IN', selectedIds);
 gr.query();
@@ -422,10 +422,10 @@ while (gr.next()) {
     },
   ],
   quiz: [
-    q('List lo selected rows ki action cheyyadaniki?', ['List choice / List banner button UI Action', 'Business Rule', 'Update Set', 'Dictionary'], 0, 'List choice leda banner button.'),
+    q('List lo selected rows ki action cheyyadaniki?', ['List choice / List banner button UI Action', 'Business Rule tho', 'Update Set tho', 'Dictionary entry tho'], 0, 'List choice leda banner button.'),
     q('Selected sys_ids ni query lo ela vaadatam?', ['addQuery("sys_id", "IN", ids)', 'addQuery("ids")', 'get(ids)', 'IN ledu'], 0, 'sys_id IN comma-separated ids.'),
     q('Client lo selected ids?', ['g_list.getChecked()', 'g_form.getChecked()', 'current.getChecked()', 'gs.getChecked()'], 0, 'g_list.getChecked().'),
-    q('Bulk action mundu confirm enduku?', ['Accident ga anni marchakunda', 'Speed', 'Security role', 'Required kaadu'], 0, 'Bulk changes risky.'),
+    q('Bulk action mundu confirm enduku?', ['Accident ga anni marchakunda', 'Speed penchadaniki', 'Security role kosam', 'Required kaadu, avasaram ledu'], 0, 'Bulk changes risky.'),
     q('Row right-click menu option edi?', ['List context menu', 'List banner', 'Form link', 'Related list'], 0, 'List context menu.'),
   ],
   exercises: [
@@ -446,7 +446,7 @@ while (gr.next()) {
       starter: 'function closeSelected() {\n  // TODO\n}',
       hint: "var ids = g_list.getChecked(); if (ids == '') { alert('Select incidents first'); return; } if (!confirm('Close selected?')) return; gsftSubmit(...)",
       solution: "function closeSelected() {\n  var ids = g_list.getChecked();\n  if (ids == '') {\n    alert('Select incidents first');\n    return;\n  }\n  if (!confirm('Close selected?')) {\n    return;\n  }\n  gsftSubmit(null, g_form.getFormElement(), 'close_selected');\n}",
-      explain: 'Real lo list banner button lo gsftSubmit(null, g_list.getListElement?..) vaadatam — exact form nee PDI lo out-of-box list actions chusi confirm chesuko. Logic same: validate → confirm → submit.',
+      explain: 'Ee practice lo g_form.getFormElement() vaadam, kani real list lo g_form ledu — list UI Actions lo submit ela cheyyalo exact pattern naaku teliyadu. Nee PDI lo out-of-box list banner / list choice UI Actions chusi confirm chesuko. Logic same: validate → confirm → submit.',
       tests: [{ label: 'submitted close_selected', expr: '__x.submitted', expect: 'close_selected' }],
     }),
     jx('cs-ua5', 3, 'Server: set In Progress', 'medium', {

@@ -115,7 +115,7 @@ ga.getXMLAnswer(function (answer) {
     q('Extra parameters peru ela undali?', ['Edaina', 'sysparm_ tho start', 'ga_ tho start', 'g_ tho start'], 1, 'sysparm_user_id laaga sysparm_ prefix.'),
     q('getXMLAnswer lo answer em type?', ['String (leda null)', 'Number', 'Object', 'Boolean'], 0, 'Ellappudu string.'),
     q('GlideAjax answer tho pani ekkada cheyyali?', ['Callback function lo', 'getXMLAnswer kinda', 'Server lo', 'onLoad lo'], 0, 'Async kabatti callback lone.'),
-    q('Script Include ki GlideAjax pilavalante?', ['Active ayithe chalu', 'Client callable tick cheyyali', 'Admin role', 'Update set'], 1, 'Client callable checkbox.'),
+    q('Script Include ki GlideAjax pilavalante?', ['Script Include Active ayithe chalu', 'Client callable tick cheyyali', 'Admin role unte chalu', 'Update Set lo undali'], 1, 'Client callable checkbox.'),
   ],
   exercises: [
     jx('cs-ajax1', 1, 'Caller email teesuko', 'easy', {
@@ -201,9 +201,9 @@ UserAjax.prototype = Object.extendsObject(AbstractAjaxProcessor, {
   quiz: [
     q('Client callable Script Include edi extend cheyyali?', ['AbstractAjaxProcessor', 'GlideRecord', 'GlideAjax', 'Class'], 0, 'Object.extendsObject(AbstractAjaxProcessor, {...}).'),
     q('Client nunchi vachina param server lo ela chaduvutam?', ['this.getParameter("sysparm_x")', 'current.sysparm_x', 'gs.getParam', 'g_form.getValue'], 0, 'this.getParameter().'),
-    q('Array ni client ki pampali ante?', ['Direct ga return', 'JSON.stringify chesi return', 'gs.info', 'Ela pampaleru'], 1, 'Answer string — JSON tho.'),
-    q('Sensitive data return cheyyadam?', ['Parledu', 'Cheyyakudadu / roles check cheyyali', 'Always cheyyali', 'Client lo hide cheste chalu'], 1, 'Evaraina pilavochu — server lo checks.'),
-    q('Function em return cheste client ki veltundi?', ['Return value (answer)', 'gs.info output', 'current', 'Nothing'], 0, 'Return value answer ga.'),
+    q('Array ni client ki pampali ante?', ['Direct ga array return cheyyadam', 'JSON.stringify chesi return', 'gs.info tho log cheyyadam', 'Array ni pampadam sadhyam kaadu'], 1, 'Answer string — JSON tho.'),
+    q('Sensitive data return cheyyadam?', ['Parledu, anni data pampochu', 'Cheyyakudadu / roles check cheyyali', 'Ellappudu pampali', 'Client lo hide cheste chalu, server ki avasaram ledu'], 1, 'Evaraina pilavochu — server lo checks.'),
+    q('Function em return cheste client ki veltundi?', ['Function return chese value (answer)', 'gs.info output client ki veltundi', 'current record client ki veltundi', 'Emi veltundi, nothing'], 0, 'Return value answer ga.'),
   ],
   exercises: [
     jx('cs-ajax2', 1, 'getName function', 'easy', {
@@ -360,11 +360,11 @@ const onsubmit = {
     },
   ],
   quiz: [
-    q('onSubmit lo save aapadaniki?', ['return false', 'return true', 'return null', 'throw'], 0, 'return false.'),
+    q('onSubmit lo save aapadaniki?', ['return false', 'return true', 'return null', 'throw'], 0, 'onSubmit lo return false chesthe form submit aagipotundi.'),
     q('onSubmit eppudu run avtundi?', ['Form load', 'Field change', 'Save/Submit mundu', 'Save tarvata'], 2, 'Server ki velle mundu.'),
     q('return confirm("..."); user Cancel nokkite?', ['Save avtundi', 'Save aagipotundi', 'Error', 'Form close'], 1, 'confirm false → onSubmit false.'),
     q('Simple mandatory field ki edi better?', ['onSubmit script', 'UI Policy', 'Scheduled Job', 'Flow'], 1, 'UI Policy / dictionary mandatory.'),
-    q('Validation fail ayithe user ki em chupinchali?', ['Emi vaddu', 'Error message (addErrorMessage / showFieldMsg)', 'alert + save', 'Reload'], 1, 'Clear error message.'),
+    q('Validation fail ayithe user ki em chupinchali?', ['Em chupinchakudadu, silent ga aapali', 'Error message (addErrorMessage / showFieldMsg)', 'alert chupinchi save cheyyali', 'Page reload cheyyali'], 1, 'Clear error message.'),
   ],
   exercises: [
     jx('cs-onsubmit', 1, 'Short description length', 'easy', {
@@ -449,10 +449,10 @@ g_form.setValue('assignment_group', map[newValue] || '');`,
   ],
   quiz: [
     q('Category → group mapping ki clean way?', ['Object lookup (map[newValue])', 'Pedda if/else chain matrame', 'GlideRecord client lo', 'alert'], 0, 'Object map tho short & readable.'),
-    q('Marpu undo cheyyali ante?', ['g_form.setValue(field, oldValue)', 'g_form.clearMessages()', 'return', 'reload'], 0, 'oldValue tho revert.'),
-    q('map[newValue] || "" lo || enduku?', ['Map lo lenappudu empty default kosam', 'Error kosam', 'Loop kosam', 'Speed'], 0, 'undefined ki default "".'),
-    q('Priority formula logic ekkada unte best?', ['Server (Script Include / Business Rule)', 'Prathi client script lo copy', 'Browser cache', 'Email'], 0, 'Okachota (server) — maintain cheyyadam easy.'),
-    q('Confirm before close — onChange lo cancel ayithe?', ['Marpu revert cheyyali', 'Em cheyyaku', 'Reload', 'Delete'], 0, 'oldValue ki revert.'),
+    q('Marpu undo cheyyali ante?', ['g_form.setValue(field, oldValue)', 'g_form.clearMessages()', 'return false', 'Page reload cheyyadam'], 0, 'oldValue tho revert.'),
+    q('map[newValue] || "" lo || enduku?', ['Map lo lenappudu empty default kosam', 'Error throw cheyyadaniki', 'Loop run cheyyadaniki', 'Speed penchadaniki'], 0, 'undefined ki default "".'),
+    q('Priority formula logic ekkada unte best?', ['Server (Script Include / Business Rule)', 'Prathi client script lo copy paste chesi', 'Browser cache lo save chesi', 'Email lo rasi pettukoni'], 0, 'Okachota (server) — maintain cheyyadam easy.'),
+    q('Confirm before close — onChange lo cancel ayithe?', ['Marpu revert cheyyali', 'Em cheyyakunda vadileyyali', 'Page reload cheyyali', 'Record delete cheyyali'], 0, 'oldValue ki revert.'),
   ],
   exercises: [
     jx('cs-usecases', 1, 'Hardware hint', 'easy', {
@@ -521,7 +521,7 @@ const oncell = {
         'List view lo cell double-click chesi (list editing) value marchinappudu onCellEdit run avtundi. Type = onCellEdit, Field name select chestam.',
         'Signature: function onCellEdit(sysIDs, table, oldValues, newValue, callback). sysIDs = edit chese records, oldValues = array (prathi record ki paata value), newValue = kotta value.',
         'Result: callback(true) → save avtundi. callback(false) → edit cancel. Ee callback ni pilavakapothe cell edit stuck avtundi!',
-        '⚠️ Exact signature Brazil lo nee PDI lo Client Script template chusi confirm chesuko (memory nunchi rasanu).',
+        '✅ Ee signature ni real PDI (Brazil) lo Client Script template lo verify chesam. oldValues oka Array (e.g. ["old value"]), sysIDs kuda Array, newValue String.',
       ],
       code: `function onCellEdit(sysIDs, table, oldValues, newValue, callback) {
   var saveAndClose = true;
@@ -538,11 +538,11 @@ const oncell = {
     },
   ],
   quiz: [
-    q('onCellEdit eppudu run avtundi?', ['Form load', 'List lo cell edit chesinappudu', 'Save tarvata', 'Server lo'], 1, 'List editing time lo.'),
+    q('onCellEdit eppudu run avtundi?', ['Form load ayinappudu', 'List lo cell edit chesinappudu', 'Record save tarvata', 'Server lo run avtundi'], 1, 'List editing time lo.'),
     q('Edit allow cheyyadaniki?', ['callback(true)', 'return true', 'g_form.save()', 'callback(false)'], 0, 'callback(true) — save & close.'),
-    q('Callback pilavakapothe?', ['Em kaadu', 'Cell edit stuck avtundi', 'Auto save', 'Error page'], 1, 'Ellappudu callback pilavali.'),
-    q('oldValues em type?', ['String', 'Array (prathi record ki)', 'Object', 'Number'], 1, 'Array — selected records order lo.'),
-    q('onCellEdit lo g_form vaadochaa?', ['Avunu', 'Ledu — idi list, form kaadu', 'Admin ki matrame', 'Mobile lo matrame'], 1, 'List context — form ledu.'),
+    q('Callback pilavakapothe?', ['Em kaadu, normal ga save avtundi', 'Cell edit stuck avtundi', 'Auto ga save avtundi', 'Error page vastundi'], 1, 'Ellappudu callback pilavali.'),
+    q('oldValues em type?', ['String (oka value)', 'Array (prathi record ki)', 'Object (key-value)', 'Number'], 1, 'Array — selected records order lo old values. PDI lo test chesi confirm chesam: oldValues = ["old value"].'),
+    q('onCellEdit lo g_form vaadochaa?', ['Avunu, ellappudu vaadochu', 'Ledu — idi list, form kaadu', 'Admin ki matrame vaadochu', 'Mobile lo matrame vaadochu'], 1, 'List context — form ledu.'),
   ],
   exercises: [
     jx('cs-oncell', 1, 'Empty value block', 'easy', {

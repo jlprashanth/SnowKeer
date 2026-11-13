@@ -61,7 +61,7 @@ if (newValue == '6') {
   ],
   quiz: [
     q('Reference field nunchi aa record yokka email ela teesukuntam?', ['g_form.getValue("caller_id.email")', 'g_form.getReference("caller_id", callback)', 'gs.getUser()', 'g_user.email'], 1, 'getReference(field, callback) — callback lo record vastundi.'),
-    q('getReference ni callback lekunda vaadithe?', ['Fast ga untundi', 'Browser block avtundi (synchronous)', 'Error vastundi', 'Em maradu'], 1, 'Callback lekapothe synchronous call — browser freeze. Ellappudu callback vaadu.'),
+    q('getReference ni callback lekunda vaadithe?', ['Fast ga untundi, extra benefit', 'Browser block avtundi (synchronous)', 'Error vastundi, run avvadu', 'Em maradu, same ga untundi'], 1, 'Callback lekapothe synchronous call — browser freeze. Ellappudu callback vaadu.'),
     q('Form kinda unna anni related lists hide cheyyali?', ['g_form.hideRelatedLists()', 'g_form.hideAll()', 'g_form.setDisplay("related", false)', 'gs.hideLists()'], 0, 'hideRelatedLists().'),
     q('Anni field messages ni oka saari teeseyyali?', ['g_form.clearMessages()', 'g_form.hideAllFieldMsgs()', 'g_form.removeAll()', 'g_form.clearValue()'], 1, 'hideAllFieldMsgs() field messages teesestundi (clearMessages top banner ki).'),
     q('getReference ki better alternative (performance)?', ['alert()', 'GlideAjax leda g_scratchpad', 'Direct GlideRecord client lo', 'setTimeout'], 1, 'GlideAjax / g_scratchpad server ni takkuva sarlu pilustayi leda controlled ga.'),
@@ -159,9 +159,9 @@ const gllist = {
     },
   ],
   quiz: [
-    q('g_list.getChecked() em istundi?', ['Array of sys_ids', 'Comma-separated sys_ids string', 'Number of records', 'GlideRecord'], 1, 'Comma-separated string, e.g. "id1,id2".'),
-    q('Emi select cheyyakapothe getChecked() em istundi?', ['null', 'undefined', '"" (empty string)', '0'], 2, 'Empty string.'),
-    q('g_list ekkada vaadatam?', ['Business Rule lo', 'List lo client UI Action lo', 'Scheduled Job lo', 'Update Set lo'], 1, 'List lo select chesina records kosam client UI Actions lo.'),
+    q('g_list.getChecked() em istundi?', ['Array of sys_ids (JavaScript array)', 'Comma-separated sys_ids string', 'Select chesina records count', 'GlideRecord object'], 1, 'Comma-separated string, e.g. "id1,id2".'),
+    q('Emi select cheyyakapothe getChecked() em istundi?', ['null', 'undefined', '"" (empty string)', '0'], 2, 'Empty string "" — code lo if (!ids) tho "emi select cheyyaledu" ani check cheyyochu.'),
+    q('g_list ekkada vaadatam?', ['Business Rule lo (server side)', 'List lo client UI Action lo', 'Scheduled Job lo', 'Update Set lo'], 1, 'List lo select chesina records kosam client UI Actions lo.'),
     q('Select chesina records count ela teesukuntam?', ['ids.length', 'ids.split(",").length', 'ids.count()', 'g_list.size'], 1, 'String ni split chesi length (empty check marchipoku).'),
     q('User confirm chesaka matrame munduku veltaniki?', ['alert()', 'confirm()', 'prompt()', 'jslog()'], 1, 'confirm() true/false istundi.'),
   ],
@@ -226,7 +226,7 @@ const clientScripts = {
     {
       h: '🧩 Client Script record',
       body: [
-        'System Definition → Client Scripts lo create chestam. Important fields: Name, Table (incident), UI Type (Desktop / Mobile / All), Type (onLoad / onChange / onSubmit / onCellEdit), Field name (onChange ki matrame), Active, Script.',
+        'System Definition → Client Scripts lo create chestam. Important fields: Name, Table (incident), UI Type (Desktop / Mobile / All), Type (onLoad / onChange / onSubmit / onCellEdit), Field name (onChange mariyu onCellEdit ki), Active, Script.',
         'ServiceNow template function ichestundi — adi marchakunda andulo code rayali: function onLoad() { }, function onChange(control, oldValue, newValue, isLoading, isTemplate) { }, function onSubmit() { }.',
       ],
     },
@@ -253,7 +253,7 @@ const clientScripts = {
     },
   ],
   quiz: [
-    q('onChange client script lo isLoading true ayithe?', ['User field marchadu', 'Form load avtundi — script return cheyyali', 'Error', 'Record save avtundi'], 1, 'Form load lo field values set avtunnappudu kuda onChange fire avtundi — guard tho return.'),
+    q('onChange client script lo isLoading true ayithe?', ['User field marchadu — script run cheyyali', 'Form load avtundi — script return cheyyali', 'Error vachindi — script aapali', 'Record save avtundi — script run cheyyali'], 1, 'Form load lo field values set avtunnappudu kuda onChange fire avtundi — guard tho return.'),
     q('newValue / oldValue em types?', ['Number', 'Boolean', 'String', 'Object'], 2, 'Ellappudu strings.'),
     q('Simple mandatory / hide ki edi best?', ['Business Rule', 'UI Policy', 'Scheduled Job', 'Script Include'], 1, 'UI Policy — code avasaram ledu.'),
     q('Client Script template function ni emi cheyyali?', ['Rename cheyyali', 'Marchakunda andulo rayali', 'Delete cheyyali', 'gs.info add cheyyali'], 1, 'Function names marchakudadu — ServiceNow aa peru tho call chestundi.'),
@@ -343,7 +343,7 @@ const onload = {
     q('New record defaults ki ela check chestam?', ['g_form.isNewRecord()', 'gs.isNew()', 'current.isNew', 'g_user.isNew'], 0, 'g_form.isNewRecord().'),
     q('onLoad lo server data kavali — best way?', ['g_scratchpad', 'getReference chala sarlu', 'Sync GlideRecord', 'prompt()'], 0, 'Display Business Rule tho g_scratchpad.'),
     q('Closed incident ni edit cheyyakunda cheyyali?', ['setReadOnly(field, true)', 'setMandatory', 'clearValue', 'setVisible(field,true)'], 0, 'setReadOnly(field, true) (+ ACL).'),
-    q('onLoad lo oldValue / newValue untaya?', ['Avunu', 'Ledu — adi onChange ki matrame', 'Strings untayi', 'Number untayi'], 1, 'onLoad function ki parameters levu.'),
+    q('onLoad lo oldValue / newValue untaya?', ['Avunu, onLoad ki kuda untayi', 'Ledu — adi onChange ki matrame', 'Strings ga untayi', 'Numbers ga untayi'], 1, 'onLoad function ki parameters levu.'),
   ],
   exercises: [
     jx('cs-onload', 1, 'P1 banner', 'easy', {
@@ -432,11 +432,11 @@ const onchange = {
     },
   ],
   quiz: [
-    q('Assignment group marchite assigned_to emi cheyyali?', ['Alage vadileyyali', 'Clear cheyyali (group lo undakapovachu)', 'Delete record', 'Mandatory chey'], 1, 'Dependent field ni clear cheyyadam standard.'),
-    q('onChange lo user ki visible ga cheppadaniki?', ['g_form.addInfoMessage / showFieldMsg', 'gs.info', 'console only', 'jslog matrame'], 0, 'g_form messages.'),
-    q('Caller inactive check ki?', ['getReference (callback)', 'g_user.active', 'gs.getUser', 'Update Set'], 0, 'getReference callback lo caller.active.'),
-    q('onChange guard lo isLoading ni enduku check chestam?', ['Form load lo kuda fire avtundi', 'Performance', 'Mandatory ki', 'Security'], 0, 'Load time lo field values set avvadam valla onChange fire avtundi.'),
-    q('onChange ellappudu emi event ki run avtundi?', ['Field value marchinappudu', 'Page refresh', 'Save', 'Login'], 0, 'Specified field value marchinappudu.'),
+    q('Assignment group marchite assigned_to emi cheyyali?', ['Alage vadileyyali, em cheyyakudadu', 'Clear cheyyali (group lo undakapovachu)', 'Aa record ni delete cheyyali', 'Assigned to ni mandatory cheyyali'], 1, 'Dependent field ni clear cheyyadam standard.'),
+    q('onChange lo user ki visible ga cheppadaniki?', ['g_form.addInfoMessage / showFieldMsg', 'gs.info (server log matrame)', 'console.log matrame (user ki kanipinchadu)', 'jslog matrame (browser log)'], 0, 'g_form messages.'),
+    q('Caller inactive check ki?', ['getReference (callback)', 'g_user.active property tho', 'gs.getUser() client lo', 'Update Set lo check chesi'], 0, 'getReference callback lo caller.active.'),
+    q('onChange guard lo isLoading ni enduku check chestam?', ['Form load lo kuda fire avtundi', 'Performance penchadaniki matrame', 'Field mandatory cheyyadaniki', 'Security kosam'], 0, 'Load time lo field values set avvadam valla onChange fire avtundi.'),
+    q('onChange ellappudu emi event ki run avtundi?', ['Field value marchinappudu', 'Page refresh chesinappudu', 'Record save chesinappudu', 'User login ayinappudu'], 0, 'Specified field value marchinappudu.'),
   ],
   exercises: [
     jx('cs-onchange', 1, 'Group marchite assigned_to clear', 'easy', {

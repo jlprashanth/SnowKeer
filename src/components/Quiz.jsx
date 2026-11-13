@@ -1,8 +1,20 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { exercisesFor } from '../data/exercises.js'
 
+// Shuffle each question's options once per quiz run (the data always lists the right answer in a fixed slot).
+function shuffleQuiz(quiz) {
+  return quiz.map((x) => {
+    const order = x.options.map((_, n) => n)
+    for (let k = order.length - 1; k > 0; k--) {
+      const j = Math.floor(Math.random() * (k + 1))
+      ;[order[k], order[j]] = [order[j], order[k]]
+    }
+    return { ...x, options: order.map((n) => x.options[n]), answer: order.indexOf(x.answer) }
+  })
+}
+
 export default function Quiz({ lesson, onFinish, finishLabel = 'Course ki back', tip }) {
-  const qs = lesson.quiz
+  const qs = useMemo(() => shuffleQuiz(lesson.quiz), [lesson])
   const hasExercises = exercisesFor(lesson.id).length > 0
   const [i, setI] = useState(0)
   const [picked, setPicked] = useState(null)

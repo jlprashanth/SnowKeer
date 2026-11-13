@@ -30,8 +30,8 @@ const formDesign = {
   quiz: [
     q('Form design cheyyadaniki e page vaduthamu?', ['Form Layout', 'Dashboard', 'Update Set', 'Filter'], 0, 'Configure → Form Layout.'),
     q('Fields ni 2 columns ga cheyyadaniki?', ['--split--', 'Mandatory', 'View rule', 'Reference'], 0, '--split-- (end ki --end_split--).'),
-    q('Form lo tabs laaga kanipinche vi?', ['Form sections', 'Modules', 'Roles', 'Filters'], 0, 'Sections.'),
-    q('Form Layout lo selected ↔ available UI peru?', ['Slushbucket', 'Breadcrumb', 'Banner', 'Navigator'], 0, 'Slushbucket.'),
+    q('Form lo tabs laaga kanipinche vi?', ['Form sections', 'Modules', 'Roles', 'Filters'], 0, 'Form Sections — form lo tabs laaga kanipistayi, Form Layout lo create chestam.'),
+    q('Form Layout lo selected ↔ available UI peru?', ['Slushbucket', 'Breadcrumb', 'Banner', 'Navigator'], 0, 'Slushbucket — Available ↔ Selected lists, fields add/remove chese UI.'),
   ],
 }
 
@@ -76,10 +76,10 @@ const views = {
     info('Chusava! Aa record Status = Completed kabatti, view rule valla auto ga "Trainee view" lo open ayyindi (title lo View: Trainee view). Rule lekunda manual ga marchakkarledu ✅', 'f-menu'),
   ],
   quiz: [
-    q('View ante?', ['Oke table ki different form layouts', 'Oka report', 'Oka role', 'Oka filter'], 0, 'Different layouts of the same table form.'),
-    q('Condition batti auto ga view marchedi?', ['View Rule', 'UI Policy', 'Data Policy', 'Business Rule'], 0, 'View Rule.'),
+    q('View ante?', ['Oke table ki different form layouts', 'Oka saved report', 'Oka role yokka permissions set', 'Oka saved list filter'], 0, 'Different layouts of the same table form.'),
+    q('Condition batti auto ga view marchedi?', ['View Rule', 'UI Policy', 'Data Policy', 'Business Rule'], 0, 'View Rule — condition batti automatic ga correct view select chestundi.'),
     q('Form lo view ni manual ga marchadam ekkada?', ['Form ☰ menu → View', 'Header', 'Navigator', 'Dictionary'], 0, 'Form context menu → View.'),
-    q('View ki layout set cheyyadaniki?', ['Form Layout lo View select chesi', 'Dictionary', 'Modules', 'Roles'], 0, 'Form Layout page lo View select chesi.'),
+    q('View ki layout set cheyyadaniki?', ['Form Layout lo View select chesi', 'Dictionary lo View column set chesi', 'Modules lo View peru rasi', 'Roles lo View ni add chesi'], 0, 'Form Layout page lo View select chesi.'),
   ],
 }
 
@@ -127,8 +127,8 @@ const dictionary = {
   quiz: [
     q('Dictionary lo Mandatory set chesthe form lo em kanipistundi?', ['Red ∗', 'Blue ∗', 'Em kaadu', 'Hidden avtundi'], 0, 'Red ∗ mandatory field ki.'),
     q('Default value e records ki apply avtundi?', ['Kotha records ki', 'Anni existing records ki', 'Deleted ki', 'Em kaadu'], 0, 'Kotha records ki matrame.'),
-    q('Category marchithe Subcategory options marali. Idi e property?', ['Dependent', 'Display', 'Default', 'Read only'], 0, 'Dependent.'),
-    q('Dictionary level Read only ante?', ['Anni forms lo edit cheyyalem', 'Oka view lo matrame', 'Admin ki matrame', 'Hidden'], 0, 'Dictionary level = anni forms/views ki.'),
+    q('Category marchithe Subcategory options marali. Idi e property?', ['Dependent', 'Display', 'Default', 'Read only'], 0, 'Dependent — parent field (Category) value batti child field (Subcategory) choices marutayi.'),
+    q('Dictionary level Read only ante?', ['Anni forms lo edit cheyyalem', 'Oka view lo matrame edit cheyyalem', 'Admin ki matrame edit cheyyalem', 'Field form lo hidden avtundi'], 0, 'Dictionary level = anni forms/views ki.'),
   ],
 }
 
@@ -151,9 +151,9 @@ const processFlow = {
     info('State field kuda "In Progress" ayyindi ✅ Process flow = State field ki visual form. Daily ga support agents ki idi chala useful.', 'f-state'),
   ],
   quiz: [
-    q('Process Flow ni form lo ela add chestam?', ['Form Layout lo formatter add chesi', 'Dictionary lo', 'Module create chesi', 'Role ichi'], 0, 'Form Layout → Process Flow formatter.'),
-    q('Process Flow em chupistundi?', ['Record ippudu e stage lo undo', 'User list', 'Tables', 'Roles'], 0, 'Current stage (State).'),
-    q('Process Flow e field meeda adharapadi untundi?', ['State', 'Number', 'Caller', 'Description'], 0, 'State field.'),
+    q('Process Flow ni form lo ela add chestam?', ['Form Layout lo formatter add chesi', 'Dictionary lo Process Flow field add chesi', 'Module create chesi', 'User ki role ichi'], 0, 'Form Layout → Process Flow formatter.'),
+    q('Process Flow em chupistundi?', ['Record ippudu e stage lo undi', 'System lo unna users list', 'Tables yokka list', 'Roles yokka list'], 0, 'Current stage (State).'),
+    q('Process Flow e field meeda adharapadi untundi?', ['State', 'Number', 'Caller', 'Description'], 0, 'State field meeda Process Flow adharapadi untundi — State choices ye stages ga kanipistayi.'),
   ],
 }
 
@@ -193,9 +193,9 @@ const menus = {
   ],
   quiz: [
     q('Navigator lo applications ni em antaru?', ['Application Menus', 'Views', 'Roles', 'Update sets'], 0, 'Application Menus.'),
-    q('Menu kinda links ni?', ['Modules', 'Fields', 'Tables', 'Policies'], 0, 'Modules.'),
+    q('Menu kinda links ni?', ['Modules', 'Fields', 'Tables', 'Policies'], 0, 'Modules — Application Menu kinda unde links.'),
     q('Module filter "priority=1^active=true" lo ^ ante?', ['AND', 'OR', 'NOT', 'Comment'], 0, '^ = AND (^OR = OR).'),
-    q('Daily vaade modules ki shortcut?', ['Favorites (star)', 'Dictionary', 'Views', 'Roles'], 0, 'Favorites.'),
+    q('Daily vaade modules ki shortcut?', ['Favorites (star)', 'Dictionary', 'Views', 'Roles'], 0, 'Favorites (star) — daily vaade modules ki shortcut.'),
   ],
 }
 

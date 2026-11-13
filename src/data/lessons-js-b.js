@@ -187,6 +187,7 @@ gs.info(s.trim().toLowerCase()); // 'vpn is down'`,
       body: [
         'Short description lo keyword undo ledo check cheyyadaniki: indexOf (position istundi, ledhante -1), includes (true/false).',
         'Case-insensitive kosam mundu toLowerCase() chey.',
+        '⚠️ includes() mariyu startsWith() newer JavaScript (ES6+) — classic (ES5) server scripts lo avi undavu, "is not a function" error vastundi. ES12 mode on unte matrame work avtayi. ES5 lo safe way: indexOf(...) !== -1 (includes ki), indexOf(...) === 0 (startsWith ki). Nee PDI script lo ES12 mode tick undo ledo check chesuko.',
       ],
       code: `var d = 'VPN keeps disconnecting';
 gs.info(d.toLowerCase().indexOf('vpn') !== -1);  // true
@@ -211,6 +212,7 @@ gs.info('Hello Abel'.replace('Abel', 'Ravi'));`,
       h: '🧱 Build: padStart & joining',
       body: [
         'Incident number lanti text build cheyyadaniki: "INC" + number.padStart(7, "0"). padStart = left lo "0" nimputundi.',
+        '⚠️ padStart kuda ES2017 — ES12 mode on unte matrame work avtundi. Classic ES5 script lo ila rayali: ("0000000" + n).slice(-7). (Ee site lo browser sandbox kabatti padStart work avtundi, kani nee PDI lo ES5 script ayithe error vastundi.)',
       ],
       code: `var n = 42;
 var number = 'INC' + String(n).padStart(7, '0');
@@ -317,7 +319,7 @@ var last = 'INC0010004';
 var next = Number(last.slice(3)) + 1;
 var nextNumber = 'INC' + String(next).padStart(7, '0');
 gs.info(nextNumber);`,
-      explain: 'Real ServiceNow lo number maintenance ila panichestundi: prefix + zero-padded counter. slice(3) "INC" teesesthundi, padStart leading zeros pedutundi.',
+      explain: '(ES12 mode kavali — classic ES5 lo ("0000000" + n).slice(-7) vaadu.) Real ServiceNow lo number maintenance ila panichestundi: prefix + zero-padded counter. slice(3) "INC" teesesthundi, padStart leading zeros pedutundi.',
       tests: [
         { label: 'Logs: INC0000042, INC0010005', logs: ['INC0000042', 'INC0010005'] },
         { label: 'nextNumber = INC0010005', expr: 'nextNumber', expect: 'INC0010005' },
@@ -397,7 +399,7 @@ gs.info([10, 9, 1].sort(function (a, b) { return a - b; }).join(','));  // 1,9,1
     q('["a", "b"].indexOf("c") — result?', ['-1', '0', 'undefined', 'false'], 0, 'Dorakapothe indexOf -1 istundi.'),
     q('[1, 2, 3].join("-") — result?', ['"1-2-3"', '[1,2,3]', '"123"', '6'], 0, 'join separator tho text build chestundi.'),
     q('[10, 9, 1].sort() — result?', ['[1, 10, 9]', '[1, 9, 10]', '[10, 9, 1]', '[9, 10, 1]'], 0, 'Default sort text order lo chestundi. Numbers ki compare function kavali.'),
-    q('filter() em chestundi?', ['Condition match ayye items tho kotha array istundi', 'Original array ni delete chestundi', 'Array ni sort chestundi', 'Count matrame istundi'], 0, 'filter kotha array return chestundi.'),
+    q('filter() em chestundi?', ['Condition match ayye items tho kotha array istundi', 'Original array nundi items ni delete chestundi', 'Array ni sort chesi return chestundi', 'Match ayina items count matrame istundi'], 0, 'filter kotha array return chestundi.'),
   ],
   exercises: [
     jx('js-arrays', 1, 'Groups list build chey', 'easy', {

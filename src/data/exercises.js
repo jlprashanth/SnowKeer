@@ -16,7 +16,7 @@ export const EXERCISES = [
     answer: 'Login ayyaka ServiceNow home (Next Experience UI) kanipinchali, top lo banner & "All" menu tho. URL lo devXXXXXX = nee instance number.',
   }),
   ex('account', 2, 'Hibernate ayina instance ni wake up chey', 'easy', {
-    scenario: 'PDI konni rojulu vaadakapothe hibernate avtundi. Adi ela wake up cheyyalo practice chey (instance ippudu active ga unte steps matrame chadivi, tick cheyyi).',
+    scenario: 'PDI konchem sepu (konni gantalu) vaadakapothe hibernate avtundi (exact time memory nunchi — confirm chesuko). Adi ela wake up cheyyalo practice chey (instance ippudu active ga unte steps matrame chadivi, tick cheyyi).',
     steps: [
       'developer.servicenow.com lo sign in ayyi.',
       'Instance status chudu — "Hibernating" ani unte "Wake up" button click cheyyi.',

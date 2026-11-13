@@ -90,7 +90,7 @@ gs.info(Number(p) + 1);             // 2    (correct)`,
     q('var p = "1"; gs.info(p + 1); — em print avtundi?', ['2', '11', 'NaN', 'Error'], 1, '"1" string, kabatti + text join chestundi → "11". Number(p) + 1 ayithe 2.'),
     q('Idi lo edi valid single-line comment?', ['// Business Rule peru', '# Business Rule peru', '-- Business Rule peru', '<!-- Business Rule peru -->'], 0, 'JavaScript lo // tho single-line comment start avtundi.'),
     q('var x; gs.info(typeof x); — em vastundi?', ['null', 'string', 'undefined', 'object'], 2, 'Value pettani variable = undefined.'),
-    q('gs.info() messages real instance lo ekkada chudali?', ['System Logs → Script Log Statements', 'Incident form lo', 'Update Set lo', 'Dictionary lo'], 0, 'System Log → Script Log Statements (System Logs menu).'),
+    q('gs.info() messages real instance lo ekkada chudali?', ['System Logs → Script Log Statements', 'Incident form lo Activity section lo', 'Update Set lo Customer Updates lo', 'Dictionary lo field Messages lo'], 0, 'System Log → Script Log Statements (System Logs menu).'),
   ],
   exercises: [
     jx('js-basics', 1, 'Incident number ni log chey', 'easy', {
