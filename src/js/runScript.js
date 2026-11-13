@@ -44,6 +44,7 @@ function runOnce({ code, scenario = {}, tests = [], client }) {
   const mk = (s) => (s ? makeRecord(s.table || 'incident', s.values, db) : undefined)
   const current = mk(scenario.current)
   const previous = scenario.previous ? mk(scenario.previous) : current ? makeRecord(scenario.current.table || 'incident', scenario.current.values, db) : undefined
+  if (current && previous) current._previous = previous // lets current.field.changes() compare with previous
 
   let evaluate = null
   let error = null

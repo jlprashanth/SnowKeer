@@ -149,7 +149,7 @@ function ClientForm({ form, onEdit, trigger, submit }) {
             <div key={i} className={'cf-msg ' + m.kind}>{m.kind === 'error' ? '⛔' : 'ℹ️'} {m.text}</div>
           ))}
           <div className="cf-grid">
-            {form.fields.filter((f) => f.visible).map((f) => (
+            {form.fields.filter((f) => f.visible || f.space).map((f) => f.visible ? (
               <label key={f.name} className={'cf-field' + (f.type === 'text' ? ' wide' : '')}>
                 <span className="cf-label">{f.mandatory && <b className="cf-req">*</b>}{f.label}</span>
                 {f.choices ? (
@@ -164,6 +164,8 @@ function ClientForm({ form, onEdit, trigger, submit }) {
                 )}
                 {f.msgs.map((m, i) => <span key={i} className={'cf-fmsg ' + m.type}>{m.text}</span>)}
               </label>
+            ) : (
+              <div key={f.name} className="cf-field cf-gap" style={{ minHeight: 54 }} title="setVisible(false): field hide ayindi kani space migilindi (setDisplay ayithe space kuda povadam)" />
             ))}
           </div>
         </>

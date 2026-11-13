@@ -53,6 +53,7 @@ React 18 + Vite 5, plain JS/JSX, no router, no backend, no CSS framework. Progre
 
 ## How to test
 - `node dev-tools/check-js.mjs` — every Stage 2 reference solution must pass all tests and every starter must FAIL. Run after any change to `src/js/` or JS lessons.
+- `node dev-tools/check-mock.mjs` — mock API checks (dot-walking `gr.caller_id.email`, `changes()/changesTo()/changesFrom()` vs `previous`, `gs.getUser()`, setVisible vs setDisplay space). Run after editing `src/js/*Mock.js`.
 - `node dev-tools/check-exercises.mjs` — Stage 1 exercise data sanity (ids, lessonIds, prerequisite notes on Practice Task exercises).
 - `dev-tools/test-driver.js` — auto-plays Stage 1 guided lessons (sets `window.__run`). Not loaded by the app: with the dev server running,
   load it in the page (e.g. `await import('/dev-tools/test-driver.js')` in the console), then `await __run('<lessonId>')`. It does not play
