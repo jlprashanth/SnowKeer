@@ -80,9 +80,13 @@ function parseEncoded(q) {
     if (raw.startsWith('ORDERBY')) { out.order.push({ f: raw.slice(7), desc: false }); continue }
     const isOr = raw.startsWith('OR')
     const body = isOr ? raw.slice(2) : raw
-    const op = OPS.find((o) => body.includes(o))
+    // operator = the one that appears EARLIEST (field names never contain operators); on a tie the longer one wins
+    let op = null, i = -1
+    for (const o of OPS) {
+      const k = body.indexOf(o)
+      if (k >= 0 && (i < 0 || k < i || (k === i && o.length > op.length))) { op = o; i = k }
+    }
     if (!op) continue
-    const i = body.indexOf(op)
     const cond = { field: body.slice(0, i), op, value: body.slice(i + op.length) }
     if (isOr && out.groups.length) out.groups[out.groups.length - 1].push(cond)
     else out.groups.push([cond])
