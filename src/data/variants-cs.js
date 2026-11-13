@@ -4,6 +4,7 @@
 const CHG = (field, oldValue, newValue) => ({ trigger: { type: 'onChange', field, oldValue, newValue } })
 const MSGS = '__msgs.map(function (m) { return m.text })'
 const CUR = (values) => ({ current: { table: 'incident', values: { number: 'INC0010001', ...values } } })
+const CELL = (nv, ov) => ({ trigger: { type: 'onCellEdit', newValue: nv, oldValues: ov || [''], table: 'incident', sysIDs: ['inc1'] } })
 const FMSGS = (f) => `__f.${f}.msgs.map(function (m) { return m.text })`
 
 export const VARIANTS_CS = {
@@ -99,4 +100,21 @@ export const VARIANTS_CS = {
   'cs-ua1-4': [{ name: 'state 2 (reopen kudaradu)', scenario: CUR({ state: '2', active: 'true' }), tests: [{ label: 'state marchaledu', expr: "current.getValue('state')", expect: '2' }, { label: 'log', logs: ['Cannot reopen'] }] }],
   'cs-ua3-4': [{ name: 'already closed', scenario: CUR({ state: '7', description: '' }), tests: [{ label: 'state 7 ala undali', expr: "current.getValue('state')", expect: '7' }, { label: 'log', logs: ['Already closed'] }] }],
   'cs-ua4-4': [{ name: 'already closed', scenario: CUR({ state: '7' }), tests: [{ label: 'state 7', expr: "current.getValue('state')", expect: '7' }, { label: 'log', logs: ['Already closed'] }] }],
-}
+  /* Stage 3 Medium+ ladder — else-branch / hardcode guards */
+  'cs-gluser-6': [{ name: 'flag false', scenario: { scratchpad: { needsApproval: false } }, tests: [{ label: 'description mandatory kaadu', expr: "g_form.isMandatory('description')", expect: false }] }],
+  'cs-gluser-7': [{ name: 'VIP kaadu', scenario: { scratchpad: { callerIsVip: false } }, tests: [{ label: 'message ledu', expr: MSGS, expect: [] }, { label: 'urgency marchaledu', expr: "g_form.getValue('urgency')", expect: '3' }] }],
+  'cs-glform-6': [{ name: 'short description undi', scenario: { form: { values: { short_description: 'Email down' } } }, tests: [{ label: 'field message ledu', expr: '__f.short_description.msgs.length', expect: 0 }] }],
+  'cs-glform-7': [{ name: 'impact 2 ayithe', scenario: { form: { values: { impact: '2', urgency: '2' } } }, client: CHG('impact', '1', '2'), tests: [{ label: 'urgency options anni undali', expr: '__f.urgency.choices.map(function (c) { return c.value })', expect: ['1', '2', '3'] }] }],
+  'cs-ua3-7': [{ name: 'state 2', scenario: CUR({ state: '2' }), tests: [{ label: 'state 6 avvali', expr: "current.getValue('state')", expect: '6' }] }],
+  'cs-ajax1-7': [{ name: 'g_desk (1 open)', scenario: { form: { values: { assignment_group: 'g_desk' } } }, client: CHG('assignment_group', '', 'g_desk'), tests: [{ label: 'field message ledu', expr: FMSGS('assignment_group'), expect: [] }] }],
+  'cs-onsubmit-5': [{ name: 'short description undi', scenario: { form: { values: { short_description: 'VPN down' } } }, tests: [{ label: 'submit avvali', expr: '__submit', expect: true }, { label: 'message ledu', expr: '__f.short_description.msgs.length', expect: 0 }] }],
+  'cs-onsubmit-6': [{ name: 'text undi', scenario: { form: { values: { short_description: '  VPN down ' } } }, tests: [{ label: 'submit avvali', expr: '__submit', expect: true }, { label: 'message ledu', expr: '__f.short_description.msgs.length', expect: 0 }] }],
+  'cs-onsubmit-7': [{ name: 'anni fields undi', scenario: { form: { values: { short_description: 'VPN down', category: 'network' } } }, tests: [{ label: 'submit avvali', expr: '__submit', expect: true }, { label: 'messages ledu', expr: '[__f.short_description.msgs.length, __f.category.msgs.length]', expect: [0, 0] }] }],
+  'cs-usecases-5': [{ name: 'user Cancel', scenario: { confirmAnswer: false }, tests: [{ label: 'assigned_to ala undali', expr: "g_form.getValue('assigned_to')", expect: 'u_admin' }] }],
+  'cs-usecases-6': [{ name: 'state 3 (On Hold)', scenario: { form: { values: { state: '3' } } }, client: CHG('state', '2', '3'), tests: [{ label: 'state 3 ala undali', expr: "g_form.getValue('state')", expect: '3' }, { label: 'message ledu', expr: MSGS, expect: [] }] }],
+  'cs-usecases-7': [{ name: 'user OK', scenario: { confirmAnswer: true }, tests: [{ label: 'group g_net ala undali', expr: "g_form.getValue('assignment_group')", expect: 'g_net' }] }],
+  'cs-ua2-6': [{ name: 'user OK', scenario: { form: { values: { short_description: 'VPN down', state: '2' } }, confirmAnswer: true }, client: { trigger: { type: 'call', fn: 'resolveIt' } }, tests: [{ label: 'state 6 avvali', expr: "g_form.getValue('state')", expect: '6' }, { label: 'message ledu', expr: MSGS, expect: [] }] }],
+  'cs-ua2-7': [{ name: 'user Cancel', scenario: { form: { values: { short_description: 'VPN down', state: '2' } }, confirmAnswer: false }, client: { trigger: { type: 'call', fn: 'resolveIt' } }, tests: [{ label: 'submit avvakudadu', expr: '__x.submitted', expect: null }] }],
+  'cs-oncell-5': [{ name: 'priority 3', client: CELL('3'), tests: [{ label: 'edit allow', expr: '__submit', expect: true }, { label: 'alert ledu', logs: [] }] }],
+  'cs-oncell-6': [{ name: 'itil user', scenario: { user: { userName: 'beth.anglin', userID: 'u_beth', roles: ['itil'] } }, tests: [{ label: 'edit allow', expr: '__submit', expect: true }, { label: 'alert ledu', logs: [] }] }],
+  'cs-oncell-7': [{ name: 'Resolved nunchi Close', client: CELL('7', ['6']), tests: [{ label: 'edit allow', expr: '__submit', expect: true }, { label: 'alert ledu', logs: [] }] }, { name: 'state 3 ki', client: CELL('3', ['2']), tests: [{ label: 'edit allow', expr: '__submit', expect: true }] }],}

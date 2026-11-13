@@ -122,6 +122,97 @@ gs.info(label);`,
       explain: 'Priority 4 → Low (else). Mundu match ayina branch matrame run.',
       tests: [{ label: 'Log: Low', logs: ['Low'] }],
     }),
+    // ---- Medium+ ladder: one new idea at a time, building up to exercises 3 and 4 ----
+    jx('js-conditions', 5, 'Assigned aa? (empty = falsy)', 'medium+', {
+      task: 'INC0010006 teesuko (idi unassigned). if (gr.getValue("assigned_to")) tho check chey: undi ayithe "Assigned", lekapothe "Unassigned" ani log chey. 🧰 Vaade words: GlideRecord, get(), getValue(), if / else',
+      starter: `var gr = new GlideRecord('incident');
+gr.get('number', 'INC0010006');
+
+// Empty field = falsy:  if (gr.getValue('assigned_to')) { ...undi... } else { ...ledu... }
+// TODO: undi ayithe 'Assigned', lekapothe 'Unassigned' log chey
+`,
+      hint: [
+        'Value undaa ledaa check cheyyadaniki condition lo getValue ni direct ga pettochu — empty text ayithe false.',
+        'if (gr.getValue("assigned_to")) { ... } else { ... }',
+        'if (gr.getValue("assigned_to")) { gs.info("Assigned"); } else { gs.info("Unassigned"); }',
+      ],
+      solution: `var gr = new GlideRecord('incident');
+gr.get('number', 'INC0010006');
+
+if (gr.getValue('assigned_to')) {
+  gs.info('Assigned');
+} else {
+  gs.info('Unassigned');
+}`,
+      explain: 'Empty string falsy kabatti if (getValue(...)) = "value undi". Exercise 4 lo idi main condition.',
+      tests: [{ label: 'Log: Unassigned', logs: ['Unassigned'] }],
+    }),
+    jx('js-conditions', 6, 'Group fallback (else if)', 'medium+', {
+      task: 'INC0010004 teesuko (assigned_to ledu, group undi). assigned_to undi ayithe "Assigned to <name>"; lekapothe group undi ayithe "Assign to group <group>"; rendu ledu ayithe "Send to triage". Names ki getDisplayValue vaadu. 🧰 Vaade words: getValue(), getDisplayValue(), if / else if / else',
+      starter: `var gr = new GlideRecord('incident');
+gr.get('number', 'INC0010004');
+
+// TODO: if assigned_to undi -> 'Assigned to <name>'
+//       else if assignment_group undi -> 'Assign to group <group>'
+//       else -> 'Send to triage'
+`,
+      hint: [
+        'Moodu paths: assigned_to undi → ok; ledu but group undi → group ki pampu; rendu ledu → triage. Most specific condition mundu.',
+        'if (gr.getValue("assigned_to")) {...} else if (gr.getValue("assignment_group")) {...} else {...}. Peru kosam getDisplayValue.',
+        'gs.info("Assign to group " + gr.getDisplayValue("assignment_group"));',
+      ],
+      solution: `var gr = new GlideRecord('incident');
+gr.get('number', 'INC0010004');
+
+if (gr.getValue('assigned_to')) {
+  gs.info('Assigned to ' + gr.getDisplayValue('assigned_to'));
+} else if (gr.getValue('assignment_group')) {
+  gs.info('Assign to group ' + gr.getDisplayValue('assignment_group'));
+} else {
+  gs.info('Send to triage');
+}`,
+      explain: 'if / else if / else chain: mundu match ayina branch matrame run avtundi. Exercise 4 lo ide loop lo 3 incidents ki chestam.',
+      tests: [{ label: 'Log: Assign to group Database', logs: ['Assign to group Database'] }],
+    }),
+    jx('js-conditions', 7, 'Category tho team pick chey (switch)', 'medium+', {
+      task: 'INC0010002 teesuko, category getValue. switch tho: "network" → "Network team", "database" → "DB team", default → "Service Desk". team ni log chey. break marchipoku! 🧰 Vaade words: getValue(), switch / case / break / default',
+      starter: `var gr = new GlideRecord('incident');
+gr.get('number', 'INC0010002');
+var category = gr.getValue('category');
+
+var team;
+// TODO: switch (category) { case 'network': team = ...; break; ... default: ... }
+
+gs.info(team);
+`,
+      hint: [
+        'Okka value ni chala options tho compare cheyyali — switch. Prathi case ki break, last lo default.',
+        'switch (category) { case "network": team = "Network team"; break; case "database": ... default: ... }',
+        'default lo team = "Service Desk"; — break avasaram ledu (last kabatti).',
+      ],
+      solution: `var gr = new GlideRecord('incident');
+gr.get('number', 'INC0010002');
+var category = gr.getValue('category');
+
+var team;
+switch (category) {
+  case 'network':
+    team = 'Network team';
+    break;
+  case 'database':
+    team = 'DB team';
+    break;
+  default:
+    team = 'Service Desk';
+}
+
+gs.info(team);`,
+      explain: 'switch lo cases quotes lo (strings). break lekapothe next case kuda run avtundi (fall-through).',
+      tests: [
+        { label: 'Log: Network team', logs: ['Network team'] },
+        { label: 'team = Network team', expr: 'team', expect: 'Network team' },
+      ],
+    }),
     jx('js-conditions', 3, 'State message (switch)', 'medium', {
       task: 'INC0010005 state teesuko (string). switch tho: "1" → New, "2" → In Progress, "3" → On Hold, "6" → Resolved - waiting for closure, default → Other. Message ni msg lo petti log chey. break marchipoku!',
       starter: `var gr = new GlideRecord('incident');
@@ -133,7 +224,11 @@ var msg;
 
 gs.info(msg);
 `,
-      hint: "case '6': msg = 'Resolved - waiting for closure'; break;",
+      hint: [
+        'Oka value (state) ni chala options tho compare — switch. Prathi case lo msg set chesi break pettu, last lo default.',
+        'switch (state) { case "1": msg = "New"; break; case "2": ... } — state string kabatti cases kuda quotes lo.',
+        "case '6': msg = 'Resolved - waiting for closure'; break;",
+      ],
       solution: `var gr = new GlideRecord('incident');
 gr.get('number', 'INC0010005');
 var state = gr.getValue('state');
@@ -174,7 +269,11 @@ while (gr.next()) {
   //       else -> 'Send to triage'
 }
 `,
-      hint: "if (gr.getValue('assigned_to')) { gs.info(number + ': Already assigned to ' + gr.getDisplayValue('assigned_to')); } else if (...)",
+      hint: [
+        'Records meeda loop (while gr.next()). Prathi record ki moodu paths — previous Medium+ exercises lo chesav: assigned → group → triage.',
+        'Most specific condition mundu: if (gr.getValue("assigned_to")) ... else if (gr.getValue("assignment_group")) ... else ...  Names ki getDisplayValue.',
+        "if (gr.getValue('assigned_to')) { gs.info(number + ': Already assigned to ' + gr.getDisplayValue('assigned_to')); } else if (...)",
+      ],
       solution: `var gr = new GlideRecord('incident');
 gr.addQuery('number', 'IN', 'INC0010001,INC0010004,INC0010006');
 gr.orderBy('number');
@@ -318,6 +417,89 @@ gs.info('Active incidents: ' + count);`,
         { label: 'count = getRowCount', expr: 'gr.getRowCount()', expect: 7 },
       ],
     }),
+    // ---- Medium+ ladder: one new idea at a time, building up to exercises 3 and 4 ----
+    jx('js-loops', 5, 'Array meeda for loop (index)', 'medium+', {
+      task: 'groups = ["Service Desk", "Network", "Database"] undi. for loop tho (i = 0 nundi groups.length varaku) prathi group ni "1. Service Desk", "2. Network", "3. Database" laaga log chey. 🧰 Vaade words: for, groups.length, groups[i]',
+      starter: `var groups = ['Service Desk', 'Network', 'Database'];
+
+// Index 0 nundi start avtundi: groups[0] = 'Service Desk'
+// TODO: for loop rayyi (i = 0 nundi groups.length varaku), lopala "1. Service Desk" laaga log chey
+`,
+      hint: [
+        'Array lo prathi item ki okasari run avvali — for loop. Start 0, end groups.length mundu varaku.',
+        'for (var i = 0; i < groups.length; i++) { ... } — lopala groups[i] vaadu.',
+        'gs.info((i + 1) + ". " + groups[i]);   — (i + 1) endukante i 0 nundi start.',
+      ],
+      solution: `var groups = ['Service Desk', 'Network', 'Database'];
+
+for (var i = 0; i < groups.length; i++) {
+  gs.info((i + 1) + '. ' + groups[i]);
+}`,
+      explain: 'Arrays index 0 nundi start; i < groups.length tho last item varaku velthundi. Exercise 1 lo number loop, ikkada array loop.',
+      tests: [{ label: 'Logs: 1. Service Desk, 2. Network, 3. Database', logs: ['1. Service Desk', '2. Network', '3. Database'] }],
+    }),
+    jx('js-loops', 6, 'P1 active count (while + addQuery)', 'medium+', {
+      task: 'Active & priority 1 incidents query chey. while (gr.next()) tho count++ chey. "P1 active: 2" ani log chey. 🧰 Vaade words: GlideRecord, addActiveQuery(), addQuery(), query(), next()',
+      starter: `var count = 0;
+
+var gr = new GlideRecord('incident');
+// TODO: addActiveQuery(), addQuery('priority', 1), query()
+
+// TODO: while (gr.next()) { count++; }
+
+gs.info('P1 active: ' + count);
+`,
+      hint: [
+        'Lesson lo Active incidents count laage — kotha idea okkate: query ki priority filter kuda add chey.',
+        'Query lo addActiveQuery tho patu addQuery("priority", 1) kuda pettu, tarvata query() — count loop already ready.',
+        'gr.addActiveQuery(); gr.addQuery("priority", 1); gr.query(); while (gr.next()) { count++; }',
+      ],
+      solution: `var count = 0;
+
+var gr = new GlideRecord('incident');
+gr.addActiveQuery();
+gr.addQuery('priority', 1);
+gr.query();
+
+while (gr.next()) {
+  count++;
+}
+
+gs.info('P1 active: ' + count);`,
+      explain: 'Filter (query) mundu set chesthe loop lo if avasaram ledu. Database already filter chestundi.',
+      tests: [
+        { label: 'Log: P1 active: 2', logs: ['P1 active: 2'] },
+        { label: 'count = 2', expr: 'count', expect: 2 },
+      ],
+    }),
+    jx('js-loops', 7, 'First P1 dorikaka aapu (break)', 'medium+', {
+      task: 'Anni incidents (number tho order) loop chey. priority "1" ayithe "First P1: <number>" ani log chesi break chey — migilina records chudakunda aapali. 🧰 Vaade words: while (gr.next()), getValue(), break',
+      starter: `var gr = new GlideRecord('incident');
+gr.orderBy('number');
+gr.query();
+
+while (gr.next()) {
+  // TODO: if priority '1' -> log 'First P1: ' + number, then break
+}
+`,
+      hint: [
+        'Pani ayyaka loop aapali — adi edaina keyword tho. Condition: priority === "1" (string).',
+        'if (gr.getValue("priority") === "1") { ... break; }',
+        'gs.info("First P1: " + gr.getValue("number")); break;',
+      ],
+      solution: `var gr = new GlideRecord('incident');
+gr.orderBy('number');
+gr.query();
+
+while (gr.next()) {
+  if (gr.getValue('priority') === '1') {
+    gs.info('First P1: ' + gr.getValue('number'));
+    break;
+  }
+}`,
+      explain: 'break loop ni immediately aapestundi. break lekapothe INC0010008 kuda log avtundi. Exercise 3 lo continue tho kalipi vaadatham.',
+      tests: [{ label: 'Log (okkate): First P1: INC0010002', logs: ['First P1: INC0010002'] }],
+    }),
     jx('js-loops', 3, 'First unassigned P1 (continue & break)', 'medium', {
       task: 'Anni incidents (number tho order) loop chey. active = "false" ayithe continue. priority "1" AND assigned_to empty ayithe "First unassigned P1: <number>" log chesi break chey.',
       starter: `var gr = new GlideRecord('incident');
@@ -329,7 +511,11 @@ while (gr.next()) {
   // TODO: priority '1' && assigned_to empty -> log 'First unassigned P1: ' + number, then break
 }
 `,
-      hint: "if (gr.getValue('active') === 'false') continue;",
+      hint: [
+        'Loop lo rendu control keywords kavali: inactive ni skip cheyyadaniki oka keyword, match dorikaka aapadaniki inkoka keyword (previous Medium+ lo break chesav).',
+        'Mundu if (gr.getValue("active") === "false") { continue; }, tarvata priority "1" && assigned_to empty check.',
+        "if (gr.getValue('active') === 'false') continue;",
+      ],
       solution: `var gr = new GlideRecord('incident');
 gr.orderBy('number');
 gr.query();
@@ -357,7 +543,11 @@ var gr = new GlideRecord('incident');
 
 // TODO: for (var name in counts) -> gs.info(name + ': ' + counts[name])
 `,
-      hint: "var name = gr.getDisplayValue('assigned_to') || 'Unassigned';",
+      hint: [
+        'Rendu loops: (1) while (gr.next()) tho counts object build chey, (2) for...in tho counts print chey. Counter pattern: (counts[name] || 0) + 1.',
+        'name kosam display value teesuko; empty ayithe "Unassigned" ravali — || tho default pettochu.',
+        "var name = gr.getDisplayValue('assigned_to') || 'Unassigned';",
+      ],
       solution: `var counts = {};
 
 var gr = new GlideRecord('incident');
@@ -476,7 +666,11 @@ gs.info(isP1(1));     // true`,
   // TODO: Number(p) batti label return chey
 }
 `,
-      hint: 'switch (Number(p)) { case 1: return "1 - Critical"; ... default: return "Unknown"; }',
+      hint: [
+        'Function ki p vastundi (string leka number). Mundu adi number ga marchu, tarvata value batti label return chey.',
+        'switch (Number(p)) { case 1: return ...; case 2: return ...; } — default lo "Unknown".',
+        'switch (Number(p)) { case 1: return "1 - Critical"; ... default: return "Unknown"; }',
+      ],
       solution: `function getPriorityLabel(p) {
   switch (Number(p)) {
     case 1: return '1 - Critical';
@@ -509,13 +703,104 @@ gs.info(isP1(1));     // true`,
         { label: 'states 6, "7", 8 → false', expr: "[isActiveState(6), isActiveState('7'), isActiveState(8)]", expect: [false, false, false] },
       ],
     }),
+    // ---- Medium+ ladder: one new idea at a time, building up to exercises 3 and 4 ----
+    jx('js-functions', 5, 'formatIncident(number, desc) — rendu parameters', 'medium+', {
+      task: 'formatIncident(number, desc) function rayyi: "INC0010002 - VPN is down" laaga <number> - <desc> text return chey (log kaadu, return!). 🧰 Vaade words: function, parameters, return, + (text join)',
+      starter: `function formatIncident(number, desc) {
+  // TODO: number + ' - ' + desc return chey
+}
+`,
+      hint: [
+        'Function ki rendu inputs (parameters) vachayi. Rendu ni oka text ga join chesi bayataki pampali — adi return.',
+        'Shape: return <number> + " - " + <desc>;   (+ tho text join, return marchipoku — lekapothe function undefined istundi).',
+        'return number + " - " + desc;',
+      ],
+      solution: `function formatIncident(number, desc) {
+  return number + ' - ' + desc;
+}`,
+      explain: 'return value ni function bayataki istundi. Parameters = function ki vache inputs.',
+      tests: [
+        { label: 'formatIncident("INC0010002", "VPN is down")', expr: "formatIncident('INC0010002', 'VPN is down')", expect: 'INC0010002 - VPN is down' },
+        { label: 'formatIncident("INC1", "x")', expr: "formatIncident('INC1', 'x')", expect: 'INC1 - x' },
+      ],
+    }),
+    jx('js-functions', 6, 'getOwner(number) — GlideRecord + safe return', 'medium+', {
+      task: 'getOwner(number) function: incident ni number tho get chey. Dorikapothe "Not found" return chey. Dorikite assigned_to display value return chey, empty ayithe "Unassigned". 🧰 Vaade words: GlideRecord, get(), getDisplayValue(), return, ||',
+      starter: `function getOwner(number) {
+  var gr = new GlideRecord('incident');
+  // TODO: gr.get(...) false ayithe 'Not found' return chey
+  // TODO: assigned_to display value return chey (empty ayithe 'Unassigned')
+}
+`,
+      hint: [
+        'Rendu cases: record dorakaledu (early return), dorikindi (value return). get() true/false istundi — adi condition ga vaadu.',
+        'if (!gr.get("number", number)) { return "Not found"; }   tarvata gr.getDisplayValue("assigned_to") || "Unassigned"',
+        'return gr.getDisplayValue("assigned_to") || "Unassigned";',
+      ],
+      solution: `function getOwner(number) {
+  var gr = new GlideRecord('incident');
+  if (!gr.get('number', number)) {
+    return 'Not found';
+  }
+  return gr.getDisplayValue('assigned_to') || 'Unassigned';
+}`,
+      explain: 'Early return (guard) tho edge cases mundu handle chesam. get() record dorikite true istundi. Ide pattern exercise 4 (Script Include) lo vaadatham.',
+      tests: [
+        { label: 'INC0010001 → System Administrator', expr: "getOwner('INC0010001')", expect: 'System Administrator' },
+        { label: 'INC0010006 → Unassigned', expr: "getOwner('INC0010006')", expect: 'Unassigned' },
+        { label: 'INC9999999 → Not found', expr: "getOwner('INC9999999')", expect: 'Not found' },
+      ],
+    }),
+    jx('js-functions', 7, 'Script Include lo okka method (isP1)', 'medium+', {
+      task: 'IncidentUtils ane class (Class.create) lo okka method isP1(number) rayyi: incident ni get chey (dorikapothe false), priority === "1" ayithe true return chey. type: "IncidentUtils" kuda pettu. 🧰 Vaade words: Class.create(), prototype, initialize, get(), getValue()',
+      starter: `var IncidentUtils = Class.create();
+IncidentUtils.prototype = {
+  initialize: function () {},
+
+  isP1: function (number) {
+    // TODO: incident get chey (dorakakapothe false), priority === '1' return chey
+  },
+
+  type: 'IncidentUtils'
+};
+`,
+      hint: [
+        'Class structure ready undi — nuvvu isP1 body matrame rayali. Pani: record teesuko, priority "1" aa choosuko.',
+        'var gr = new GlideRecord("incident"); if (!gr.get("number", number)) { return false; }',
+        'return gr.getValue("priority") === "1";',
+      ],
+      solution: `var IncidentUtils = Class.create();
+IncidentUtils.prototype = {
+  initialize: function () {},
+
+  isP1: function (number) {
+    var gr = new GlideRecord('incident');
+    if (!gr.get('number', number)) {
+      return false;
+    }
+    return gr.getValue('priority') === '1';
+  },
+
+  type: 'IncidentUtils'
+};`,
+      explain: 'Script Include = class lo methods. Method lopala function laage GlideRecord vaadochu. Exercise 4 lo rendo method kuda add chestam.',
+      tests: [
+        { label: 'isP1: INC0010008 true, INC0010003 false', expr: "[new IncidentUtils().isP1('INC0010008'), new IncidentUtils().isP1('INC0010003')]", expect: [true, false] },
+        { label: 'unknown number → false', expr: "new IncidentUtils().isP1('INC9999999')", expect: false },
+        { label: 'type', expr: 'new IncidentUtils().type', expect: 'IncidentUtils' },
+      ],
+    }),
     jx('js-functions', 3, 'getIncidentCount(category)', 'medium', {
       task: 'getIncidentCount(category) function: aa category lo ACTIVE incidents count return chey (GlideRecord, addActiveQuery, addQuery, getRowCount).',
       starter: `function getIncidentCount(category) {
   // TODO: GlideRecord query chesi count return chey
 }
 `,
-      hint: "var gr = new GlideRecord('incident'); gr.addActiveQuery(); gr.addQuery('category', category); gr.query(); return gr.getRowCount();",
+      hint: [
+        'Function lopala GlideRecord query set chey — category parameter ni filter ga vaadu. Count ni return cheyali (log kaadu).',
+        'gr.addActiveQuery(); gr.addQuery("category", category); gr.query(); — count kosam getRowCount().',
+        "var gr = new GlideRecord('incident'); gr.addActiveQuery(); gr.addQuery('category', category); gr.query(); return gr.getRowCount();",
+      ],
       solution: `function getIncidentCount(category) {
   var gr = new GlideRecord('incident');
   gr.addActiveQuery();
@@ -547,7 +832,11 @@ IncidentUtils.prototype = {
   type: 'IncidentUtils'
 };
 `,
-      hint: "Group: var g = new GlideRecord('sys_user_group'); g.get('name', groupName); g.getUniqueValue() = sys_id.",
+      hint: [
+        'isP1 laage Medium+ 7 lo chesav. getOpenCountForGroup kosam: mundu group peru nundi group record teesuko, tarvata aa group ki assign ayina active incidents count chey.',
+        'Incident lo assignment_group value = group sys_id. Kabatti mundu sys_user_group lo get("name", groupName) chesi sys_id teesuko; dorakakapothe 0 return chey.',
+        "var g = new GlideRecord('sys_user_group'); g.get('name', groupName); g.getUniqueValue() = sys_id.",
+      ],
       solution: `var IncidentUtils = Class.create();
 IncidentUtils.prototype = {
   initialize: function () {},

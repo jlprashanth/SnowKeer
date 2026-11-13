@@ -149,17 +149,68 @@ ga.getXMLAnswer(function (answer) {
       client: CHG('urgency', '3', '2'),
       task: 'onChange (urgency) rayi: GlideAjax("PriorityAjax") getPriority function ki rendu params pampu — sysparm_impact (form lo impact value) mariyu sysparm_urgency (newValue). Answer tho priority field set chey.',
       starter: ONCHANGE('  // TODO\n'),
-      hint: "ga.addParam('sysparm_impact', g_form.getValue('impact')); ga.addParam('sysparm_urgency', newValue);",
+      hint: [
+        'Exercise 1 laage GlideAjax call — kani ee sari Script Include PriorityAjax, function getPriority, mariyu RENDU extra params (impact form nunchi, urgency newValue).',
+        "Shape: var ga = new GlideAjax('PriorityAjax'); ga.addParam('sysparm_name', 'getPriority'); ga.addParam('sysparm_impact', ...); ga.addParam('sysparm_urgency', ...);",
+        "ga.addParam('sysparm_impact', g_form.getValue('impact')); ga.addParam('sysparm_urgency', newValue); ga.getXMLAnswer(function (answer) { g_form.setValue('priority', answer); });",
+      ],
       solution: ONCHANGE("  var ga = new GlideAjax('PriorityAjax');\n  ga.addParam('sysparm_name', 'getPriority');\n  ga.addParam('sysparm_impact', g_form.getValue('impact'));\n  ga.addParam('sysparm_urgency', newValue);\n  ga.getXMLAnswer(function (answer) {\n    g_form.setValue('priority', answer);\n  });\n"),
       explain: 'Business logic (priority formula) server lo untundi — client sirf pilustundi. Formula marchali ante Script Include okkate marchali.',
       tests: [{ label: 'priority = 3', expr: "g_form.getValue('priority')", expect: '3' }],
+    }),
+    // ---- Medium+ ladder: one new idea at a time, building up to exercise 4 ----
+    jx('cs-ajax1', 5, 'Open count message chupinchu', 'medium+', {
+      scenario: { scriptInclude: INC_AJAX, form: { values: { assignment_group: 'g_net' } } },
+      client: CHG('assignment_group', '', 'g_net'),
+      task: 'onChange (assignment_group) rayi: GlideAjax("IncidentAjax") lo getOpenCount function pilu (sysparm_group = newValue). Answer vachaka form paina info message "Open incidents: <answer>" chupinchu. (Network group lo 2 open incidents unnayi.) 🧰 Vaade words: GlideAjax, ga.addParam(), sysparm_name, ga.getXMLAnswer(), g_form.addInfoMessage()',
+      starter: ONCHANGE("  // Step 1: GlideAjax object create chey (Script Include peru: IncidentAjax)\n\n  // Step 2: sysparm_name = function peru (getOpenCount), sysparm_group = newValue\n\n  // Step 3: getXMLAnswer callback lo 'Open incidents: ' + answer ni info message ga chupinchu\n"),
+      hint: [
+        'Exercise 1 pattern ne — Script Include peru, function peru, okka extra param marutayi. Message callback LOPALA chupinchali.',
+        "var ga = new GlideAjax('IncidentAjax'); ga.addParam('sysparm_name', 'getOpenCount'); ga.addParam('sysparm_group', newValue);",
+        "var ga = new GlideAjax('IncidentAjax'); ga.addParam('sysparm_name', 'getOpenCount'); ga.addParam('sysparm_group', newValue); ga.getXMLAnswer(function (answer) { g_form.addInfoMessage('Open incidents: ' + answer); });",
+      ],
+      solution: ONCHANGE("  var ga = new GlideAjax('IncidentAjax');\n  ga.addParam('sysparm_name', 'getOpenCount');\n  ga.addParam('sysparm_group', newValue);\n  ga.getXMLAnswer(function (answer) {\n    g_form.addInfoMessage('Open incidents: ' + answer);\n  });\n"),
+      explain: 'Server getRowCount() number return chesina, client ki answer "2" laaga STRING ga vastundi. Text lo join cheyyadaniki adi saripotundi.',
+      tests: [{ label: 'message', expr: MSGS, expect: ['Open incidents: 2'] }],
+    }),
+    jx('cs-ajax1', 6, 'Answer ni number ga marchu (parseInt)', 'medium+', {
+      scenario: { scriptInclude: INC_AJAX, form: { values: { assignment_group: 'g_net' } } },
+      client: CHG('assignment_group', '', 'g_net'),
+      task: 'Same getOpenCount call (IncidentAjax, sysparm_group = newValue). Callback lo answer ni parseInt(answer, 10) tho number ga marchi, description lo "Queue position: <count + 1>" pettu. Network ki "Queue position: 3" raavali — "21" vaste string + number bug! 🧰 Vaade words: ga.getXMLAnswer(), parseInt, g_form.setValue()',
+      starter: ONCHANGE("  var ga = new GlideAjax('IncidentAjax');\n  ga.addParam('sysparm_name', 'getOpenCount');\n  ga.addParam('sysparm_group', newValue);\n  ga.getXMLAnswer(function (answer) {\n    // Step 1: answer ('2' laanti string) ni number ga marchu (base 10)\n\n    // Step 2: description lo 'Queue position: ' + (count + 1) pettu\n  });\n"),
+      hint: [
+        'answer ellappudu string. "2" + 1 = "21". Mundu number ga marchali, tarvata + 1.',
+        'var count = parseInt(answer, 10);   — ippudu count oka number (2).',
+        "var count = parseInt(answer, 10); g_form.setValue('description', 'Queue position: ' + (count + 1));",
+      ],
+      solution: ONCHANGE("  var ga = new GlideAjax('IncidentAjax');\n  ga.addParam('sysparm_name', 'getOpenCount');\n  ga.addParam('sysparm_group', newValue);\n  ga.getXMLAnswer(function (answer) {\n    var count = parseInt(answer, 10);\n    g_form.setValue('description', 'Queue position: ' + (count + 1));\n  });\n"),
+      explain: '(count + 1) brackets lo pettali — lekapothe "Queue position: " + 2 + 1 = "Queue position: 21". GlideAjax answer tho math chese mundu ellappudu parseInt.',
+      tests: [{ label: 'description', expr: "g_form.getValue('description')", expect: 'Queue position: 3' }],
+    }),
+    jx('cs-ajax1', 7, 'Busy group warning (>= 2)', 'medium+', {
+      scenario: { scriptInclude: INC_AJAX, form: { values: { assignment_group: 'g_db' } } },
+      client: CHG('assignment_group', '', 'g_db'),
+      task: 'Same getOpenCount call. Answer number ga 2 leda ekkuva ayithe assignment_group kinda error field message "Ee group busy ga undi" chupinchu; takkuva ayithe emi cheyyaku. (Database group lo 2 open incidents.) 🧰 Vaade words: ga.getXMLAnswer(), parseInt, >=, g_form.showFieldMsg()',
+      starter: ONCHANGE("  var ga = new GlideAjax('IncidentAjax');\n  // Step 1: sysparm_name, sysparm_group params\n\n  // Step 2: getXMLAnswer callback lo — answer ni number chesi >= 2 aa ani check chey\n\n  // Step 3: avunu ante assignment_group kinda error field message\n"),
+      hint: [
+        'Params Exercise 5 laage. Callback lo oka if — condition lo parseInt(answer, 10) >= 2.',
+        "ga.getXMLAnswer(function (answer) { if (parseInt(answer, 10) >= 2) { ... } });",
+        "if (parseInt(answer, 10) >= 2) { g_form.showFieldMsg('assignment_group', 'Ee group busy ga undi', 'error'); }",
+      ],
+      solution: ONCHANGE("  var ga = new GlideAjax('IncidentAjax');\n  ga.addParam('sysparm_name', 'getOpenCount');\n  ga.addParam('sysparm_group', newValue);\n  ga.getXMLAnswer(function (answer) {\n    if (parseInt(answer, 10) >= 2) {\n      g_form.showFieldMsg('assignment_group', 'Ee group busy ga undi', 'error');\n    }\n  });\n"),
+      explain: 'Number tho compare chesthe "2" >= 2 pani chestundi, kani rendu strings compare chesthe ("10" >= "9") false vastundi. Anduke parseInt chesi compare cheyyadam safe habit. Exercise 4 lo ide condition + answer tho message.',
+      tests: [{ label: 'field message', expr: "__f.assignment_group.msgs.map(function (m) { return m.text })", expect: ['Ee group busy ga undi'] }],
     }),
     jx('cs-ajax1', 4, 'Group lo open incidents', 'hard', {
       scenario: { scriptInclude: INC_AJAX, form: { values: { assignment_group: 'g_net' } } },
       client: CHG('assignment_group', '', 'g_net'),
       task: 'onChange (assignment_group) rayi: IncidentAjax.getOpenCount (param sysparm_group = newValue) pilichi, answer parseInt(answer, 10) >= 2 ayithe addInfoMessage("Group already has " + answer + " open incidents") chupinchu.',
       starter: ONCHANGE('  // TODO\n'),
-      hint: "ga.addParam('sysparm_name', 'getOpenCount'); ... if (parseInt(answer, 10) >= 2) g_form.addInfoMessage(...)",
+      hint: [
+        'Exercise 5 (call) + Exercise 7 (parseInt >= 2 condition) kalipi — message lo answer kuda join chey.',
+        "var ga = new GlideAjax('IncidentAjax'); ga.addParam('sysparm_name', 'getOpenCount'); ga.addParam('sysparm_group', newValue); ga.getXMLAnswer(function (answer) { ... });",
+        "var ga = new GlideAjax('IncidentAjax'); ga.addParam('sysparm_name', 'getOpenCount'); ga.addParam('sysparm_group', newValue); ga.getXMLAnswer(function (answer) { if (parseInt(answer, 10) >= 2) { g_form.addInfoMessage('Group already has ' + answer + ' open incidents'); } });",
+      ],
       solution: ONCHANGE("  var ga = new GlideAjax('IncidentAjax');\n  ga.addParam('sysparm_name', 'getOpenCount');\n  ga.addParam('sysparm_group', newValue);\n  ga.getXMLAnswer(function (answer) {\n    if (parseInt(answer, 10) >= 2) {\n      g_form.addInfoMessage('Group already has ' + answer + ' open incidents');\n    }\n  });\n"),
       explain: 'Answer string ("2") — compare mundu parseInt tho number ki marchu.',
       tests: [{ label: 'message', expr: MSGS, expect: ['Group already has 2 open incidents'] }],
@@ -270,7 +321,11 @@ IncidentCountAjax.prototype = Object.extendsObject(AbstractAjaxProcessor, {
   },
   type: 'IncidentCountAjax'
 });`,
-      hint: "gr.addQuery('category', this.getParameter('sysparm_category')); gr.addActiveQuery(); gr.query(); return gr.getRowCount();",
+      hint: [
+        'Incident table query — category param tho filter, active matrame, tarvata entha records vachayo count return chey.',
+        "var gr = new GlideRecord('incident'); gr.addQuery('category', this.getParameter('sysparm_category')); gr.addActiveQuery(); gr.query();",
+        "var gr = new GlideRecord('incident'); gr.addQuery('category', this.getParameter('sysparm_category')); gr.addActiveQuery(); gr.query(); return gr.getRowCount();",
+      ],
       solution: `var IncidentCountAjax = Class.create();
 IncidentCountAjax.prototype = Object.extendsObject(AbstractAjaxProcessor, {
   getOpenCount: function () {
@@ -288,6 +343,127 @@ IncidentCountAjax.prototype = Object.extendsObject(AbstractAjaxProcessor, {
         { label: 'hardware → 1', expr: "callAjax(IncidentCountAjax, 'getOpenCount', { sysparm_category: 'hardware' })", expect: 1 },
       ],
     }),
+    // ---- Medium+ ladder: one new idea at a time, building up to exercise 4 ----
+    jx('cs-ajax2', 5, 'Rendu params (category + priority)', 'medium+', {
+      server: true,
+      task: 'CatPriorityAjax lo getCount function rayi: client nunchi RENDU params vastayi — sysparm_category mariyu sysparm_priority. Rendu match ayye incidents count (active filter avasaram ledu) return chey. (software + priority 3 → 2 records.) 🧰 Vaade words: this.getParameter(), addQuery, query, getRowCount',
+      starter: `var CatPriorityAjax = Class.create();
+CatPriorityAjax.prototype = Object.extendsObject(AbstractAjaxProcessor, {
+  getCount: function () {
+    var gr = new GlideRecord('incident');
+    // Step 1: category = sysparm_category param
+
+    // Step 2: priority = sysparm_priority param
+
+    // Step 3: query chesi count return chey
+  },
+  type: 'CatPriorityAjax'
+});`,
+      hint: [
+        'Prathi param ki okko addQuery — rendu addQuery lu AND ga kalustayi.',
+        "gr.addQuery('category', this.getParameter('sysparm_category'));   — priority ki kuda ide pattern.",
+        "gr.addQuery('category', this.getParameter('sysparm_category')); gr.addQuery('priority', this.getParameter('sysparm_priority')); gr.query(); return gr.getRowCount();",
+      ],
+      solution: `var CatPriorityAjax = Class.create();
+CatPriorityAjax.prototype = Object.extendsObject(AbstractAjaxProcessor, {
+  getCount: function () {
+    var gr = new GlideRecord('incident');
+    gr.addQuery('category', this.getParameter('sysparm_category'));
+    gr.addQuery('priority', this.getParameter('sysparm_priority'));
+    gr.query();
+    return gr.getRowCount();
+  },
+  type: 'CatPriorityAjax'
+});`,
+      explain: 'Client lo ga.addParam("sysparm_priority", ..) enni pettina, server lo prathidaniki this.getParameter() okkate maargam.',
+      tests: [
+        { label: 'software + 3 → 2', expr: "callAjax(CatPriorityAjax, 'getCount', { sysparm_category: 'software', sysparm_priority: '3' })", expect: 2 },
+        { label: 'network + 1 → 1', expr: "callAjax(CatPriorityAjax, 'getCount', { sysparm_category: 'network', sysparm_priority: '1' })", expect: 1 },
+      ],
+    }),
+    jx('cs-ajax2', 6, 'Loop tho numbers (join)', 'medium+', {
+      server: true,
+      task: 'GroupNumbersAjax lo getNumbers function rayi: sysparm_group group ki assign ayina ACTIVE incidents ni number order lo loop chesi, numbers ni array lo push chey, last lo list.join(",") return chey. (Network → "INC0010002,INC0010007".) 🧰 Vaade words: while, next, push(), join()',
+      starter: `var GroupNumbersAjax = Class.create();
+GroupNumbersAjax.prototype = Object.extendsObject(AbstractAjaxProcessor, {
+  getNumbers: function () {
+    var list = [];
+    var gr = new GlideRecord('incident');
+    gr.addQuery('assignment_group', this.getParameter('sysparm_group'));
+    gr.addActiveQuery();
+    gr.orderBy('number');
+    gr.query();
+    // Step 1: prathi record ki loop chey
+
+    // Step 2: loop lo aa record number ni list lo pettu
+
+    // Step 3: list ni comma tho join chesi return chey
+  },
+  type: 'GroupNumbersAjax'
+});`,
+      hint: [
+        'Query ready ga undi. Records anni chadavadaniki while (gr.next()) loop — prathi round lo okka record.',
+        "while (gr.next()) { list.push(gr.getValue('number')); }",
+        "while (gr.next()) { list.push(gr.getValue('number')); } return list.join(',');",
+      ],
+      solution: `var GroupNumbersAjax = Class.create();
+GroupNumbersAjax.prototype = Object.extendsObject(AbstractAjaxProcessor, {
+  getNumbers: function () {
+    var list = [];
+    var gr = new GlideRecord('incident');
+    gr.addQuery('assignment_group', this.getParameter('sysparm_group'));
+    gr.addActiveQuery();
+    gr.orderBy('number');
+    gr.query();
+    while (gr.next()) {
+      list.push(gr.getValue('number'));
+    }
+    return list.join(',');
+  },
+  type: 'GroupNumbersAjax'
+});`,
+      explain: 'join(",") array ni okka string chestundi — answer string kabatti client ki pampochu. Client lo answer.split(",") tho malli array. Values lo comma unte idi break avtundi — anduke Exercise 4 lo JSON.',
+      tests: [
+        { label: 'g_net', expr: "callAjax(GroupNumbersAjax, 'getNumbers', { sysparm_group: 'g_net' })", expect: 'INC0010002,INC0010007' },
+        { label: 'g_db', expr: "callAjax(GroupNumbersAjax, 'getNumbers', { sysparm_group: 'g_db' })", expect: 'INC0010004,INC0010008' },
+      ],
+    }),
+    jx('cs-ajax2', 7, 'Object ni JSON ga pampu', 'medium+', {
+      server: true,
+      task: 'IncidentInfoAjax lo getInfo function rayi: sysparm_number param tho incident ni get("number", ...) chesi, { number, priority } object ni JSON.stringify chesi return chey. (Object direct ga pampaleru — answer string!) 🧰 Vaade words: get, getValue, JSON.stringify()',
+      starter: `var IncidentInfoAjax = Class.create();
+IncidentInfoAjax.prototype = Object.extendsObject(AbstractAjaxProcessor, {
+  getInfo: function () {
+    var gr = new GlideRecord('incident');
+    // Step 1: number field = sysparm_number unna record get chey
+
+    // Step 2: { number: ..., priority: ... } object tayaru chey (getValue tho)
+
+    // Step 3: object ni JSON string ga marchi return chey
+  },
+  type: 'IncidentInfoAjax'
+});`,
+      hint: [
+        'get(field, value) okka record load chestundi. Tarvata oka object lo rendu values pettu, last lo string ga marchu.',
+        "gr.get('number', this.getParameter('sysparm_number')); var info = { number: gr.getValue('number'), priority: gr.getValue('priority') };",
+        "gr.get('number', this.getParameter('sysparm_number')); var info = { number: gr.getValue('number'), priority: gr.getValue('priority') }; return JSON.stringify(info);",
+      ],
+      solution: `var IncidentInfoAjax = Class.create();
+IncidentInfoAjax.prototype = Object.extendsObject(AbstractAjaxProcessor, {
+  getInfo: function () {
+    var gr = new GlideRecord('incident');
+    gr.get('number', this.getParameter('sysparm_number'));
+    var info = { number: gr.getValue('number'), priority: gr.getValue('priority') };
+    return JSON.stringify(info);
+  },
+  type: 'IncidentInfoAjax'
+});`,
+      explain: 'Client lo var info = JSON.parse(answer); info.priority — okka call lo chala values. Exercise 4 lo ide JSON trick array tho.',
+      tests: [
+        { label: 'string return', expr: "typeof callAjax(IncidentInfoAjax, 'getInfo', { sysparm_number: 'INC0010004' })", expect: 'string' },
+        { label: 'JSON object', expr: "JSON.parse(callAjax(IncidentInfoAjax, 'getInfo', { sysparm_number: 'INC0010004' }))", expect: { number: 'INC0010004', priority: '2' } },
+      ],
+    }),
     jx('cs-ajax2', 4, 'P1 incident numbers (JSON)', 'hard', {
       server: true,
       task: 'P1Ajax.getP1Numbers rayi: priority 1 unna ACTIVE incidents numbers ni number order lo oka array lo petti JSON.stringify chesi return chey. (Array direct ga pampaleru!)',
@@ -298,7 +474,11 @@ P1Ajax.prototype = Object.extendsObject(AbstractAjaxProcessor, {
   },
   type: 'P1Ajax'
 });`,
-      hint: "var list = []; ... while (gr.next()) { list.push(gr.getValue('number')); } return JSON.stringify(list);",
+      hint: [
+        'Exercise 6 (loop + push) + Exercise 7 (JSON.stringify) kalipi. Query lo priority 1, active, number order.',
+        "var list = []; var gr = new GlideRecord('incident'); gr.addQuery('priority', 1); gr.addActiveQuery(); gr.orderBy('number'); gr.query();",
+        "gr.addQuery('priority', 1); gr.addActiveQuery(); gr.orderBy('number'); gr.query(); while (gr.next()) { list.push(gr.getValue('number')); } return JSON.stringify(list);",
+      ],
       solution: `var P1Ajax = Class.create();
 P1Ajax.prototype = Object.extendsObject(AbstractAjaxProcessor, {
   getP1Numbers: function () {
@@ -401,7 +581,11 @@ const onsubmit = {
       client: SUBMIT,
       task: 'onSubmit lo: priority "1" ayithe return confirm("Idi P1. Submit cheyyala?"); (user Cancel nokkite save aagali). Lekapothe emi cheyyaku.',
       starter: 'function onSubmit() {\n  // TODO\n}',
-      hint: "if (g_form.getValue('priority') == '1') { return confirm('Idi P1. Submit cheyyala?'); }",
+      hint: [
+        'confirm() true (OK) leda false (Cancel) istundi. Aa value ne onSubmit nunchi return chesthe — false ayithe save aagutundi.',
+        "if (g_form.getValue('priority') == '1') { return confirm(...); }",
+        "if (g_form.getValue('priority') == '1') { return confirm('Idi P1. Submit cheyyala?'); }   — else avasaram ledu (emi return cheyyakapothe save avtundi).",
+      ],
       solution: "function onSubmit() {\n  if (g_form.getValue('priority') == '1') {\n    return confirm('Idi P1. Submit cheyyala?');\n  }\n}",
       explain: 'confirm() boolean ni direct ga return cheyyochu. (Ee practice lo user Cancel nokkindi anukunnam.)',
       tests: [
@@ -409,12 +593,68 @@ const onsubmit = {
         { label: 'confirm asked', logs: ['Idi P1. Submit cheyyala?'] },
       ],
     }),
+    // ---- Medium+ ladder: one new idea at a time, building up to exercise 4 ----
+    jx('cs-onsubmit', 5, 'Flag variable (ok) tho', 'medium+', {
+      scenario: { form: { values: { short_description: '' } } },
+      client: SUBMIT,
+      task: 'onSubmit lo direct ga "return false" raayakunda flag vaadu: var ok = true; short_description empty ayithe daani kinda "Required" error field message chupinchi ok = false. Last lo return ok. 🧰 Vaade words: var, g_form.getValue(), g_form.showFieldMsg(), return',
+      starter: 'function onSubmit() {\n  // Step 1: ok variable — mundu true\n\n  // Step 2: short_description empty aa? → field message + ok = false\n\n  // Step 3: last lo ok return chey\n}',
+      hint: [
+        'ok = "ippativaraku anni correct" ani artham. Problem dorikithe false chey — return matram function chivara okkasari.',
+        "var ok = true; if (g_form.getValue('short_description') == '') { ... ok = false; }",
+        "var ok = true; if (g_form.getValue('short_description') == '') { g_form.showFieldMsg('short_description', 'Required', 'error'); ok = false; } return ok;",
+      ],
+      solution: "function onSubmit() {\n  var ok = true;\n  if (g_form.getValue('short_description') == '') {\n    g_form.showFieldMsg('short_description', 'Required', 'error');\n    ok = false;\n  }\n  return ok;\n}",
+      explain: 'Ippudu okate check — kani flag pattern valla tarvata inko check add cheyyadam easy (Exercise 7, 4).',
+      tests: [
+        { label: 'blocked', expr: '__submit', expect: false },
+        { label: 'field message', expr: '__f.short_description.msgs.map(function (m) { return m.text })', expect: ['Required'] },
+      ],
+    }),
+    jx('cs-onsubmit', 6, 'Spaces matrame? (trim)', 'medium+', {
+      scenario: { form: { values: { short_description: '   ' } } },
+      client: SUBMIT,
+      task: 'User short_description lo spaces matrame (" ") type chesadu — adi kuda empty laage treat cheyyali. Exercise 5 laage flag tho, kani check mundu value ni trim() chey. Empty ayithe "Required" error field message, ok = false, return ok. 🧰 Vaade words: g_form.getValue(), trim(), g_form.showFieldMsg()',
+      starter: 'function onSubmit() {\n  var ok = true;\n  // Step 1: short_description value teesukoni rendu vaipula spaces teesey\n\n  // Step 2: trim chesina value empty aa? → field message + ok = false\n\n  return ok;\n}',
+      hint: [
+        "'   ' == '' false istundi! Mundu spaces teeseyali — trim() string methods lo undi.",
+        "var desc = g_form.getValue('short_description').trim();",
+        "var desc = g_form.getValue('short_description').trim(); if (desc == '') { g_form.showFieldMsg('short_description', 'Required', 'error'); ok = false; }",
+      ],
+      solution: "function onSubmit() {\n  var ok = true;\n  var desc = g_form.getValue('short_description').trim();\n  if (desc == '') {\n    g_form.showFieldMsg('short_description', 'Required', 'error');\n    ok = false;\n  }\n  return ok;\n}",
+      explain: 'g_form.getValue() ellappudu string istundi, kabatti .trim() direct ga vaadochu. Real forms lo "   " laanti values chala common.',
+      tests: [
+        { label: 'blocked', expr: '__submit', expect: false },
+        { label: 'field message', expr: '__f.short_description.msgs.map(function (m) { return m.text })', expect: ['Required'] },
+      ],
+    }),
+    jx('cs-onsubmit', 7, 'Rendo check add chey', 'medium+', {
+      scenario: { form: { values: { short_description: 'VPN down', category: '' } } },
+      client: SUBMIT,
+      task: 'Short_description check ready ga undi. Daani KINDA separate if tho category check add chey: category empty ayithe category kinda "Required" error, ok = false. Ee form lo short_description undi, category ledu — category ki matrame message raavali. 🧰 Vaade words: if, g_form.getValue(), g_form.showFieldMsg()',
+      starter: "function onSubmit() {\n  var ok = true;\n  if (g_form.getValue('short_description') == '') {\n    g_form.showFieldMsg('short_description', 'Required', 'error');\n    ok = false;\n  }\n  // Step 1: inko if (else if kaadu!) — category empty aa?\n\n  // Step 2: avunu ante category kinda field message + ok = false\n\n  return ok;\n}",
+      hint: [
+        'Rendo check ki separate if — else if ayithe first check fail ayinappudu rendodi asalu check avvadu.',
+        "if (g_form.getValue('category') == '') { ... }",
+        "if (g_form.getValue('category') == '') { g_form.showFieldMsg('category', 'Required', 'error'); ok = false; }",
+      ],
+      solution: "function onSubmit() {\n  var ok = true;\n  if (g_form.getValue('short_description') == '') {\n    g_form.showFieldMsg('short_description', 'Required', 'error');\n    ok = false;\n  }\n  if (g_form.getValue('category') == '') {\n    g_form.showFieldMsg('category', 'Required', 'error');\n    ok = false;\n  }\n  return ok;\n}",
+      explain: 'Separate ifs + okka flag = user ki anni problems okesari kanipistayi. Exercise 4 lo idi motham nuvve scratch nunchi rastav.',
+      tests: [
+        { label: 'blocked', expr: '__submit', expect: false },
+        { label: 'category ki matrame message', expr: '[__f.short_description.msgs.length, __f.category.msgs.length]', expect: [0, 1] },
+      ],
+    }),
     jx('cs-onsubmit', 4, 'Anni errors okesari', 'hard', {
       scenario: { form: { values: { short_description: '', category: '' } } },
       client: SUBMIT,
       task: 'onSubmit lo: short_description empty ayithe daani kinda "Required" error field message, category empty ayithe daani kinda "Required" error. Rendu check cheyyali (okati fail ayina aapakudadu). Edaina fail ayithe last lo return false.',
       starter: 'function onSubmit() {\n  // TODO\n}',
-      hint: 'var ok = true; if (...) { g_form.showFieldMsg(...); ok = false; } if (...) {...} return ok;',
+      hint: [
+        'Exercise 5 + 7 pattern: okka flag, rendu SEPARATE ifs, last lo flag return.',
+        'var ok = true; if (...) { g_form.showFieldMsg(...); ok = false; } if (...) { ... } return ok;',
+        "var ok = true; if (g_form.getValue('short_description') == '') { g_form.showFieldMsg('short_description', 'Required', 'error'); ok = false; }   — category ki kuda ide block, tarvata return ok;",
+      ],
       solution: "function onSubmit() {\n  var ok = true;\n  if (g_form.getValue('short_description') == '') {\n    g_form.showFieldMsg('short_description', 'Required', 'error');\n    ok = false;\n  }\n  if (g_form.getValue('category') == '') {\n    g_form.showFieldMsg('category', 'Required', 'error');\n    ok = false;\n  }\n  return ok;\n}",
       explain: 'Flag variable (ok) tho anni errors okesari chupinchi, last lo return ok — user ki anni problems oke saari telustayi.',
       tests: [
@@ -473,7 +713,11 @@ g_form.setValue('assignment_group', map[newValue] || '');`,
       client: CHG('category', 'software', 'database'),
       task: 'onChange (category) rayi: map tho — network → g_net, database → g_db, hardware → g_hw. Map lo lekapothe assignment_group empty chey. (g_form.setValue("assignment_group", map[newValue] || ""))',
       starter: ONCHANGE('  // TODO\n'),
-      hint: "var map = { network: 'g_net', database: 'g_db', hardware: 'g_hw' };",
+      hint: [
+        'If/else chain badulu oka object: key = category value, value = group sys_id. map[newValue] tho direct ga teesuko.',
+        "var map = { network: 'g_net', database: 'g_db', hardware: 'g_hw' };",
+        "var map = { network: 'g_net', database: 'g_db', hardware: 'g_hw' }; g_form.setValue('assignment_group', map[newValue] || '');",
+      ],
       solution: ONCHANGE("  var map = { network: 'g_net', database: 'g_db', hardware: 'g_hw' };\n  g_form.setValue('assignment_group', map[newValue] || '');\n"),
       explain: 'Object lookup tho 3 if-else kante clean.',
       tests: [{ label: 'g_db', expr: "g_form.getValue('assignment_group')", expect: 'g_db' }],
@@ -483,17 +727,77 @@ g_form.setValue('assignment_group', map[newValue] || '');`,
       client: CHG('impact', '2', '1'),
       task: 'onChange (impact) rayi: priority = impact + urgency - 1 (numbers ga marchi) calculate chesi priority field set chey. (Strings add cheste "12"-type bug vastundi!)',
       starter: ONCHANGE('  // TODO\n'),
-      hint: "var p = parseInt(newValue, 10) + parseInt(g_form.getValue('urgency'), 10) - 1; g_form.setValue('priority', String(p));",
+      hint: [
+        'newValue (impact) mariyu form lo urgency — rendu strings. Rendu numbers ga marchi formula, result ni malli string ga set chey.',
+        "var p = parseInt(newValue, 10) + parseInt(g_form.getValue('urgency'), 10) - 1;",
+        "var p = parseInt(newValue, 10) + parseInt(g_form.getValue('urgency'), 10) - 1; g_form.setValue('priority', String(p));",
+      ],
       solution: ONCHANGE("  var p = parseInt(newValue, 10) + parseInt(g_form.getValue('urgency'), 10) - 1;\n  g_form.setValue('priority', String(p));\n"),
       explain: 'parseInt tho number ki marchi calculate. (Real lo priority Data Lookup rule tho server lo set avtundi — idi practice.)',
       tests: [{ label: 'priority = 2', expr: "g_form.getValue('priority')", expect: '2' }],
+    }),
+    // ---- Medium+ ladder: one new idea at a time, building up to exercise 4 ----
+    jx('cs-usecases', 5, 'Group marchithe assigned_to clear (confirm)', 'medium+', {
+      scenario: { form: { values: { assignment_group: 'g_net', assigned_to: 'u_admin' } }, confirmAnswer: true },
+      client: CHG('assignment_group', 'g_desk', 'g_net'),
+      task: 'onChange (assignment_group) rayi: confirm("Group marchithe Assigned to clear avtundi. OK na?") adugu. User OK nokkite (confirm true) assigned_to ni clearValue chey. (Ee practice lo user OK nokkadu.) 🧰 Vaade words: confirm(), if, g_form.clearValue()',
+      starter: ONCHANGE("  // Step 1: confirm(...) adugu — adi true (OK) / false (Cancel) istundi\n\n  // Step 2: true ayithe assigned_to clear chey\n"),
+      hint: [
+        'confirm() oka boolean return chestundi — daanni direct ga if condition lo pettochu.',
+        "if (confirm('Group marchithe Assigned to clear avtundi. OK na?')) { ... }",
+        "if (confirm('Group marchithe Assigned to clear avtundi. OK na?')) { g_form.clearValue('assigned_to'); }",
+      ],
+      solution: ONCHANGE("  if (confirm('Group marchithe Assigned to clear avtundi. OK na?')) {\n    g_form.clearValue('assigned_to');\n  }\n"),
+      explain: 'Group marithe paata assignee kotta group lo undakapovachu — anduke clear. confirm() result ni if lo vaadatam = user decision tho code nadapatam.',
+      tests: [
+        { label: 'assigned_to clear', expr: "g_form.getValue('assigned_to')", expect: '' },
+        { label: 'confirm asked', logs: ['Group marchithe Assigned to clear avtundi. OK na?'] },
+      ],
+    }),
+    jx('cs-usecases', 6, 'Marpu undo (oldValue)', 'medium+', {
+      scenario: { form: { values: { state: '8' } } },
+      client: CHG('state', '2', '8'),
+      task: 'onChange (state) rayi: newValue "8" (Canceled) ayithe state ni oldValue ki tirigi pettu (setValue) mariyu addErrorMessage("Form nunchi Canceled cheyyaku") chupinchu. 🧰 Vaade words: oldValue, g_form.setValue(), g_form.addErrorMessage()',
+      starter: ONCHANGE("  // Step 1: newValue '8' aa?\n\n  // Step 2: avunu ante state ni paata value (oldValue) ki set chey\n\n  // Step 3: error message chupinchu\n"),
+      hint: [
+        'onChange ki oldValue parameter vastundi — field marchaka mundu value. Daanni malli setValue chesthe marpu undo.',
+        "if (newValue == '8') { g_form.setValue('state', oldValue); ... }",
+        "if (newValue == '8') { g_form.setValue('state', oldValue); g_form.addErrorMessage('Form nunchi Canceled cheyyaku'); }",
+      ],
+      solution: ONCHANGE("  if (newValue == '8') {\n    g_form.setValue('state', oldValue);\n    g_form.addErrorMessage('Form nunchi Canceled cheyyaku');\n  }\n"),
+      explain: 'oldValue = form load ayinappati value (field ni rendu sarlu marchina, last-before value kaadu). setValue chesthe onChange malli fire avvochu; appudu newValue "8" kaadu kabatti ee script emi cheyyadu. ⚠️ Ee rendu behaviours real PDI lo confirm chesuko.',
+      tests: [
+        { label: 'state reverted', expr: "g_form.getValue('state')", expect: '2' },
+        { label: 'error message', expr: MSGS, expect: ['Form nunchi Canceled cheyyaku'] },
+      ],
+    }),
+    jx('cs-usecases', 7, 'Cancel nokkite revert (!confirm)', 'medium+', {
+      scenario: { form: { values: { assignment_group: 'g_net' } }, confirmAnswer: false },
+      client: CHG('assignment_group', 'g_desk', 'g_net'),
+      task: 'onChange (assignment_group) rayi: confirm("Assignment group marchala?") adugu. User Cancel nokkite (confirm false) assignment_group ni oldValue ki revert chey. (Ee practice lo user Cancel nokkadu.) 🧰 Vaade words: confirm(), ! (not), oldValue, g_form.setValue()',
+      starter: ONCHANGE("  // Step 1: confirm(...) adugu — Cancel ante false\n\n  // Step 2: false ayithe (! tho check) group ni oldValue ki tirigi pettu\n"),
+      hint: [
+        'Exercise 5 lo OK ayithe pani chesam; ikkada Cancel ayithe pani cheyyali — ! tho result ni ulta chey.',
+        "if (!confirm('Assignment group marchala?')) { ... }",
+        "if (!confirm('Assignment group marchala?')) { g_form.setValue('assignment_group', oldValue); }",
+      ],
+      solution: ONCHANGE("  if (!confirm('Assignment group marchala?')) {\n    g_form.setValue('assignment_group', oldValue);\n  }\n"),
+      explain: '!confirm(...) = "user Cancel nokkite". Exercise 4 lo ide pattern ki newValue condition && tho kaluputam.',
+      tests: [
+        { label: 'group reverted', expr: "g_form.getValue('assignment_group')", expect: 'g_desk' },
+        { label: 'confirm asked', logs: ['Assignment group marchala?'] },
+      ],
     }),
     jx('cs-usecases', 4, 'Close confirm (revert)', 'hard', {
       scenario: { form: { values: { state: '7' } }, confirmAnswer: false },
       client: CHG('state', '2', '7'),
       task: 'onChange (state) rayi: newValue "7" (Closed) ayithe confirm("Incident close cheyyala?") adugu. User Cancel nokkite state ni oldValue ki revert chey.',
       starter: ONCHANGE('  // TODO\n'),
-      hint: "if (newValue == '7' && !confirm('Incident close cheyyala?')) { g_form.setValue('state', oldValue); }",
+      hint: [
+        'Exercise 6 (newValue check + oldValue revert) + Exercise 7 (!confirm). Rendu conditions && tho — newValue "7" kakapothe confirm adagakudadu.',
+        "if (newValue == '7' && !confirm(...)) { ... }",
+        "if (newValue == '7' && !confirm('Incident close cheyyala?')) { g_form.setValue('state', oldValue); }",
+      ],
       solution: ONCHANGE("  if (newValue == '7' && !confirm('Incident close cheyyala?')) {\n    g_form.setValue('state', oldValue);\n  }\n"),
       explain: '&& short-circuit: newValue "7" kakapothe confirm asalu adagadu.',
       tests: [
@@ -576,7 +880,11 @@ const oncell = {
       client: CELL('2', ['6']),
       task: 'oldValues[0] "6" (Resolved) ayithe alert("Resolved record edit cheyyaku") chupinchi callback(false); lekapothe callback(true).',
       starter: 'function onCellEdit(sysIDs, table, oldValues, newValue, callback) {\n  // TODO\n}',
-      hint: "if (oldValues[0] == '6') { alert('...'); callback(false); return; } callback(true);",
+      hint: [
+        'oldValues oka array — first (index 0) record paata value oldValues[0]. Adi "6" aa ani check chey.',
+        "if (oldValues[0] == '6') { alert(...); callback(false); return; } callback(true);",
+        "if (oldValues[0] == '6') { alert('Resolved record edit cheyyaku'); callback(false); return; } callback(true);",
+      ],
       solution: "function onCellEdit(sysIDs, table, oldValues, newValue, callback) {\n  if (oldValues[0] == '6') {\n    alert('Resolved record edit cheyyaku');\n    callback(false);\n    return;\n  }\n  callback(true);\n}",
       explain: 'oldValues array — multiple records select chesthe prathidi check cheyyali (idi simple version).',
       tests: [
@@ -584,12 +892,68 @@ const oncell = {
         { label: 'alert', logs: ['Resolved record edit cheyyaku'] },
       ],
     }),
+    // ---- Medium+ ladder: one new idea at a time, building up to exercise 4 ----
+    jx('cs-oncell', 5, 'Callback okkasari matrame (return)', 'medium+', {
+      scenario: { form: { values: {} } },
+      client: CELL('5'),
+      task: 'Priority column ki: newValue "5" (Planning) ayithe alert("Priority 5 list nunchi set cheyyaku") chupinchi callback(false) pilichi VENTANE return chey. Function chivara callback(true). (if/else vaadakunda — return tho.) 🧰 Vaade words: alert(), callback, return',
+      starter: 'function onCellEdit(sysIDs, table, oldValues, newValue, callback) {\n  // Step 1: newValue \'5\' aa? → alert + callback(false) + return\n\n  // Step 2: migilina anni cases — callback(true)\n}',
+      hint: [
+        'callback ni okka sari matrame pilavali. callback(false) tarvata return lekapothe code kindaki velli callback(true) kuda pilustundi.',
+        "if (newValue == '5') { alert(...); callback(false); return; }",
+        "if (newValue == '5') { alert('Priority 5 list nunchi set cheyyaku'); callback(false); return; } callback(true);",
+      ],
+      solution: "function onCellEdit(sysIDs, table, oldValues, newValue, callback) {\n  if (newValue == '5') {\n    alert('Priority 5 list nunchi set cheyyaku');\n    callback(false);\n    return;\n  }\n  callback(true);\n}",
+      explain: 'Early return pattern: problem case lo callback(false) + return, chivara callback(true). Ila prathi path lo callback okka sari matrame. (Ee practice runner lo return marchipothe last callback(true) gelustundi; real list lo rendu sarlu pilavadam behaviour ⚠️ PDI lo confirm chesuko — ellappudu okkasari pilavadame safe.)',
+      tests: [
+        { label: 'blocked', expr: '__submit', expect: false },
+        { label: 'alert', logs: ['Priority 5 list nunchi set cheyyaku'] },
+      ],
+    }),
+    jx('cs-oncell', 6, 'List lo g_user role check', 'medium+', {
+      scenario: { form: { values: {} }, user: { userName: 'abel.tuter', userID: 'u_abel', roles: [] } },
+      client: CELL('3'),
+      task: 'Ee column ni "itil" role unnavaalle list nunchi edit cheyyali. g_user.hasRole("itil") false ayithe alert("List edit ki itil role kavali") + callback(false) + return; lekapothe callback(true). (Ee practice user ki roles levu.) 🧰 Vaade words: g_user.hasRole(), ! (not), alert(), callback',
+      starter: 'function onCellEdit(sysIDs, table, oldValues, newValue, callback) {\n  // Step 1: itil role LEKAPOTHE → alert + callback(false) + return\n\n  // Step 2: role unte callback(true)\n}',
+      hint: [
+        'g_user list scripts lo kuda untundi. hasRole true/false istundi — ! tho "role ledu" check.',
+        "if (!g_user.hasRole('itil')) { alert(...); callback(false); return; }",
+        "if (!g_user.hasRole('itil')) { alert('List edit ki itil role kavali'); callback(false); return; } callback(true);",
+      ],
+      solution: "function onCellEdit(sysIDs, table, oldValues, newValue, callback) {\n  if (!g_user.hasRole('itil')) {\n    alert('List edit ki itil role kavali');\n    callback(false);\n    return;\n  }\n  callback(true);\n}",
+      explain: 'g_user.hasRole() admin ki ellappudu true istundi. Client check UX kosam matrame — asalu security ACL tho server lo. Exercise 4 lo ide role check ki newValue condition kalustundi.',
+      tests: [
+        { label: 'blocked', expr: '__submit', expect: false },
+        { label: 'alert', logs: ['List edit ki itil role kavali'] },
+      ],
+    }),
+    jx('cs-oncell', 7, 'Rendu conditions (&&)', 'medium+', {
+      scenario: { form: { values: {} } },
+      client: CELL('7', ['2']),
+      task: 'State column ki: newValue "7" (Closed) MARIYU paata value oldValues[0] "6" (Resolved) kaakapothe — alert("Mundu Resolved chey, tarvata Close") + callback(false) + return. Migilina anni cases ki callback(true). (Ee record paata state 2.) 🧰 Vaade words: &&, !=, oldValues[0], alert(), callback',
+      starter: "function onCellEdit(sysIDs, table, oldValues, newValue, callback) {\n  // Step 1: newValue '7' && oldValues[0] '6' kaadu → alert + callback(false) + return\n\n  // Step 2: callback(true)\n}",
+      hint: [
+        'Rendu conditions okate if lo && tho: kotta value Closed, paata value Resolved kaadu.',
+        "if (newValue == '7' && oldValues[0] != '6') { ... }",
+        "if (newValue == '7' && oldValues[0] != '6') { alert('Mundu Resolved chey, tarvata Close'); callback(false); return; } callback(true);",
+      ],
+      solution: "function onCellEdit(sysIDs, table, oldValues, newValue, callback) {\n  if (newValue == '7' && oldValues[0] != '6') {\n    alert('Mundu Resolved chey, tarvata Close');\n    callback(false);\n    return;\n  }\n  callback(true);\n}",
+      explain: '&& lo rendu true ayithene block. Exercise 4 lo rendo condition role check (!g_user.hasRole) avtundi — same shape.',
+      tests: [
+        { label: 'blocked', expr: '__submit', expect: false },
+        { label: 'alert', logs: ['Mundu Resolved chey, tarvata Close'] },
+      ],
+    }),
     jx('cs-oncell', 4, 'Role check', 'hard', {
       scenario: { form: { values: {} }, user: { userName: 'abel.tuter', userID: 'u_abel', roles: [] } },
       client: CELL('1'),
       task: 'Priority column ki: newValue "1" ayithe "itil" role unnavaalle set cheyyali. Role lekapothe alert("P1 set cheyyadaniki itil role kavali") chupinchi callback(false). Migilina anni cases ki callback(true).',
       starter: 'function onCellEdit(sysIDs, table, oldValues, newValue, callback) {\n  // TODO\n}',
-      hint: "if (newValue == '1' && !g_user.hasRole('itil')) { alert('...'); callback(false); return; } callback(true);",
+      hint: [
+        'Exercise 6 (role check) + Exercise 7 (&& tho rendu conditions): newValue "1" MARIYU role ledu → block.',
+        "if (newValue == '1' && !g_user.hasRole('itil')) { ... callback(false); return; } callback(true);",
+        "if (newValue == '1' && !g_user.hasRole('itil')) { alert('P1 set cheyyadaniki itil role kavali'); callback(false); return; } callback(true);",
+      ],
       solution: "function onCellEdit(sysIDs, table, oldValues, newValue, callback) {\n  if (newValue == '1' && !g_user.hasRole('itil')) {\n    alert('P1 set cheyyadaniki itil role kavali');\n    callback(false);\n    return;\n  }\n  callback(true);\n}",
       explain: 'g_user list scripts lo kuda available.',
       tests: [

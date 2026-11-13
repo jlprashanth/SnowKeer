@@ -23,8 +23,8 @@ title, in the course's order. Stage 1 and Stage 2 titles are already in the code
 | Stage | Topic | Status |
 |---|---|---|
 | 1 | Introduction (18 lessons: account, users, UI tour, tables, forms, views, dictionary, update sets, UI/data policies...) | DONE — guided mock lessons + quiz, plus 54 real-PDI exercises |
-| 2 | JavaScript, ServiceNow style (8 lessons) | DONE — learn cards + quiz + 32 coding exercises (only lesson 1 clicked through in a browser) |
-| 3 | Client scripting & UI (26 lectures, titles below) | DONE — all 26 lectures in `src/data/lessons-cs*.js` (101 exercises: client runner, server runner, and `mode: 'pdi'` real-PDI lessons). Not clicked through in a browser except a few exercises |
+| 2 | JavaScript, ServiceNow style (8 lessons) | DONE — learn cards + quiz + 56 coding exercises (7 per lesson, ladder with Medium+ and 3-tier hints; lessons 1 and 4 clicked through in a browser; awaiting friend feedback on step size) |
+| 3 | Client scripting & UI (26 lectures, titles below) | DONE — all 26 lectures in `src/data/lessons-cs*.js` (161 exercises: client runner, server runner, and `mode: 'pdi'` real-PDI lessons; the 17 coding lessons have the 7-exercise ladder). Not clicked through in a browser except a few exercises |
 | 4 | Server scripting (Business Rules, Script Includes, GlideRecord deeper, GlideAggregate, scheduled jobs) | planned |
 | 5 | Service Catalog and Flow Designer | planned |
 | 6 | ITSM and Now Assist | planned |
@@ -46,8 +46,13 @@ React 18 + Vite 5, plain JS/JSX, no router, no backend, no CSS framework. Progre
   Lessons: `src/data/lessons-js.js`, `lessons-js-b.js`, `lessons-js-c.js`. UI: `JsLesson.jsx` (Learn / Quiz / Code tabs),
   `ScriptRunner.jsx`, `CodeEditor.jsx` (CodeMirror 6; lazy-loaded because it is large).
 - Practice exercise shape: `jx(lessonId, n, title, level, { task, starter, hint, solution, explain, scenario?, tests })`;
-  tests are `{ label, logs: [...] }` or `{ label, expr, expect }` (expr runs in the script's own scope). Each lesson: 4–5 learn cards, 5 quiz
-  questions, 4 exercises (easy, easy, medium, hard).
+  tests are `{ label, logs: [...] }` or `{ label, expr, expect }` (expr runs in the script's own scope). Each lesson: 4–5 learn cards, 20 quiz
+  questions, and a 7-exercise **ladder**: easy, easy, medium, then three `'medium+'` exercises (ids 5–7, one new idea each, starter fades toward
+  the hard one), then hard. `level` is `easy | medium | medium+ | hard`; `JsLesson.jsx` sorts by RANK, so ids need not match display order.
+  Ids are stored in progress — append new ones, never renumber. `hint` is a string or a **3-tier array** (nudge → method/shape → near-complete
+  line; tier 3 must give more than tier 2). Keep starter comments to the step outline, not the finished code. `padStart` etc. need the
+  "ES12 mode" note in `explain`. Stage 3 client/server exercises share `JsLesson`, so they get the same level badge and tiered hints for free
+  The Stage 3 ladder is done too (all 17 non-PDI lessons have ids 5–7; extra else-branch tests are inline `variants` or in `variants-cs.js`).
 - Mock fidelity matters: `gr.priority == 1` works but `=== '1'` does not (field values are GlideElement-like objects), `getValue()` returns strings,
   changes need `update()`. Keep the mock faithful so she learns real behaviour.
 

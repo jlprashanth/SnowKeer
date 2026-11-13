@@ -139,7 +139,11 @@ var unassigned;
 
 gs.info('Page on-call: ' + (urgent && unassigned));
 `,
-      hint: 'var unassigned = !gr.getValue("assigned_to");',
+      hint: [
+        'Rendu conditions kavali: urgent (priority chinna number) & unassigned (assigned_to empty). Rendu boolean values ayyaka && tho kalupu.',
+        'urgent: Number(gr.getValue("priority")) <= 2.   unassigned: empty string falsy, kabatti ! vaadu.',
+        'var unassigned = !gr.getValue("assigned_to");',
+      ],
       solution: `var gr = new GlideRecord('incident');
 gr.get('number', 'INC0010004');
 
@@ -151,6 +155,82 @@ gs.info('Page on-call: ' + (urgent && unassigned));`,
       tests: [
         { label: 'Log: Page on-call: true', logs: ['Page on-call: true'] },
         { label: 'urgent oka boolean', expr: 'typeof urgent', expect: 'boolean' },
+      ],
+    }),
+    // ---- Medium+ ladder: one new idea at a time, building up to exercise 4 ----
+    jx('js-operators', 5, 'Urgent aa? (<= comparison)', 'medium+', {
+      scenario: { current: { table: 'incident', values: { number: 'INC0010061', priority: '2', impact: '1', urgency: '2' } } },
+      task: 'current lo priority 2 undi. priority ni Number ga teesuko, isUrgent = priority <= 2 (boolean) ga set chey, tarvata "Urgent: true" ani log chey. 🧰 Vaade words: current, getValue(), Number(), <= — comparison result boolean istundi.',
+      starter: `// Step 1: priority ni Number ga teesuko
+var priority;
+
+// Step 2: isUrgent = priority <= 2   (true / false vastundi)
+var isUrgent;
+
+// Step 3: gs.info('Urgent: ' + isUrgent)
+`,
+      hint: [
+        'Mundu priority ni current nundi teesuko (string vastundi — number ga marchu). Tarvata <= tho compare chey, last lo log.',
+        'var priority = Number(current.getValue("priority"));   var isUrgent = priority <= 2;',
+        'gs.info("Urgent: " + isUrgent);',
+      ],
+      solution: `var priority = Number(current.getValue('priority'));
+var isUrgent = priority <= 2;
+gs.info('Urgent: ' + isUrgent);`,
+      explain: 'Comparison operators (<=) ellappudu true/false istayi. getValue string kabatti mundu Number() tho marchali.',
+      tests: [
+        { label: 'Log: Urgent: true', logs: ['Urgent: true'] },
+        { label: 'isUrgent oka boolean', expr: 'typeof isUrgent', expect: 'boolean' },
+      ],
+    }),
+    jx('js-operators', 6, 'Impact + urgency score (+=)', 'medium+', {
+      scenario: { current: { table: 'incident', values: { number: 'INC0010062', priority: '5', impact: '2', urgency: '2' } } },
+      task: 'current lo impact=2, urgency=2. score = 0 tho start chesi, += tho impact, urgency add chey (rendu Number ga). Tarvata "Score: 4" ani log chey. 🧰 Vaade words: current, getValue(), Number(), +=',
+      starter: `var score = 0;
+
+// TODO: score += Number(current.getValue('impact'));
+// TODO: urgency ki kuda ade pattern
+
+gs.info('Score: ' + score);
+`,
+      hint: [
+        'score lo mundu 0 undi. Prathi field value ni score ki add chestunnav — okko line okko field.',
+        'score += Number(current.getValue("impact"));   — urgency ki kuda ide pattern.',
+        'score += Number(current.getValue("impact"));   score += Number(current.getValue("urgency"));',
+      ],
+      solution: `var score = 0;
+score += Number(current.getValue('impact'));
+score += Number(current.getValue('urgency'));
+gs.info('Score: ' + score);`,
+      explain: 'score += x ante score = score + x. Number() lekunda + chesthe text join avtundi ("022").',
+      tests: [
+        { label: 'Log: Score: 4', logs: ['Score: 4'] },
+        { label: 'score oka number', expr: 'typeof score', expect: 'number' },
+      ],
+    }),
+    jx('js-operators', 7, 'Score nundi label (ternary)', 'medium+', {
+      scenario: { current: { table: 'incident', values: { number: 'INC0010063', priority: '5', impact: '1', urgency: '1' } } },
+      task: 'current lo impact=1, urgency=1 (score 2). Score calculate chey. label = score <= 2 ? "Critical" : "Normal" (ternary). "Label: Critical" ani log chey. 🧰 Vaade words: current, getValue(), Number(), ?:',
+      starter: `var score = Number(current.getValue('impact')) + Number(current.getValue('urgency'));
+
+// condition ? ifTrue : ifFalse
+// TODO: label = score <= 2 ? 'Critical' : 'Normal'
+var label;
+
+gs.info('Label: ' + label);
+`,
+      hint: [
+        'Ternary = chinna if/else: condition ? true-value : false-value. Condition ante score <= 2.',
+        'Shape: var label = score <= 2 ? <true-value> : <false-value>;   — rendu values text (quotes lo).',
+        'var label = score <= 2 ? "Critical" : "Normal";   gs.info("Label: " + label);',
+      ],
+      solution: `var score = Number(current.getValue('impact')) + Number(current.getValue('urgency'));
+var label = score <= 2 ? 'Critical' : 'Normal';
+gs.info('Label: ' + label);`,
+      explain: 'Ternary oka line lo if/else. Exercise 4 lo ide idea ni chain chesi priority 1-4 calculate chestam.',
+      tests: [
+        { label: 'Log: Label: Critical', logs: ['Label: Critical'] },
+        { label: 'label = Critical', expr: 'label', expect: 'Critical' },
       ],
     }),
     jx('js-operators', 4, 'Priority calculate chey (ternary, +=)', 'hard', {
@@ -165,7 +245,11 @@ var priority;
 current.setValue('priority', priority);
 gs.info('Calculated priority: ' + current.getValue('priority'));
 `,
-      hint: 'var priority = score <= 2 ? 1 : score === 3 ? 2 : score === 4 ? 3 : 4;',
+      hint: [
+        'Mundu score build chey (+= rendu sarlu). Tarvata score batti priority 1–4 pick chey — previous Medium+ exercises lo ide practice chesav.',
+        'Ternary chain: condition1 ? value1 : condition2 ? value2 : ... : lastValue. Score <= 2 → 1, === 3 → 2, === 4 → 3, migilindi 4.',
+        'var priority = score <= 2 ? 1 : score === 3 ? 2 : score === 4 ? 3 : 4;',
+      ],
       solution: `var score = 0;
 score += Number(current.getValue('impact'));
 score += Number(current.getValue('urgency'));
@@ -294,6 +378,85 @@ gs.info('VPN ticket: ' + isVpn);`,
       explain: 'indexOf -1 ante dorakaledu. !== -1 ante undi. Case-insensitive kosam mundu toLowerCase().',
       tests: [{ label: 'Log: VPN ticket: true', logs: ['VPN ticket: true'] }],
     }),
+    // ---- Medium+ ladder: one new idea at a time, building up to exercises 3 and 4 ----
+    jx('js-strings', 5, 'User nundi email teesuko', 'medium+', {
+      task: 'sys_user lo user_name = "abel.tuter" user ni get chey. Daani email ni getValue tho teesukuni email variable lo pettu. "Email: abel.tuter@example.com" ani log chey. 🧰 Vaade words: GlideRecord, get(), getValue()',
+      starter: `var gr = new GlideRecord('sys_user');
+// get(field, value) = aa value unna record load chestundi
+// TODO: user_name = abel.tuter user ni get chey
+
+// TODO: email = gr.getValue('email')
+var email;
+
+gs.info('Email: ' + email);
+`,
+      hint: [
+        'Mundu record load chey (get), tarvata aa record nundi oka field value teesuko (getValue).',
+        'get(field, value) record ni load chestundi; getValue("field") aa field text istundi. Rendu lines.',
+        'gr.get("user_name", "abel.tuter");   var email = gr.getValue("email");',
+      ],
+      solution: `var gr = new GlideRecord('sys_user');
+gr.get('user_name', 'abel.tuter');
+var email = gr.getValue('email');
+gs.info('Email: ' + email);`,
+      explain: 'get() record ni load chestundi, getValue() field text istundi. Next exercise lo ee email ni split chestam.',
+      tests: [
+        { label: 'Log: Email: abel.tuter@example.com', logs: ['Email: abel.tuter@example.com'] },
+        { label: 'email oka string', expr: 'typeof email', expect: 'string' },
+      ],
+    }),
+    jx('js-strings', 6, 'Email split chesi domain teesuko', 'medium+', {
+      task: 'email = "abel.tuter@example.com" undi. split("@") tho rendu mukkalu chesi, rendo part (index 1) ni domain lo pettu. "Domain: example.com" ani log chey. 🧰 Vaade words: split(), array index [1]',
+      starter: `var email = 'abel.tuter@example.com';
+
+// split('@') array istundi: [ 'abel.tuter', 'example.com' ]
+// TODO: parts = email.split('@')
+var parts;
+
+// TODO: domain = parts lo index 1 (index 0 nundi start avtundi)
+var domain;
+
+gs.info('Domain: ' + domain);
+`,
+      hint: [
+        'split oka array istundi — mundu daanini oka variable lo pettuko. Tarvata array lo ye position kavalo choosuko (0 nundi lekka).',
+        'var parts = email.split("@");   var domain = parts[1];',
+        'Short ga: var domain = email.split("@")[1];',
+      ],
+      solution: `var email = 'abel.tuter@example.com';
+var parts = email.split('@');
+var domain = parts[1];
+gs.info('Domain: ' + domain);`,
+      explain: 'split("@") tho "@" daggara mukkalu avtundi: [username, domain]. Array index 0 nundi start — kabatti domain = [1].',
+      tests: [
+        { label: 'Log: Domain: example.com', logs: ['Domain: example.com'] },
+        { label: 'domain = example.com', expr: 'domain', expect: 'example.com' },
+      ],
+    }),
+    jx('js-strings', 7, 'Incident number build (padStart)', 'medium+', {
+      task: 'counter = 7 undi. "INC" + counter ni 7 digits varaku leading zeros tho pad chesi (padStart) log chey → INC0000007. 🧰 Vaade words: String(), padStart()',
+      starter: `var counter = 7;
+
+// padStart(totalLength, fillChar) — number ni mundu String() chesi vaadali
+// TODO: padded = String(counter).padStart(7, '0')
+var padded;
+
+// TODO: 'INC' + padded ni log chey
+`,
+      hint: [
+        'Number ki padStart ledu — mundu text ga marchu. Tarvata total length 7 varaku mundu zeros pettu.',
+        'var padded = String(counter).padStart(7, "0");',
+        'gs.info("INC" + padded);',
+      ],
+      solution: `var counter = 7;
+var padded = String(counter).padStart(7, '0');
+gs.info('INC' + padded);`,
+      explain: 'padStart(7, "0") total length 7 ayye varaku mundu "0" pedutundi. Exercise 4 lo idi + slice(3) kalipi vaadatam. (ES12 mode kavali — classic ES5 lo ("0000000" + n).slice(-7) vaadu.)',
+      tests: [
+        { label: 'Log: INC0000007', logs: ['INC0000007'] },
+        { label: 'padded = 0000007', expr: 'padded', expect: '0000007' },
+      ],
+    }),
     jx('js-strings', 3, 'Email nundi domain & username', 'medium', {
       task: 'sys_user lo user_name = "abel.tuter" user ni get chey. email nundi split("@") tho domain teesuko → "Domain: example.com" log chey. Tarvata user_name ni uppercase chesi "User: ABEL.TUTER" log chey.',
       starter: `var gr = new GlideRecord('sys_user');
@@ -307,7 +470,11 @@ gs.info('Domain: ' + domain);
 
 // TODO: user_name uppercase chesi log chey: 'User: ABEL.TUTER'
 `,
-      hint: 'gr.get("user_name", "abel.tuter"); var domain = email.split("@")[1];',
+      hint: [
+        'Mundu user ni load chey, email teesuko. Domain kosam email ni "@" daggara mukkalu cheyali; uppercase kosam oka string method undi.',
+        'email.split("@") array istundi — domain ye index lo undo choosuko. Uppercase: toUpperCase().',
+        'gr.get("user_name", "abel.tuter"); var domain = email.split("@")[1];',
+      ],
       solution: `var gr = new GlideRecord('sys_user');
 gr.get('user_name', 'abel.tuter');
 
@@ -330,7 +497,11 @@ var last = 'INC0010004';
 var nextNumber;   // 'INC' + padded next
 gs.info(nextNumber);
 `,
-      hint: "'INC' + String(counter).padStart(7, '0')",
+      hint: [
+        'Rendu parts: (1) number ni 7-digit padded text ga marchi INC mundu pettu. (2) "INC0010004" nundi digits teesi +1 chesi malli same pattern.',
+        'padStart(7, "0") — mundu String(...) cheyali. Digits kosam last.slice(3) ("INC" 3 letters skip).',
+        "'INC' + String(counter).padStart(7, '0')    |    var next = Number(last.slice(3)) + 1;",
+      ],
       solution: `var counter = 42;
 gs.info('INC' + String(counter).padStart(7, '0'));
 
@@ -463,6 +634,110 @@ gs.info('On P1 team: ' + onTeam);`,
       explain: 'Reference field ki getValue = sys_id, getDisplayValue = peru ("Database"). indexOf tho array lo membership check.',
       tests: [{ label: 'Log: On P1 team: true', logs: ['On P1 team: true'] }],
     }),
+    // ---- Medium+ ladder: one new idea at a time, building up to exercise 4 ----
+    jx('js-arrays', 5, 'Unassigned incidents collect chey', 'medium+', {
+      task: 'Active & unassigned (assigned_to empty) incidents query chey — addNullQuery("assigned_to") vaadu, orderBy("number"). Numbers ni array lo push chesi join(", ") tho log chey. 🧰 Vaade words: GlideRecord, addActiveQuery(), addNullQuery(), orderBy(), query(), next(), push()',
+      starter: `var numbers = [];
+
+var gr = new GlideRecord('incident');
+// TODO: addActiveQuery(), addNullQuery('assigned_to'), orderBy('number'), query()
+
+// TODO: while (gr.next()) { numbers.push(gr.getValue('number')); }
+
+gs.info(numbers.join(', '));
+`,
+      hint: [
+        'Pattern ade (query → while next → push). Kotha idea okkate: assigned_to empty ani filter cheyyali — addQuery kaadu, oka special method undi.',
+        'gr.addNullQuery("assigned_to") = aa field empty unnavi matrame.',
+        'gr.addActiveQuery(); gr.addNullQuery("assigned_to"); gr.orderBy("number"); gr.query(); while (gr.next()) { numbers.push(gr.getValue("number")); }',
+      ],
+      solution: `var numbers = [];
+
+var gr = new GlideRecord('incident');
+gr.addActiveQuery();
+gr.addNullQuery('assigned_to');
+gr.orderBy('number');
+gr.query();
+
+while (gr.next()) {
+  numbers.push(gr.getValue('number'));
+}
+
+gs.info(numbers.join(', '));`,
+      explain: 'addNullQuery(field) = field empty unna records. Exercise 3 lo laage array build, filter matrame maarindi.',
+      tests: [
+        { label: 'Log: 4 unassigned numbers', logs: ['INC0010002, INC0010004, INC0010006, INC0010007'] },
+        { label: 'numbers lo 4 items', expr: 'numbers.length', expect: 4 },
+      ],
+    }),
+    jx('js-arrays', 6, 'Objects array build chey', 'medium+', {
+      task: 'Ade query (active, unassigned, orderBy number). Ikkada numbers kaadu — prathi incident ki { number, priority } object create chesi list lo push chey. priority Number ga undali. Chivarlo list.length (4) log chey. 🧰 Vaade words: GlideRecord, push(), Number(), object { key: value }',
+      starter: `var list = [];
+
+var gr = new GlideRecord('incident');
+gr.addActiveQuery();
+gr.addNullQuery('assigned_to');
+gr.orderBy('number');
+gr.query();
+
+while (gr.next()) {
+  // TODO: list.push({ number: ..., priority: Number(...) })
+}
+
+gs.info(list.length);
+`,
+      hint: [
+        'Loop already ready. Prathi round lo oka object (number + priority) tayaru chesi list lo push chey.',
+        'Object: { number: gr.getValue("number"), priority: Number(gr.getValue("priority")) } — push( ) lopala pettu.',
+        'list.push({ number: gr.getValue("number"), priority: Number(gr.getValue("priority")) });',
+      ],
+      solution: `var list = [];
+
+var gr = new GlideRecord('incident');
+gr.addActiveQuery();
+gr.addNullQuery('assigned_to');
+gr.orderBy('number');
+gr.query();
+
+while (gr.next()) {
+  list.push({ number: gr.getValue('number'), priority: Number(gr.getValue('priority')) });
+}
+
+gs.info(list.length);`,
+      explain: 'Array lo strings kaadu, objects pettochu. Ikkada priority ni Number ga marchamu — next exercise lo adi tho sort chestam.',
+      tests: [
+        { label: 'Log: 4', logs: ['4'] },
+        { label: 'first item = INC0010002, priority 1', expr: "list[0].number + ':' + list[0].priority", expect: 'INC0010002:1' },
+        { label: 'priority number type', expr: 'typeof list[0].priority', expect: 'number' },
+      ],
+    }),
+    jx('js-arrays', 7, 'Sort + top N (slice)', 'medium+', {
+      task: 'priorities = [3, 1, 4, 2] undi. Numbers ni ascending sort chey (compare function tho), top 2 teesuko (slice(0, 2)), join(", ") tho "1, 2" ani log chey. 🧰 Vaade words: sort(), slice(), join()',
+      starter: `var priorities = [3, 1, 4, 2];
+
+// Numbers sort: priorities.sort(function (a, b) { return a - b; })
+// TODO: sort chey
+
+// TODO: top2 = priorities.slice(0, 2)
+var top2 = [];
+
+gs.info(top2.join(', '));
+`,
+      hint: [
+        'Sort chesaka array order maaruthundi; tarvata first 2 items matrame kavali. Numbers ni default sort (text order) sort chestundi — compare function ivvali.',
+        'priorities.sort(function (a, b) { return a - b; });   var top2 = priorities.slice(0, 2);',
+        'gs.info(top2.join(", "));',
+      ],
+      solution: `var priorities = [3, 1, 4, 2];
+priorities.sort(function (a, b) { return a - b; });
+var top2 = priorities.slice(0, 2);
+gs.info(top2.join(', '));`,
+      explain: 'a - b compare function numbers ni correct ga ascending sort chestundi. slice(0, 2) first rendu items copy istundi. Exercise 4 lo ide objects tho (a.priority - b.priority).',
+      tests: [
+        { label: 'Log: 1, 2', logs: ['1, 2'] },
+        { label: 'top2 = [1, 2]', expr: 'top2.join(",")', expect: '1,2' },
+      ],
+    }),
     jx('js-arrays', 3, 'P1 incident numbers collect chey', 'medium', {
       task: 'Active & priority 1 incidents query chey (number tho orderBy). while (gr.next()) loop lo numbers array lo push chesi, numbers.join(", ") log chey.',
       starter: `var numbers = [];
@@ -474,7 +749,11 @@ var gr = new GlideRecord('incident');
 
 gs.info(numbers.join(', '));
 `,
-      hint: "gr.addActiveQuery(); gr.addQuery('priority', 1); gr.orderBy('number'); gr.query(); while (gr.next()) { numbers.push(gr.getValue('number')); }",
+      hint: [
+        'Query set chey (active + priority 1 + order), tarvata records meeda loop chesi prathi number ni array lo cheru.',
+        'gr.addActiveQuery(); gr.addQuery("priority", 1); gr.orderBy("number"); gr.query(); — tarvata while (gr.next()) { ... }',
+        "gr.addActiveQuery(); gr.addQuery('priority', 1); gr.orderBy('number'); gr.query(); while (gr.next()) { numbers.push(gr.getValue('number')); }",
+      ],
       solution: `var numbers = [];
 
 var gr = new GlideRecord('incident');
@@ -509,7 +788,11 @@ var top3 = [];
 
 gs.info(top3.join(', '));
 `,
-      hint: "Sort compare function: function (a, b) { return a.priority - b.priority; }",
+      hint: [
+        'Steps: (1) query + objects list build (Medium+ 6 laage), (2) priority tho sort (Medium+ 7 laage), (3) top 3 slice, (4) map tho numbers matrame.',
+        'Sort compare function: objects ki a.priority - b.priority. Map: function (o) { return o.number; }',
+        "Sort compare function: function (a, b) { return a.priority - b.priority; }   |   list.slice(0, 3).map(function (o) { return o.number; })",
+      ],
       solution: `var list = [];
 
 var gr = new GlideRecord('incident');
@@ -635,6 +918,85 @@ gs.info(Object.keys(payload).join(','));`,
       explain: 'Assign tho add, delete tho remove. Object.keys tho final keys chudochu.',
       tests: [{ label: 'Log: number,priority,assigned_to', logs: ['number,priority,assigned_to'] }],
     }),
+    // ---- Medium+ ladder: one new idea at a time, building up to exercises 3 and 4 ----
+    jx('js-objects', 5, 'current nundi object build chey', 'medium+', {
+      scenario: { current: { table: 'incident', values: { number: 'INC0010071', state: '2', priority: '3' } } },
+      task: 'current nundi number, state teesukoni { number, state } object (payload) create chey. JSON.stringify(payload) log chey → {"number":"INC0010071","state":"2"}. 🧰 Vaade words: current, getValue(), object { key: value }, JSON.stringify()',
+      starter: `// TODO: payload = { number: ..., state: ... }  (values: current.getValue(...))
+var payload;
+
+gs.info(JSON.stringify(payload));
+`,
+      hint: [
+        'Object lo key peru nuvve pedatav; value kosam current nundi field teesuko.',
+        'Shape: { number: <current nundi number>, state: <current nundi state> } — values ki getValue vaadu.',
+        'var payload = { number: current.getValue("number"), state: current.getValue("state") };',
+      ],
+      solution: `var payload = { number: current.getValue('number'), state: current.getValue('state') };
+gs.info(JSON.stringify(payload));`,
+      explain: 'Object values ga getValue() results pettochu. Ila build chesina object ni REST call ki body ga pampistam.',
+      tests: [
+        { label: 'Log: {"number":"INC0010071","state":"2"}', logs: ['{"number":"INC0010071","state":"2"}'] },
+        { label: 'payload.number = INC0010071', expr: 'payload.number', expect: 'INC0010071' },
+      ],
+    }),
+    jx('js-objects', 6, 'Property undaa? (hasOwnProperty)', 'medium+', {
+      task: 'payload = { number: "INC0010002", priority: 1 } undi. assigned_to undaa ani hasOwnProperty tho check chesi log chey (false). Tarvata assigned_to = "Abel Tuter" add chesi malli check chesi log chey (true). 🧰 Vaade words: hasOwnProperty(), property add',
+      starter: `var payload = { number: 'INC0010002', priority: 1 };
+
+// TODO: payload.hasOwnProperty('assigned_to') log chey  (false vastundi)
+
+// TODO: payload.assigned_to = 'Abel Tuter'
+
+// TODO: malli hasOwnProperty('assigned_to') log chey  (ippudu true)
+`,
+      hint: [
+        'Object lo oka key undaa ani adagadaniki oka method undi. Mundu check, tarvata add, malli check.',
+        'payload.hasOwnProperty("assigned_to") true/false istundi — gs.info lo pettu.',
+        'gs.info(payload.hasOwnProperty("assigned_to"));   payload.assigned_to = "Abel Tuter";   gs.info(payload.hasOwnProperty("assigned_to"));',
+      ],
+      solution: `var payload = { number: 'INC0010002', priority: 1 };
+gs.info(payload.hasOwnProperty('assigned_to'));
+payload.assigned_to = 'Abel Tuter';
+gs.info(payload.hasOwnProperty('assigned_to'));`,
+      explain: 'hasOwnProperty("key") object lo aa key undaa ledaa true/false istundi. Missing key ni access chesthe undefined vastundi — adi gurtu pettuko.',
+      tests: [{ label: 'Logs: false, true', logs: ['false', 'true'] }],
+    }),
+    jx('js-objects', 7, 'Object ni counter ga vaadu', 'medium+', {
+      task: 'Moodu categories: "network", "software", "network". counts = {} lo prathi category ki counts[cat] = (counts[cat] || 0) + 1 vaadi count chey. JSON.stringify(counts) log chey → {"network":2,"software":1}. 🧰 Vaade words: object, bracket notation counts[cat], ||',
+      starter: `var counts = {};
+
+var cat = 'network';
+counts[cat] = (counts[cat] || 0) + 1;     // modati sari: counts[cat] undefined → 0 + 1
+
+// TODO: cat = 'software' pettu, adey pattern malli
+// TODO: cat = 'network' pettu, adey pattern malli
+
+gs.info(JSON.stringify(counts));
+`,
+      hint: [
+        'Modati line lo pattern ready ga undi. Cat value maarchi ade line malli rendu sarlu rayyi.',
+        '(counts[cat] || 0) = key ledhante 0 tho start avtundi, undhante unna count. Cat maarchi, ade line repeat.',
+        'cat = "software"; counts[cat] = (counts[cat] || 0) + 1;   — tarvata cat = "network" tho kuda.',
+      ],
+      solution: `var counts = {};
+
+var cat = 'network';
+counts[cat] = (counts[cat] || 0) + 1;
+
+cat = 'software';
+counts[cat] = (counts[cat] || 0) + 1;
+
+cat = 'network';
+counts[cat] = (counts[cat] || 0) + 1;
+
+gs.info(JSON.stringify(counts));`,
+      explain: 'Bracket notation lo variable key vaadochu. (counts[cat] || 0) trick exercise 4 lo loop lo vaadatham — ikkada loop lekunda manually chusam.',
+      tests: [
+        { label: 'Log: {"network":2,"software":1}', logs: ['{"network":2,"software":1}'] },
+        { label: 'network = 2', expr: 'counts.network', expect: 2 },
+      ],
+    }),
     jx('js-objects', 3, 'REST response parse & build', 'medium', {
       task: 'response = \'{"result":{"number":"INC0010009","state":"1"}}\' (JSON text). JSON.parse chesi data lo pettu, data.result.number log chey. Tarvata { number: "INC0010009", state: "2" } object ni JSON.stringify chesi log chey.',
       starter: `var response = '{"result":{"number":"INC0010009","state":"1"}}';
@@ -645,7 +1007,11 @@ gs.info(data.result.number);
 
 // TODO: { number: 'INC0010009', state: '2' } ni JSON.stringify chesi log chey
 `,
-      hint: 'var data = JSON.parse(response); gs.info(JSON.stringify({ number: ..., state: ... }));',
+      hint: [
+        'Rendu direction lu: text → object (parse), object → text (stringify). Response lo "result" ane key lopala data undi.',
+        'JSON.parse(response) object istundi; number kosam data.result.number. Object ni text ga marchadaniki JSON.stringify(...).',
+        'var data = JSON.parse(response); gs.info(JSON.stringify({ number: ..., state: ... }));',
+      ],
       solution: `var response = '{"result":{"number":"INC0010009","state":"1"}}';
 
 var data = JSON.parse(response);
@@ -667,7 +1033,11 @@ gr.query();
 
 gs.info(JSON.stringify(counts));
 `,
-      hint: "var cat = gr.getValue('category'); counts[cat] = (counts[cat] || 0) + 1;",
+      hint: [
+        'Records meeda loop (while gr.next()). Prathi round lo category teesuko, counts object lo aa key count ni 1 penchu (previous Medium+ lo chesav).',
+        'var cat = gr.getValue("category");   counts[cat] = (counts[cat] || 0) + 1;',
+        "while (gr.next()) { var cat = gr.getValue('category'); counts[cat] = (counts[cat] || 0) + 1; }",
+      ],
       solution: `var counts = {};
 
 var gr = new GlideRecord('incident');
