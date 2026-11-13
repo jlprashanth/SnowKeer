@@ -132,7 +132,7 @@ const gllist = {
       body: [
         'g_form form kosam. g_list LIST kosam — incident list lo checkbox tho select chesina records gurinchi. List lo UI Action (client) rasinappudu g_list vaadatam.',
         'g_list.getChecked() → select chesina records sys_ids oka comma-separated STRING ga istundi: "id1,id2,id3". Emi select cheyyakapothe empty string "".',
-        'Inka: g_list.getTableName(), g_list.getQuery() (list filter), g_list.getView(). ✅ PDI lo list object (GlideList2) lo ivi unnayi, getChecked() em select cheyyakapote "" istundi. g_list.size ane method ledu. ⚠️ Plain list page console lo g_list undefined vachindi — list UI Action lo ready ga untundi ani anukuntunna, nee PDI lo oka list UI Action tho confirm chey.',
+        'Inka: g_list.getTableName(), g_list.getQuery() (list filter), g_list.getView(). ✅ PDI lo list object (GlideList2) lo ivi unnayi, getChecked() em select cheyyakapote "" istundi. g_list.size ane method ledu. ✅ Plain list page console lo g_list undefined vastundi (adi normal) — kani list banner UI Action (client) lo g_list.getChecked() work ayindi (PDI lo tested).',
       ],
       code: `function bulkClose() {
   var ids = g_list.getChecked();     // "id1,id2"

@@ -20,7 +20,7 @@ export const GLOSSARY_CS = s3({
   // ---------- client objects ----------
   g_form: { g: 'cl', m: 'GlideForm — browser lo form ni control chese object. Field value chadavadam / marchadam, mandatory / read-only / hide, messages anni g_form tho. Client side lo matrame (server script lo g_form ledu).', ex: "g_form.setValue('priority', '1');" },
   g_user: { g: 'cl', m: 'GlideUser — ippudu login ayina user info, client lo. Properties: userName, firstName, lastName, fullName, userID (sys_id). (g_user.email / g_user.active ane properties levu.) Role check kosam methods kinda unnayi. Server lo idi ledu — akkada gs.getUserName() vaadali.', ex: "g_user.firstName;   // 'Abel'" },
-  g_list: { g: 'cl', m: 'GlideList — list page (incident list) lo selected records teeskovadaniki. List banner UI Action / list context menu (client) lo vaadatharu. Form lo kaadu. PDI lo tested: plain list page console lo g_list undefined vachindi; adi GlideList2.get("incident") object laanti ade. List UI Action lo ready ga untundi anukuntunna — adi nee PDI lo confirm chey.', ex: 'var ids = g_list.getChecked();', check: true },
+  g_list: { g: 'cl', m: 'GlideList — list page (incident list) lo selected records teeskovadaniki. List banner UI Action / list context menu (client) lo vaadatharu. Form lo kaadu. PDI lo tested: list banner UI Action (client) lo g_list.getChecked() work ayindi. Plain list page console lo g_list undefined vastundi — adi normal.', ex: 'var ids = g_list.getChecked();' },
   g_scratchpad: { g: 'cl', m: 'Server nundi client ki data pampadaniki. Display Business Rule lo g_scratchpad.xyz = value pettali; client script lo g_scratchpad.xyz chaduvachu — extra server call avasaram ledu (getReference kante fast).', ex: 'g_scratchpad.callerIsVip   // Display BR lo set chesindi' },
   'confirm()': { g: 'cl', m: 'Browser dialog: OK / Cancel adugutundi. OK nokkite true, Cancel nokkite false. Delete / close mundu user ni adagadaniki.', ex: "if (!confirm('Close incident?')) { return; }" },
   'alert()': { g: 'cl', m: 'Browser dialog lo message chupistundi (OK button matrame). Chinna warnings kosam.', ex: "alert('Select incidents first');" },
@@ -39,9 +39,9 @@ export const GLOSSARY_CS = s3({
   'g_form.setReadOnly()': { g: 'gf', m: 'Field ni read-only chestundi — user edit cheyyaleru. true = read-only, false = edit cheyochu.', ex: "g_form.setReadOnly('number', true);" },
   'g_form.setDisplay()': { g: 'gf', m: 'Field ni hide / show chestundi. false ayithe hide, aa field space kuda form lo teeseyabaduthundi (setVisible tho difference idi).', ex: "g_form.setDisplay('assignment_group', false);" },
   'g_form.setVisible()': { g: 'gf', m: 'Field ni hide / show chestundi. false ayithe hide, kani aa field space khali ga migilipotundi (setDisplay ki difference).', ex: "g_form.setVisible('assignment_group', false);" },
-  'g_form.setSectionDisplay()': { g: 'gf', m: 'Form lo oka section (tab) ni show / hide chestundi.', ex: "g_form.setSectionDisplay('notes', false);", check: true },
-  'g_form.hideRelatedList()': { g: 'gf', m: 'Form kinda unna oka related list ni hide chestundi.', ex: "g_form.hideRelatedList('incident.parent');", check: true },
-  'g_form.hideRelatedLists()': { g: 'gf', m: 'Form kinda unna anni related lists ni hide chestundi.', ex: 'g_form.hideRelatedLists();', check: true },
+  'g_form.setSectionDisplay()': { g: 'gf', m: 'Form lo oka section (tab) ni show / hide chestundi.', ex: "g_form.setSectionDisplay('notes', false);" },
+  'g_form.hideRelatedList()': { g: 'gf', m: 'Form kinda unna oka related list ni hide chestundi (saved record form lo; PDI lo tested: "incident.parent" = Child Incidents list hide ayindi).', ex: "g_form.hideRelatedList('incident.parent');" },
+  'g_form.hideRelatedLists()': { g: 'gf', m: 'Form kinda unna anni related lists ni hide chestundi (PDI lo tested).', ex: 'g_form.hideRelatedLists();' },
   'g_form.showFieldMsg()': { g: 'gf', m: 'Oka field kinda chinna message chupistundi. 3rd value "info" leda "error". Field chuttu icon kuda vastundi.', ex: "g_form.showFieldMsg('short_description', 'Too short', 'error');" },
   'g_form.hideFieldMsg()': { g: 'gf', m: 'Oka field meeda unna message teeseystundi.', ex: "g_form.hideFieldMsg('short_description');" },
   'g_form.hideAllFieldMsgs()': { g: 'gf', m: 'Form lo anni field messages (showFieldMsg tho chupinchinavi) teeseystundi.', ex: 'g_form.hideAllFieldMsgs();' },
@@ -60,7 +60,7 @@ export const GLOSSARY_CS = s3({
   // ---------- g_user methods ----------
   'g_user.hasRole()': { g: 'gu', m: 'User ki aa role undha ani check (true / false). ⚠️ admin user ki anni roles untayi anukuntaru, anduke idi admin ki ellappudu true istundi. Exact check kavalante hasRoleExactly. (PDI lo tested: admin ki hasRole("edo_fake_role") kuda true vachindi.)', ex: "if (g_user.hasRole('itil')) { ... }" },
   'g_user.hasRoleExactly()': { g: 'gu', m: 'User ki exactly aa role undha — admin ki aa role assign cheyyakapote false. Role-specific logic kosam. (PDI lo tested: admin user ki hasRoleExactly("itil") false vachindi.)', ex: "g_user.hasRoleExactly('admin');" },
-  'g_user.hasRoles()': { g: 'gu', m: 'User ki kanisam oka role (any role) undha ani check. Role ledu ante plain user.', ex: 'g_user.hasRoles();', check: true },
+  'g_user.hasRoles()': { g: 'gu', m: 'User ki kanisam oka role (any role) undha ani check. PDI lo admin user ki true vachindi. Role leni user ki false ravali — adi inka test cheyyaledu, nee PDI lo role leni user tho confirm chey.', ex: 'g_user.hasRoles();', check: true },
   'g_user.hasRoleFromList()': { g: 'gu', m: 'Comma tho ichina roles lo edaina okati user ki unte true. Okesari konni roles check cheyyadaniki. hasRole laage admin ki ellappudu true.', ex: "g_user.hasRoleFromList('itil,admin');" },
 
   // ---------- g_list methods ----------
