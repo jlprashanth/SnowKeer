@@ -32,7 +32,7 @@ export default function LessonGlossary({ lesson }) {
             {keys.length
               ? <TermBox keys={keys} title="📘 Ee page lo words" />
               : <p className="muted small">Ee page lo special words ledu. Kinda full glossary chudu 👇</p>}
-            <GlossaryPanel />
+            <GlossaryPanel stage={lesson.stage || 2} />
           </div>
         </aside>
       )}

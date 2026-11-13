@@ -1,6 +1,8 @@
 // Stage 2 glossary — every ServiceNow abbreviation, GlideRecord/GlideElement/gs method and JS word used in the JavaScript part.
 // Each term is written ONCE here. Learn cards reference terms by key: learn card { terms: ['gs', 'GlideRecord'] } shows them in a sub-box.
 // Fields: g = group, m = meaning (Tenglish), ex = ServiceNow example, check = true means "PDI lo confirm chey" (uncertain).
+import { GLOSSARY_CS, GLOSSARY_GROUPS_CS } from './glossary-cs.js'
+
 export const GLOSSARY_GROUPS = {
   sn: 'ServiceNow abbreviations & objects',
   gsm: 'gs methods (GlideSystem)',
@@ -8,9 +10,10 @@ export const GLOSSARY_GROUPS = {
   gem: 'GlideElement methods (field)',
   js: 'JavaScript words',
   jsm: 'JavaScript methods',
+  ...GLOSSARY_GROUPS_CS, // Stage 3 groups (their entries carry s: 3)
 }
 
-export const GLOSSARY_JS = {
+const GLOSSARY_STAGE2 = {
   // ---------- ServiceNow abbreviations & objects ----------
   gs: { g: 'sn', m: 'GlideSystem ki short form. ServiceNow ready ga ichche utility object — new tho create cheyyakkarledu, direct ga vaadochu (gs.info, gs.getUserName).', ex: 'gs.info("Hello");' },
   GlideSystem: { g: 'sn', m: 'gs ki full peru. Logs, user info, utility functions ikkada untayi.', ex: 'gs.info(...) = GlideSystem.info(...)' },
@@ -112,6 +115,9 @@ export const GLOSSARY_JS = {
   'Math.round()': { g: 'jsm', m: 'Number ni daggaraga integer ki round chestundi.', ex: 'Math.round(2.6);  // 3' },
   'Math.min() / max()': { g: 'jsm', m: 'Numbers lo chinnadi / peddadi istundi. Priority min/max kosam.', ex: 'Math.min(3, 1, 2);  // 1' },
 }
+
+// Stage 2 entries + Stage 3 entries (Stage 3 ones carry s: 3 so the Stage 2 hub glossary can leave them out)
+export const GLOSSARY_JS = { ...GLOSSARY_STAGE2, ...GLOSSARY_CS }
 
 // Find glossary entries for a list of keys (keeps only the keys that exist, so a typo never crashes a page)
 export function termsFor(keys = []) {

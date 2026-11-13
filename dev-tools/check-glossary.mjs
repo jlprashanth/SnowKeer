@@ -1,7 +1,8 @@
-// Stage 2 glossary check — run: node dev-tools/check-glossary.mjs
+// Stage 2 + Stage 3 glossary check — run: node dev-tools/check-glossary.mjs
 // 1) every card `terms` key must exist in GLOSSARY_JS
 // 2) every method / gs.* / ServiceNow word used in Stage 2 learn code, hints and solutions must have a glossary entry
 import { JS_LESSONS } from '../src/data/lessons-js.js'
+import { CS_LESSONS } from '../src/data/lessons-cs.js'
 import { GLOSSARY_JS } from '../src/data/glossary-js.js'
 import { scanCalls } from '../src/data/glossary-scan.js'
 
@@ -22,7 +23,7 @@ const note = (lesson, word) => {
   missing.get(word).add(lesson)
 }
 
-for (const l of JS_LESSONS) {
+for (const l of [...JS_LESSONS, ...CS_LESSONS]) {
   for (const c of l.learn || []) {
     for (const k of c.terms || []) if (!known.has(k)) fail(`${l.id}: card "${c.h}" terms key "${k}" not in glossary`)
   }
@@ -38,7 +39,9 @@ for (const l of JS_LESSONS) {
     if (text.includes(w) && !known.has(w)) note(l.id, w)
   }
   // every obj.method( and bare call( must resolve to an exact glossary key (shared rule with the panel)
-  for (const u of scanCalls(text).unknown) note(l.id, u)
+  // lesson-made demo code (the practice Script Include in cs-ajax1) is not ServiceNow API, so it needs no glossary entry
+  const OWN_DEMO = new Set(['IncidentAjax.getOpenCount()'])
+  for (const u of scanCalls(text).unknown) if (!OWN_DEMO.has(u)) note(l.id, u)
   for (const m of text.matchAll(/\bgs\.([A-Za-z]+)\s*\(/g)) {
     if (!has('gs.' + m[1])) note(l.id, 'gs.' + m[1])
   }
@@ -49,5 +52,5 @@ for (const [word, lessons] of [...missing].sort()) {
   bad++
 }
 
-console.log(bad ? `\n${bad} issue(s)` : `OK — ${Object.keys(GLOSSARY_JS).length} glossary terms cover all Stage 2 card terms and method calls`)
+console.log(bad ? `\n${bad} issue(s)` : `OK — ${Object.keys(GLOSSARY_JS).length} glossary terms cover all Stage 2 + Stage 3 card terms and method calls`)
 process.exit(bad ? 1 : 0)

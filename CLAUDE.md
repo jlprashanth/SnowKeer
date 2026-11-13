@@ -56,10 +56,18 @@ React 18 + Vite 5, plain JS/JSX, no router, no backend, no CSS framework. Progre
 - `node dev-tools/check-mock.mjs` — mock API checks (dot-walking `gr.caller_id.email`, `changes()/changesTo()/changesFrom()` vs `previous`, `gs.getUser()`, setVisible vs setDisplay space). Run after editing `src/js/*Mock.js`.
 - `node dev-tools/check-quiz.mjs` — Stage 2 quizzes: 20 questions per lesson (5 original in `lessons-js*.js` + 15 in `src/data/quiz-extra-js.js`, merged in `lessons-js.js`), unique options, valid answers. Stage 3 / Stage 1 quizzes still have ~5 each.
 - `node dev-tools/check-exercises.mjs` — Stage 1 exercise data sanity (ids, lessonIds, prerequisite notes on Practice Task exercises).
+- `node dev-tools/check-glossary.mjs` — Stage 2 + Stage 3: every card `terms` key exists, and every `obj.method(` / bare call used in lesson code, hints and solutions has a glossary entry. Run after adding code to any Stage 2/3 lesson.
+- `node dev-tools/check-page-terms.mjs` — floating glossary panel: client calls (`g_form.x()`) resolve to their own entries (never the server `getValue`), hints/solutions never add terms to a page (no spoilers), Stage 2 pages never list Stage 3-only entries.
 - `dev-tools/test-driver.js` — auto-plays Stage 1 guided lessons (sets `window.__run`). Not loaded by the app: with the dev server running,
   load it in the page (e.g. `await import('/dev-tools/test-driver.js')` in the console), then `await __run('<lessonId>')`. It does not play
   the quiz. Re-run it after engine changes. (Load path not re-verified in this session.)
 - `npm run build` must pass. For UI changes, also check in a real browser (Claude in Chrome) — start `npx vite --port 5199`.
+
+## Glossary (Stage 2 + Stage 3)
+- Entries live in `src/data/glossary-js.js` (Stage 2) and `src/data/glossary-cs.js` (Stage 3, every entry tagged `s: 3`; merged into `GLOSSARY_JS`). Fields: `g` group, `m` meaning (Tenglish), `ex` example, `check: true` = shows ⚠️ "confirm in your PDI".
+- Key naming: GlideRecord/GlideElement methods and JS words are bare (`getValue`, `var`); `gs.*` are `gs.info`; JS methods are `trim()`; client objects are exact (`g_form.setMandatory()`); two-word terms are phrases (`UI Action`).
+- `src/data/glossary-scan.js` decides which terms a lesson page uses (shared by the panel and the checks). `LessonGlossary.jsx` is the floating 📘 button on every Stage 2/3 lesson (hidden on the Quiz tab). Per-card sub-boxes (`terms: [...]` on a learn card) are still used on `js-basics`.
+- New API in a lesson → add its glossary entry (the check fails until you do). Never let a client method (`g_form.x`) fall back to a server entry.
 
 ## Conventions
 - New Stage 1-style lessons: keep the `lessonKit.js` step format. New coding lessons: keep the `jx` format above.
