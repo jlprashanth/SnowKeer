@@ -3,6 +3,7 @@
 // 2) every method / gs.* / ServiceNow word used in Stage 2 learn code, hints and solutions must have a glossary entry
 import { JS_LESSONS } from '../src/data/lessons-js.js'
 import { GLOSSARY_JS } from '../src/data/glossary-js.js'
+import { scanCalls } from '../src/data/glossary-scan.js'
 
 let bad = 0
 const fail = (m) => { bad++; console.log('FAIL', m) }
@@ -32,21 +33,14 @@ for (const l of JS_LESSONS) {
   for (const e of l.exercises || []) for (const k of ['task', 'hint', 'solution', 'starter']) if (e[k]) texts.push(String(e[k]))
   const text = texts.join('\n')
 
-  // gs.xxx and Class.create are glossary keys by full name
-  for (const m of text.matchAll(/\bgs\.([A-Za-z]+)\s*\(/g)) {
-    if (!has('gs.' + m[1])) note(l.id, 'gs.' + m[1])
-  }
   // ServiceNow object names
   for (const w of ['GlideRecord', 'GlideElement', 'GlideSystem', 'Class.create', 'current']) {
     if (text.includes(w) && !known.has(w)) note(l.id, w)
   }
-  // method calls on any object: x.method(  — the method name is the key
-  // names the lesson defines itself (function foo / foo: function) are its own code, not API
-  const own = new Set([...text.matchAll(/function\s+(\w+)|(\w+)\s*:\s*function/g)].map((m) => m[1] || m[2]))
-  for (const m of text.matchAll(/\.([A-Za-z_]\w*)\s*\(/g)) {
-    const name = m[1]
-    if (name.startsWith('gs') || SKIP.has(name) || own.has(name)) continue
-    if (!has(name)) note(l.id, '.' + name + '()')
+  // every obj.method( and bare call( must resolve to an exact glossary key (shared rule with the panel)
+  for (const u of scanCalls(text).unknown) note(l.id, u)
+  for (const m of text.matchAll(/\bgs\.([A-Za-z]+)\s*\(/g)) {
+    if (!has('gs.' + m[1])) note(l.id, 'gs.' + m[1])
   }
 }
 
