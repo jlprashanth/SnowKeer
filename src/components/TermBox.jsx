@@ -23,12 +23,13 @@ export function TermBox({ keys, title = '📘 Ee topic lo words' }) {
   )
 }
 
-// Full glossary: every term grouped by kind. Used on the Stage 2 hub.
-export function GlossaryPanel() {
-  const all = termsFor(Object.keys(GLOSSARY_JS))
+// Full glossary: every term grouped by kind. stage 2 (hub, Stage 2 lessons) = JavaScript part only;
+// stage 3 (Stage 3 lessons) = everything, including the client-side words.
+export function GlossaryPanel({ stage = 2 }) {
+  const all = termsFor(Object.keys(GLOSSARY_JS)).filter((t) => stage >= 3 || !t.s)
   return (
     <details className="glossary">
-      <summary>📚 JavaScript part — words & abbreviations ({all.length})</summary>
+      <summary>{stage >= 3 ? '📚 Full glossary — all words' : '📚 JavaScript part — words & abbreviations'} ({all.length})</summary>
       <p className="muted small">Prathi word ki meaning + ServiceNow example. ⚠️ unna words PDI lo confirm chesuko.</p>
       {Object.entries(GLOSSARY_GROUPS).map(([gk, label]) => {
         const rows = all.filter((t) => t.g === gk)

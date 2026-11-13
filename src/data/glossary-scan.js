@@ -1,14 +1,16 @@
 // Shared glossary matching. Used by the in-lesson glossary panel (LessonGlossary.jsx)
-// and by dev-tools/check-glossary.mjs, so both always agree on what a page "uses".
+// and by the dev-tools checks, so everything agrees on what a page "uses".
 import { GLOSSARY_JS } from './glossary-js.js'
 
 const KNOWN = new Set(Object.keys(GLOSSARY_JS))
 
-// Stage 3 client objects (g_form, g_user, g_list). Their entries are not written yet, so a call like
-// g_form.getValue() must NOT fall back to the server getValue() entry (that would teach wrong behaviour).
+// Client objects (g_form, g_user, g_list, g_scratchpad) have their OWN entries ('g_form.getValue()' ...).
+// A call like g_form.getValue() must never fall back to the server getValue entry — different API, different behaviour.
 const CLIENT_OBJ = /^g_/
 // Plain syntax words that look like calls but are not API
 const SYNTAX = new Set(['if', 'for', 'while', 'switch', 'catch', 'function', 'return', 'require', 'console'])
+// Words that are safe to find in normal prose too (never ordinary English): g_form, sys_id, onChange, GlideAjax, Jelly...
+const PROSE_SAFE = /_|^on[A-Z]|^[A-Z]/
 
 // Names the code itself defines (function foo / foo: function) are the lesson's own code, not API
 const ownNames = (text) =>
@@ -20,17 +22,25 @@ export function scanCalls(text) {
   const unknown = new Set()
   const own = ownNames(text)
 
-  // obj.method(  e.g. gs.info(  gr.getValue(  Object.keys(  g_form.setVisible(
+  // obj.method(  e.g. gs.info(  gr.getValue(  Object.keys(  g_form.setVisible(  ga.addParam(
   for (const m of text.matchAll(/\b([A-Za-z_]\w*)\.([A-Za-z_]\w*)\s*\(/g)) {
     const [, obj, meth] = m
-    if (CLIENT_OBJ.test(obj) || SYNTAX.has(meth) || own.has(meth)) continue
-    // GlideRecord/GlideElement entries are stored as bare names (getValue, query), so try the bare name too
-    const hit = [`${obj}.${meth}()`, `${obj}.${meth}`, `${meth}()`, meth].find((c) => KNOWN.has(c))
+    if (SYNTAX.has(meth) || own.has(meth)) continue
+    if (CLIENT_OBJ.test(obj)) {
+      // client object: exact entry only (never the bare server name); also show the object's own overview entry
+      if (KNOWN.has(obj)) keys.add(obj)
+      if (KNOWN.has(`${obj}.${meth}()`)) keys.add(`${obj}.${meth}()`)
+      else unknown.add(`${obj}.${meth}()`)
+      continue
+    }
+    // GlideRecord/GlideElement entries are stored as bare names (getValue, query), so try the bare name too.
+    // `ga.` is the usual GlideAjax variable name, so it is the last fallback for any other variable name.
+    const hit = [`${obj}.${meth}()`, `${obj}.${meth}`, `${meth}()`, meth, `ga.${meth}()`].find((c) => KNOWN.has(c))
     if (hit) keys.add(hit)
     else unknown.add(`${obj}.${meth}()`)
   }
 
-  // bare call  Number(  parseInt(  String(
+  // bare call  Number(  parseInt(  String(  confirm(  gsftSubmit(
   for (const m of text.matchAll(/(?<![.\w])([A-Za-z_]\w*)\s*\(/g)) {
     const name = m[1]
     if (SYNTAX.has(name) || own.has(name)) continue
@@ -40,13 +50,24 @@ export function scanCalls(text) {
   return { keys, unknown }
 }
 
-// Plain words (gr, current, const, GlideRecord...) — matched only in code, not in prose,
-// because words like "new" or "next" are also normal English.
-export function scanWords(code) {
+// Plain words (gr, current, const, GlideRecord, g_user, onChange...). Normal lowercase words (new, next, get...) are
+// matched only in code, because they are also ordinary English; names that are never English (PROSE_SAFE) match in prose too.
+export function scanWords(code, prose = '') {
   const keys = new Set()
   for (const k of KNOWN) {
     if (k.includes('(') || k.includes('.') || k.includes(' ')) continue
-    if (new RegExp(`(?<![\\w.])${k.replace(/[$^]/g, '\\$&')}(?![\\w])`).test(code)) keys.add(k)
+    const text = PROSE_SAFE.test(k) ? code + '\n' + prose : code
+    if (new RegExp(`(?<![\\w.])${k.replace(/[$^]/g, '\\$&')}(?![\\w])`).test(text)) keys.add(k)
+  }
+  return keys
+}
+
+// Two-word terms (UI Action, Client Script, Business Rule...) — matched literally in code or prose.
+export function scanPhrases(text) {
+  const keys = new Set()
+  for (const k of KNOWN) {
+    if (!k.includes(' ') || k.includes('(') || k.includes('/')) continue
+    if (text.includes(k)) keys.add(k)
   }
   return keys
 }
@@ -66,8 +87,13 @@ export function pageTermKeys(lesson) {
     if (e.task) prose.push(String(e.task))
     if (e.starter) code.push(String(e.starter))
   }
+  const codeText = code.join('\n')
+  const proseText = prose.join('\n')
   const out = new Set(curated)
-  for (const k of scanCalls([...code, ...prose].join('\n')).keys) out.add(k)
-  for (const k of scanWords(code.join('\n'))) out.add(k)
-  return [...out]
+  for (const k of scanCalls(codeText + '\n' + proseText).keys) out.add(k)
+  for (const k of scanWords(codeText, proseText)) out.add(k)
+  for (const k of scanPhrases(codeText + '\n' + proseText)) out.add(k)
+  // Stage 3-only entries (s: 3) are not in the Stage 2 full glossary, so Stage 2 pages leave them out too
+  const stage = lesson.stage || 2
+  return [...out].filter((k) => stage >= 3 || !GLOSSARY_JS[k]?.s)
 }
