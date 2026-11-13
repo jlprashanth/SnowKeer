@@ -4,6 +4,7 @@ import ScriptRunner from './ScriptRunner.jsx'
 import { Card as PdiCard } from './Exercises.jsx'
 import { TermBox } from './TermBox.jsx'
 import LessonGlossary from './LessonGlossary.jsx'
+import { cardTermKeys } from '../data/glossary-scan.js'
 
 const RANK = { easy: 0, medium: 1, 'medium+': 1.5, hard: 2 }
 const LEVEL = { easy: '🟢 Easy', medium: '🟡 Medium', 'medium+': '🟠 Medium+', hard: '🔴 Hard' }
@@ -37,7 +38,7 @@ export default function JsLesson({ lesson, progress, onBack, onQuizFinish, onExe
             <div key={i} className="learn-card">
               <h3>{c.h}</h3>
               {c.body.map((p, j) => <p key={j}>{p}</p>)}
-              {c.terms && <TermBox keys={c.terms} />}
+              <TermBox keys={cardTermKeys(c, lesson.stage)} collapsible />
               {c.code && <pre className="code-sample">{c.code}</pre>}
             </div>
           ))}

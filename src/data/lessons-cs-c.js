@@ -81,6 +81,7 @@ const ajax1 = {
         'Client lo database access ledu. Server data kavali ante GlideAjax vaadatam: client lo ga = new GlideAjax("ScriptIncludeName"), params pettali, server function pilavali, answer callback lo vastundi.',
         'Mukhyamaina rules: 1) sysparm_name = server lo call cheyyali anukune function peru. 2) Extra parameters sysparm_ tho start avvali (e.g. sysparm_user_id). 3) Answer ellappudu STRING (null kuda raavachu). 4) getXMLAnswer(callback) — async, callback lopale value vaadali.',
       ],
+      terms: ['GlideAjax', 'Script Include', 'sysparm_name', 'ga.addParam()', 'ga.getXMLAnswer()'],
       code: `var ga = new GlideAjax('UserAjax');           // Script Include peru
 ga.addParam('sysparm_name', 'getEmail');       // function peru
 ga.addParam('sysparm_user_id', newValue);      // parameter
@@ -94,6 +95,7 @@ ga.getXMLAnswer(function (answer) {
         'getXMLAnswer ki kinda unna code answer ravakamundey run avtundi. Anduke answer tho chese pani anta callback function lone cheyyali.',
         'Server error ayithe / answer null ayithe — handle cheyyali: if (!answer) { ... }.',
       ],
+      terms: ['ga.getXMLAnswer()', 'g_form.showFieldMsg()', 'g_form.setValue()'],
       code: `ga.getXMLAnswer(function (answer) {
   if (!answer) {
     g_form.showFieldMsg('caller_id', 'Email dorakaledu', 'error');
@@ -108,6 +110,7 @@ ga.getXMLAnswer(function (answer) {
         'getReference ki reference record motham vastundi (anni fields) — kani prathi sari server call. GlideAjax lo nee kavalsina data matrame (chinna payload), logic server lo untundi (secure, reusable). Pedda projects lo GlideAjax preferred.',
         '⚠️ Script Include lo "Client callable" checkbox tick cheyyali — lekapothe GlideAjax pilavaledu. (Real PDI lo confirm chesuko.)',
       ],
+      terms: ['g_form.getReference()', 'GlideAjax', 'Script Include'],
     },
   ],
   quiz: [
