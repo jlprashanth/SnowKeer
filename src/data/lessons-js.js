@@ -77,6 +77,8 @@ gs.info('Hello {0}, priority {1}', name, 1);`,
       body: [
         'Script lo rendu rakala words untayi. (1) JavaScript words — var, new, if, for, function: ivi JavaScript lo untayi. (2) ServiceNow words — GlideRecord, gs, current, getValue, setValue: ivi ServiceNow isse built-in tools. Mundu ee rendu difference telusukunte confusion undadu.',
         'Excel laaga anuko: GlideRecord = "table (sheet) ni open chese tool". new = "aa tool tho kotha cursor tayaru chey" (idi JavaScript word). gr = aa cursor ki nuvvu pettukune peru (edaina pettochu: gr, incGR, inc — gr anedi convention). ("incident") = e table — label kaadu, database peru (incident, problem, sys_user...).',
+        'gs = GlideSystem ki short form. ServiceNow ready ga ichche utility object — new tho create cheyyakkarledu, script lo ekkadaina direct ga vaadochu: gs.info("...") (log), gs.getUserName() (ippudu login ayina user) laanti pani kosam. gs.info lo "gs" ante idi.',
+        'gr = GlideRecord ki short form. Idi ServiceNow word kaadu — nuvve pettukune variable peru (GlideRecord object ni pattukuntundi). Anduke gr ki badulu incGR, inc ani edaina pettochu; chala mandi gr ani vaadatharu, kabatti ade convention.',
         'Server script lo almost eppudu ide 5-step pattern: table open → record load → value chadavadam → value marchadam → save.',
       ],
       code: `var gr = new GlideRecord('incident');    // 1. table open  (new = JS word, GlideRecord = ServiceNow tool)
