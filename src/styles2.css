@@ -265,3 +265,22 @@
 .cf-fmsg { font-size: 12px; }
 .cf-fmsg.info { color: #174c78; }
 .cf-fmsg.error { color: #c62828; }
+
+/* Learn-card sub-box: term -> meaning (gs, gr, methods) */
+.term-box { background: #f1f7fb; border: 1px solid #b9d3ea; border-left: 4px solid #2e6fa8; border-radius: 6px; padding: 10px 14px; margin: 10px 0; }
+.term-title { font-weight: 600; color: #1e4566; margin-bottom: 6px; font-size: 14px; }
+.term-list { margin: 0; display: grid; gap: 8px; }
+.term-row { display: grid; grid-template-columns: 170px 1fr; gap: 10px; align-items: start; border-top: 1px dashed #cfe0ee; padding-top: 8px; }
+.term-row:first-child { border-top: 0; padding-top: 0; }
+.term-row dt { font-weight: 600; }
+.term-row dt code { background: #fff; border: 1px solid #b9d3ea; border-radius: 4px; padding: 1px 6px; color: #1e4566; font-size: 13px; }
+.term-row dd { margin: 0; font-size: 14px; line-height: 1.5; }
+.term-ex { background: #1f2a33; color: #e6edf1; border-radius: 4px; padding: 6px 8px; font: 12px/1.45 Consolas, "Courier New", monospace; white-space: pre; overflow-x: auto; margin: 6px 0 0; }
+.term-check { margin-left: 4px; font-size: 12px; }
+.glossary { background: #fff; border: 1px solid #d9e2e6; border-radius: 8px; padding: 10px 16px; margin: 10px 0 14px; }
+.glossary > summary { cursor: pointer; font-weight: 600; color: #1e4566; }
+.glossary-group h4 { margin: 14px 0 6px; color: #3b4a54; }
+@media (max-width: 560px) { .term-row { grid-template-columns: 1fr; gap: 2px; } }
+:root[data-theme="dark"] .app.themed .term-box { background: var(--surface); border-color: var(--line); }
+:root[data-theme="dark"] .app.themed .term-row dt code { background: var(--bg); }
+:root[data-theme="dark"] .app.themed .glossary { background: var(--surface); border-color: var(--line); }
