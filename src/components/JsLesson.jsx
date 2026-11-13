@@ -4,8 +4,8 @@ import ScriptRunner from './ScriptRunner.jsx'
 import { Card as PdiCard } from './Exercises.jsx'
 import { TermBox } from './TermBox.jsx'
 
-const RANK = { easy: 0, medium: 1, hard: 2 }
-const LEVEL = { easy: '🟢 Easy', medium: '🟡 Medium', hard: '🔴 Hard' }
+const RANK = { easy: 0, medium: 1, 'medium+': 1.5, hard: 2 }
+const LEVEL = { easy: '🟢 Easy', medium: '🟡 Medium', 'medium+': '🟠 Medium+', hard: '🔴 Hard' }
 
 export default function JsLesson({ lesson, progress, onBack, onQuizFinish, onExerciseDone, onExerciseToggle }) {
   const pdi = lesson.mode === 'pdi'

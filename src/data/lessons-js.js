@@ -210,7 +210,11 @@ var nextP;
 
 gs.info('Next priority: ' + nextP);
 `,
-      hint: 'Lopala nundi: gr.getValue("priority") mundu string istundi ("2"), tarvata Number(p) + 1. Number() lekapothe "2" + 1 = "21" avtundi.',
+      hint: [
+        'Priority value ni record nundi teesukovali — daaniki oka method undi. Tarvata aa value tho calculation chestunnav, so type gurtuku pettuko.',
+        'gr.getValue("priority") istundi value — kani adi STRING ("2"). Number(...) tho number ga marchu.',
+        'var p = gr.getValue("priority");   var nextP = Number(p) + 1;',
+      ],
       solution: `var gr = new GlideRecord('incident');
 gr.get('number', 'INC0010004');
 
@@ -223,6 +227,88 @@ gs.info('Next priority: ' + nextP);`,
         { label: 'Log: Next priority: 3', logs: ['Next priority: 3'] },
         { label: 'p oka string', expr: 'typeof p', expect: 'string' },
         { label: 'nextP oka number', expr: 'typeof nextP', expect: 'number' },
+      ],
+    }),
+    // ---- Medium+ ladder (added later): one new idea at a time, building up to exercise 4 ----
+    jx('js-basics', 5, 'current nundi okka field teesuko', 'medium+', {
+      scenario: { current: { table: 'incident', values: { number: 'INC0010051', priority: '3', short_description: 'VPN is down', state: '1' } } },
+      task: 'Business Rule lo laaga `current` record undi. Daani nundi number field teesukuni, number ane variable lo pettu. Tarvata gs.info tho aa number ni log chey. 🧰 Vaade words: current, getValue() — Learn tab lo "gr vs current" card chudu.',
+      starter: `// current = ServiceNow ready ga ichina record (new GlideRecord avasaram ledu)
+// Value kavali → current.getValue('field_name')
+var number;   // TODO: current nundi number teesuko
+
+// TODO: number ni gs.info tho log chey
+`,
+      hint: [
+        'current lo nundi oka field value kavali — "Value kavali" ante ye method vaadali? (starter lo comment chudu)',
+        'current.getValue("number") — field peru quotes lo ivvali.',
+        'var number = current.getValue("number");   gs.info(number);',
+      ],
+      solution: `var number = current.getValue('number');
+gs.info(number);`,
+      explain: 'current.getValue("field") field value ni (string ga) istundi. current.number ane object kaadu — text kavali kabatti getValue vaadali.',
+      tests: [
+        { label: 'Log: INC0010051', logs: ['INC0010051'] },
+        { label: 'number oka string', expr: 'typeof number', expect: 'string' },
+      ],
+    }),
+    jx('js-basics', 6, 'Moodu fields tho message build chey', 'medium+', {
+      scenario: { current: { table: 'incident', values: { number: 'INC0010052', priority: '1', short_description: 'Email server down', state: '2' } } },
+      task: 'current nundi number, priority, short_description teesuko (moodu variables). Tarvata "INC0010052 (P1): Email server down" laaga oka message build chesi log chey. Format: <number> (P<priority>): <shortDesc>. 🧰 Vaade words: current, getValue() — + tho text join chestam.',
+      starter: `// Moodu fields teesuko — okkati ela chestavo kinda chupistunna, migatha rendu ade pattern
+var number = current.getValue('number');
+var priority;    // TODO: current.getValue('priority')
+var shortDesc;   // TODO: current.getValue('short_description')
+
+// Message ni + tho join chey: number + ' (P' + priority + '): ' + shortDesc
+// TODO: aa message ni gs.info tho log chey
+`,
+      hint: [
+        'Rendu variables empty ga unnayi — number laaga ade pattern vaadi fill chey. Tarvata moodu variables ni oka text lo join chey.',
+        'var priority = current.getValue("priority"); — short_description ki kuda ide. Message: number + " (P" + priority + "): " + shortDesc',
+        'gs.info(number + " (P" + priority + "): " + shortDesc);',
+      ],
+      solution: `var number = current.getValue('number');
+var priority = current.getValue('priority');
+var shortDesc = current.getValue('short_description');
+
+gs.info(number + ' (P' + priority + '): ' + shortDesc);`,
+      explain: 'Prathi field ki getValue vaadi, tarvata + tho text, variables ni join chesi message build chestam. Quotes lo unnadi text, quotes lekunda unnadi variable.',
+      tests: [
+        { label: 'Log: INC0010052 (P1): Email server down', logs: ['INC0010052 (P1): Email server down'] },
+        { label: 'priority, shortDesc variables set ayyayi', expr: "priority + '|' + shortDesc", expect: '1|Email server down' },
+      ],
+    }),
+    jx('js-basics', 7, 'Priority ni oka step penchu (setValue)', 'medium+', {
+      scenario: { current: { table: 'incident', values: { number: 'INC0010053', priority: '3', short_description: 'Printer offline', state: '1' } } },
+      task: 'current lo priority 3 undi. 1) priority variable lo Number ga teesuko. 2) newPriority = priority - 1. 3) current.setValue("priority", newPriority) tho marchu. 4) "New priority: 2" ani log chey. 🧰 Vaade words: current, getValue(), setValue(), Number() — Learn tab lo "getValue gotcha" gurtu techuko.',
+      starter: `// Step 1: priority ni Number ga teesuko  (getValue string istundi, Number() number chestundi)
+var priority;
+
+// Step 2: newPriority = priority - 1
+var newPriority;
+
+// Step 3: current.setValue('priority', newPriority)  — field ni marchadam
+
+// Step 4: gs.info('New priority: ' + current.getValue('priority'))
+`,
+      hint: [
+        'Naalugu steps comments lo unnayi — okko step ki okka line rayyi. Mundu value teesuko, tarvata calculate chey, tarvata marchu, last lo log.',
+        'Number(current.getValue("priority")) — number ga. Marchadaniki current.setValue("priority", newPriority).',
+        'var priority = Number(current.getValue("priority"));   var newPriority = priority - 1;   current.setValue("priority", newPriority);',
+      ],
+      solution: `var priority = Number(current.getValue('priority'));
+
+var newPriority = priority - 1;
+
+current.setValue('priority', newPriority);
+
+gs.info('New priority: ' + current.getValue('priority'));`,
+      explain: 'getValue → Number() → calculate → setValue. Idi exercise 4 lo unna main flow. Ikkada message build cheyyalsina avasaram ledu, kabatti simple.',
+      tests: [
+        { label: 'Log: New priority: 2', logs: ['New priority: 2'] },
+        { label: 'current priority = "2"', expr: "current.getValue('priority')", expect: '2' },
+        { label: 'newPriority oka number', expr: 'typeof newPriority', expect: 'number' },
       ],
     }),
     jx('js-basics', 4, 'Incident escalate chey (current)', 'hard', {
@@ -242,7 +328,11 @@ var shortDesc;
 
 // TODO: 'New priority: ' + current.getValue('priority') log chey
 `,
-      hint: 'Value kavali kabatti current.getValue("number") (current.number kaadu — adi object). Priority ni Number(current.getValue("priority")) ga marchu. Message: gs.info("Escalating " + number + " (P" + priority + "): " + shortDesc);',
+      hint: [
+        'Mundu moodu variables fill chey (number, priority, shortDesc) — okko line okko field. Tarvata message build chey, last lo marpu (setValue). Previous exercises (Medium+ moodu) lo ide practice chesav.',
+        'Value kavali kabatti current.getValue("field_name") vaadu (current.number kaadu — adi object). Priority ni Number(...) tho number ga marchu. Message ni "text " + variable + " text" laaga + tho join chey.',
+        'var priority = Number(current.getValue("priority"));   gs.info("Escalating " + number + " (P" + priority + "): " + shortDesc);   current.setValue("priority", priority - 1);',
+      ],
       solution: `var number = current.getValue('number');
 var priority = Number(current.getValue('priority'));
 var shortDesc = current.getValue('short_description');
