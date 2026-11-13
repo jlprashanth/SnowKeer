@@ -66,10 +66,10 @@ switch (s) {
     },
   ],
   quiz: [
-    q('switch lo break marchipothe emavtundi?', ['Next case code kuda run avtundi (fall-through)', 'Error vastundi', 'Default run avtundi', 'Em kaadu'], 0, 'break lekunda next cases kuda run avtayi.'),
+    q('switch lo break marchipothe emavtundi?', ['Next case code kuda run avtundi (fall-through)', 'Error vastundi, script aagipotundi', 'Default case matrame run avtundi', 'Emi kaadu, normal ga break avtundi'], 0, 'break lekunda next cases kuda run avtayi.'),
     q('var s = "2"; switch (s) { case 2: ... } — case 2 match avtunda?', ['Avvadu (=== strict)', 'Avtundi', 'Error', 'Default avtundi'], 0, 'switch strict compare. "2" !== 2.'),
-    q('Edi falsy kaadu?', ['"0" (non-empty string)', '""', '0', 'null'], 0, '"0" non-empty string kabatti truthy.'),
-    q('if (x = 1) — idi em chestundi?', ['x ki 1 assign chestundi (compare kaadu)', 'x == 1 check chestundi', 'Error', 'x === 1 check chestundi'], 0, '= assignment. Compare ki == leka ===.'),
+    q('Edi falsy kaadu?', ['"0" (non-empty string)', '"" (empty string)', '0 (number zero)', 'null'], 0, '"0" non-empty string kabatti truthy.'),
+    q('if (x = 1) — idi em chestundi?', ['x ki 1 assign chestundi (compare kaadu)', 'x == 1 check chestundi (compare)', 'Syntax Error istundi', 'x === 1 strict check chestundi'], 0, '= assignment. Compare ki == leka ===.'),
     q('Mundu true ayina else-if tarvata migilina branches ni?', ['Skip chestundi', 'Anni run chestundi', 'Error istundi', 'Malli check chestundi'], 0, 'if-else chain lo first match matrame run.'),
   ],
   exercises: [
@@ -272,7 +272,7 @@ gs.info(gr.getRowCount());`,
   ],
   quiz: [
     q('while (gr.next()) loop mundu em marchipokudadu?', ['gr.query()', 'gr.update()', 'gs.info()', 'break'], 0, 'query() lekapothe records load avvavu, loop run avvadu.'),
-    q('continue em chestundi?', ['Ee iteration skip chesi next ki veltundi', 'Loop ni aapestundi', 'Script ni aapestundi', 'Loop malli start chestundi'], 0, 'continue = skip this iteration.'),
+    q('continue em chestundi?', ['Ee iteration skip chesi next ki veltundi', 'Loop ni poorthiga aapestundi', 'Script anta aapestundi', 'Loop ni modati nundi malli start chestundi'], 0, 'continue = skip this iteration.'),
     q('for (var i = 1; i <= 3; i++) — entha sarlu run avtundi?', ['3', '2', '4', '1'], 0, 'i = 1, 2, 3 → 3 sarlu.'),
     q('Records entha unnayo chudadaniki loop lekunda?', ['gr.getRowCount()', 'gr.length', 'gr.count', 'gr.size()'], 0, 'query() tarvata getRowCount().'),
     q('for...in object meeda em istundi?', ['Prathi key', 'Prathi value', 'Index number', 'Array'], 0, 'for (var k in obj) k = key; value ki obj[k].'),

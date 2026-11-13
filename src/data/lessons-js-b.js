@@ -399,7 +399,7 @@ gs.info([10, 9, 1].sort(function (a, b) { return a - b; }).join(','));  // 1,9,1
     q('["a", "b"].indexOf("c") — result?', ['-1', '0', 'undefined', 'false'], 0, 'Dorakapothe indexOf -1 istundi.'),
     q('[1, 2, 3].join("-") — result?', ['"1-2-3"', '[1,2,3]', '"123"', '6'], 0, 'join separator tho text build chestundi.'),
     q('[10, 9, 1].sort() — result?', ['[1, 10, 9]', '[1, 9, 10]', '[10, 9, 1]', '[9, 10, 1]'], 0, 'Default sort text order lo chestundi. Numbers ki compare function kavali.'),
-    q('filter() em chestundi?', ['Condition match ayye items tho kotha array istundi', 'Original array ni delete chestundi', 'Array ni sort chestundi', 'Count matrame istundi'], 0, 'filter kotha array return chestundi.'),
+    q('filter() em chestundi?', ['Condition match ayye items tho kotha array istundi', 'Original array nundi items ni delete chestundi', 'Array ni sort chesi return chestundi', 'Match ayina items count matrame istundi'], 0, 'filter kotha array return chestundi.'),
   ],
   exercises: [
     jx('js-arrays', 1, 'Groups list build chey', 'easy', {

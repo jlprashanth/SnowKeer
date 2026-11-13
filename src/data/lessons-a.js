@@ -23,9 +23,9 @@ const account = {
     info('Idi nee instance home — ika ikkada nundi practice. Eppudu "All" menu tho modules vethukuntav.', 'header'),
   ],
   quiz: [
-    q('Free instance ni em antaru?', ['PDI (Personal Developer Instance)', 'MID server', 'Update set', 'Workspace'], 0, 'PDI — free, nee own instance.'),
+    q('Free instance ni em antaru?', ['PDI (Personal Developer Instance)', 'MID Server (company network agent)', 'Update Set (changes package)', 'Workspace (agent UI)'], 0, 'PDI — free, nee own instance.'),
     q('Instance request chese website eadi?', ['servicenow.com/docs', 'developer.servicenow.com', 'store.servicenow.com', 'nowlearning.servicenow.com'], 1, 'Developer site (developer.servicenow.com).'),
-    q('PDI konni rojulu use cheyyakapothe em avtundi?', ['Delete ayipothundi', 'Hibernate avtundi — wake up cheyochu', 'Paid avtundi', 'Em kaadu'], 1, 'Hibernate avtundi; Developer site lo Wake up click chesthe saripoddi.'),
+    q('PDI konni rojulu use cheyyakapothe em avtundi?', ['Instance permanent ga delete ayipothundi', 'Hibernate avtundi — wake up cheyochu', 'Automatic ga paid plan ki marutundi', 'Emi maradu, ellappudu active ga untundi'], 1, 'Hibernate avtundi; Developer site lo Wake up click chesthe saripoddi.'),
     q('Instance password ni em cheyyali?', ['Marchipoku — safe ga petta', 'Share cheyyi', 'Em avvadu', 'Screenshot social media lo petta'], 0, 'Password safe ga save cheyyali.'),
   ],
 }
@@ -64,7 +64,7 @@ const users = {
   quiz: [
     q('User ki permissions ivvadaniki em vaduthamu?', ['Roles', 'Views', 'Filters', 'Menus'], 0, 'Roles — permissions ivvadaniki.'),
     q('Roles ni add chese UI peru emiti?', ['Slushbucket', 'Dashboard', 'Update set', 'Catalog'], 0, 'Slushbucket (Available ↔ Selected).'),
-    q('Best practice ela?', ['Prathi user ki direct ga roles', 'Group ki roles ichi users ni group lo petta', 'Andariki admin role', 'Roles vaddu'], 1, 'Group ki roles ivvadam maintain cheyyadaniki easy.'),
+    q('Best practice ela?', ['Prathi user ki direct ga roles ivvadam', 'Group ki roles ichi users ni group lo petta', 'Andariki admin role ivvadam', 'Roles asalu vaadakunda undadam'], 1, 'Group ki roles ivvadam maintain cheyyadaniki easy.'),
     q('User login avvakunda cheyyalante?', ['Delete only', 'Active uncheck', 'Roles remove', 'Em cheyyalem'], 1, 'Active uncheck chesthe login avvadu.'),
   ],
 }
@@ -97,7 +97,7 @@ const ui = {
     q('Anni applications & modules ni open chese button eadi?', ['Home', 'All', 'Favorites', 'History'], 1, '"All" button — Application Navigator open avtundi.'),
     q('Navigator lo "incident" ani type chese box peru?', ['Global search', 'Filter navigator', 'List search', 'Breadcrumb'], 1, 'Filter navigator.'),
     q('Incident form lo "Number" grey ga undi, edit cheyalem. Ante?', ['Mandatory', 'Read-only', 'Hidden', 'Reference'], 1, 'Read-only — system auto generate chestundi.'),
-    q('Priority ela vachindi?', ['Random', 'Caller valla', 'Impact + Urgency nundi auto calculate', 'Description batti'], 2, 'Impact & Urgency kalipi (Data Lookup rule).'),
+    q('Priority ela vachindi?', ['Random ga system pick chestundi', 'Caller yokka location batti', 'Impact + Urgency nundi auto calculate', 'Description lo rasina words batti'], 2, 'Impact & Urgency kalipi (Data Lookup rule).'),
   ],
 }
 
@@ -122,9 +122,9 @@ const products = {
   ],
   quiz: [
     q('Developer ki first website eadi?', ['developer.servicenow.com', 'store.servicenow.com', 'support.servicenow.com', 'linkedin.com'], 0, 'Developer site — PDI, docs ikkade.'),
-    q('IT help desk workflows (Incident, Problem, Change) e product lo untayi?', ['HRSD', 'ITSM', 'CSM', 'SecOps'], 1, 'ITSM.'),
-    q('Own custom apps build chese platform?', ['App Engine (Creator Workflows)', 'ITOM', 'Store', 'Community'], 0, 'App Engine.'),
-    q('Error vasthe mundu e site lo vethakali?', ['Community', 'Instagram', 'Store', 'Em kaadu'], 0, 'Community / Docs.'),
+    q('IT help desk workflows (Incident, Problem, Change) e product lo untayi?', ['HRSD', 'ITSM', 'CSM', 'SecOps'], 1, 'ITSM (IT Service Management) lo Incident, Problem, Change untayi.'),
+    q('Own custom apps build chese platform?', ['App Engine (Creator Workflows)', 'ITOM (infrastructure monitoring product)', 'Store (apps download chese site)', 'Community (forum)'], 0, 'App Engine (Creator Workflows) tho custom apps build chestam; ITOM monitoring kosam.'),
+    q('Error vasthe mundu e site lo vethakali?', ['Community', 'Social media lo', 'ServiceNow Store lo', 'Evarini adagakunda wait cheyyadam'], 0, 'Community / Docs.'),
   ],
 }
 
@@ -148,8 +148,8 @@ const architecture = {
   quiz: [
     q('Mana server-side scripts (Business Rules) ekkada run avtayi?', ['Browser', 'Application nodes', 'MID server', 'Store'], 1, 'Application nodes (server).'),
     q('Client scripts ekkada run avtayi?', ['Browser', 'Database', 'MID server', 'Data center'], 0, 'User browser lo.'),
-    q('Changes ela Dev nundi Prod ki veltayi?', ['Update Sets', 'Email', 'Favorites', 'Views'], 0, 'Update Sets.'),
-    q('Company internal systems ki connect cheyyadaniki?', ['Load balancer', 'MID Server', 'Browser', 'Filter'], 1, 'MID Server.'),
+    q('Changes ela Dev nundi Prod ki veltayi?', ['Update Sets', 'Email', 'Favorites', 'Views'], 0, 'Update Sets — Dev lo chesina config changes XML ga capture ayyi Prod ki move avtayi.'),
+    q('Company internal systems ki connect cheyyadaniki?', ['Load balancer', 'MID Server', 'Browser', 'Filter'], 1, 'MID Server — instance ni company internal network lo systems tho connect chese Java agent.'),
   ],
 }
 
@@ -189,10 +189,10 @@ const tableCreation = {
     info('Chusava! Number (auto), Course name, Status — nuvvu add chesina columns form lo vachayi. Idi mana first custom table ✅', 'main-section'),
   ],
   quiz: [
-    q('Custom table name "u_" tho start avtundi ante?', ['Custom (user-created) table', 'System table', 'Hidden table', 'Child table'], 0, '"u_" = custom.'),
+    q('Custom table name "u_" tho start avtundi ante?', ['Custom (user-created) table', 'System table (ServiceNow ichindi)', 'Hidden table (users ki kanipinchadu)', 'Child table (inkoka table extend)'], 0, '"u_" prefix = user-created custom table. ServiceNow tables ki ee prefix undadu.'),
     q('"Table name" ekkada nundi vastundi?', ['Label nundi auto', 'Manual type cheyyali', 'Random', 'Extends table nundi'], 0, 'Label nundi auto generate.'),
     q('Navigator lo table list direct ga open cheyyalante?', ['table_name.list', 'table_name.view', 'open table_name', 'list.table'], 0, 'table_name.list (new form = table_name.do).'),
-    q('Dropdown (choices) field type?', ['String', 'Choice', 'Reference', 'Integer'], 1, 'Choice.'),
+    q('Dropdown (choices) field type?', ['String', 'Choice', 'Reference', 'Integer'], 1, 'Choice field type — dropdown laaga options chupistundi (Choices tab lo values add chestam).'),
   ],
 }
 
