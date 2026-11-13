@@ -56,6 +56,7 @@ export default function ScriptRunner({ exercise, starter, done, onPass, scenario
       code,
       scenario: scen,
       tests: interactive ? [] : exercise?.tests || [],
+      variants: interactive ? undefined : exercise?.variants,
       client: clientCfg ? (interactive ? { ...clientCfg, ...interactive, interactive: true } : clientCfg) : undefined,
     })
   }

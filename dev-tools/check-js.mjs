@@ -19,13 +19,13 @@ for (const l of JS_LESSONS) {
     for (const k of ['title', 'task', 'starter', 'solution', 'hint', 'explain']) if (!String(e[k] || '').trim()) fail(`${e.id}: empty ${k}`)
     if (!['easy', 'medium', 'hard'].includes(e.level)) fail(`${e.id}: bad level`)
     if (!e.tests?.length) { fail(`${e.id}: no tests`); continue }
-    const sol = runScript({ code: e.solution, scenario: e.scenario, tests: e.tests })
+    const sol = runScript({ code: e.solution, scenario: e.scenario, tests: e.tests, variants: e.variants })
     if (!sol.passed) {
       fail(`${e.id}: solution does not pass`)
       if (sol.error) console.log('   error:', sol.error)
       sol.results.filter((r) => !r.pass).forEach((r) => console.log('   ✗', r.label, JSON.stringify(r.got), '≠', JSON.stringify(r.expect), r.note || ''))
     }
-    const st = runScript({ code: e.starter, scenario: e.scenario, tests: e.tests })
+    const st = runScript({ code: e.starter, scenario: e.scenario, tests: e.tests, variants: e.variants })
     if (st.passed) fail(`${e.id}: starter already passes (nothing to do!)`)
   }
 }

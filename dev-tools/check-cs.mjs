@@ -27,7 +27,7 @@ for (const l of CS_LESSONS) {
     for (const k of ['title', 'task', 'starter', 'solution', 'hint', 'explain']) if (!String(e[k] || '').trim()) fail(`${e.id}: empty ${k}`)
     if (!e.client && !e.server) fail(`${e.id}: needs client trigger or server:true`)
     if (!e.tests?.length) { fail(`${e.id}: no tests`); continue }
-    const run = (code) => runScript({ code, scenario: e.scenario, tests: e.tests, client: e.client })
+    const run = (code) => runScript({ code, scenario: e.scenario, tests: e.tests, client: e.client, variants: e.variants })
     const sol = run(e.solution)
     if (!sol.passed) {
       fail(`${e.id}: solution does not pass`)
@@ -37,5 +37,7 @@ for (const l of CS_LESSONS) {
     if (run(e.starter).passed) fail(`${e.id}: starter already passes`)
   }
 }
+import { VARIANTS_CS } from '../src/data/variants-cs.js'
+for (const id of Object.keys(VARIANTS_CS)) if (!ids.has(id)) fail('variants-cs.js: unknown exercise id ' + id)
 console.log(`${CS_LESSONS.length} lessons, ${n} exercises, ${bad} problems`)
 process.exit(bad ? 1 : 0)

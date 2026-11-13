@@ -7,6 +7,7 @@ import { CS_LESSONS_B } from './lessons-cs-b.js'
 import { CS_LESSONS_C } from './lessons-cs-c.js'
 import { CS_LESSONS_D } from './lessons-cs-d.js'
 import { CS_LESSONS_E } from './lessons-cs-e.js'
+import { VARIANTS_CS } from './variants-cs.js'
 
 const LOAD = { trigger: { type: 'onLoad' } }
 const onChangeOf = (field, oldValue, newValue) => ({ trigger: { type: 'onChange', field, oldValue, newValue } })
@@ -250,4 +251,10 @@ g_form.addOption('category', 'cloud', 'Cloud');`,
 // Course order (Udemy "Client scripting" section, 26 lectures) — all 26 covered. mode 'pdi' lessons are done in her real PDI.
 export const CS_LESSONS = [gluser, glform, ...CS_LESSONS_B, ...CS_LESSONS_C, ...CS_LESSONS_D, ...CS_LESSONS_E]
   .sort((a, b) => a.no - b.no)
-  .map((l) => ({ stage: 3, section: 'Client scripting', ...l }))
+  .map((l) => ({
+    stage: 3,
+    section: 'Client scripting',
+    ...l,
+    // extra test runs (else-branches etc.) live in variants-cs.js, keyed by exercise id
+    exercises: l.exercises.map((e) => (VARIANTS_CS[e.id] ? { ...e, variants: VARIANTS_CS[e.id] } : e)),
+  }))
