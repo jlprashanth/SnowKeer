@@ -7,12 +7,16 @@ const TIMEOUT_MS = 3000
 const show = (v) => (typeof v === 'string' ? JSON.stringify(v) : JSON.stringify(v) ?? String(v))
 
 // Editor + Run + Script Log + test results. `exercise` = null → free scratchpad (no tests).
+const HINT_ICONS = ['🧭', '🔧', '📝'] // nudge, tool, almost the answer
+
 export default function ScriptRunner({ exercise, starter, done, onPass, scenario, client }) {
   const initial = exercise ? exercise.starter : starter || ''
   const [code, setCode] = useState(initial)
   const [out, setOut] = useState(null)
   const [running, setRunning] = useState(false)
-  const [hint, setHint] = useState(false)
+  const [hintsShown, setHintsShown] = useState(0) // how many hint steps are revealed
+  // hint can be one string, or an array of tiers: [nudge, tool, almost-the-answer]
+  const hintList = [].concat(exercise?.hint || []).filter(Boolean)
   const [solution, setSolution] = useState(false)
   const worker = useRef(null)
   const timer = useRef(null)
@@ -101,13 +105,19 @@ export default function ScriptRunner({ exercise, starter, done, onPass, scenario
       <div className="runner-bar">
         <button className="btn primary small" onClick={() => run()} disabled={running}>{running ? 'Running…' : '▶ Run'}</button>
         <button className="btn small" onClick={reset}>↺ Reset</button>
-        {exercise?.hint && !hint && <button className="btn small" onClick={() => setHint(true)}>💡 Hint</button>}
+        {hintList.length > 0 && hintsShown < hintList.length && (
+          <button className="btn small" onClick={() => setHintsShown(hintsShown + 1)}>
+            {hintList.length > 1 ? `💡 Hint ${hintsShown + 1}/${hintList.length}` : '💡 Hint'}
+          </button>
+        )}
         {exercise && !solution && <button className="btn small" onClick={() => setSolution(true)}>✅ Solution chupinchu</button>}
         <span className="muted small">Ctrl + Enter = Run</span>
         {done && <span className="runner-done">✔ Done</span>}
       </div>
 
-      {hint && <div className="ex-block ex-hint">💡 {exercise.hint}</div>}
+      {hintList.slice(0, hintsShown).map((h, i) => (
+        <div key={i} className="ex-block ex-hint">{hintList.length > 1 ? (HINT_ICONS[i] || '💡') : '💡'} {h}</div>
+      ))}
 
       {out?.form && <ClientForm form={out.form} onEdit={editField} trigger={out.trigger} submit={out.submit} />}
 

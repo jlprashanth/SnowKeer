@@ -17,7 +17,7 @@ for (const l of JS_LESSONS) {
     if (ids.has(e.id)) fail('duplicate id ' + e.id)
     ids.add(e.id)
     for (const k of ['title', 'task', 'starter', 'solution', 'hint', 'explain']) if (!String(e[k] || '').trim()) fail(`${e.id}: empty ${k}`)
-    if (!['easy', 'medium', 'hard'].includes(e.level)) fail(`${e.id}: bad level`)
+    if (!['easy', 'medium', 'medium+', 'hard'].includes(e.level)) fail(`${e.id}: bad level`)
     if (!e.tests?.length) { fail(`${e.id}: no tests`); continue }
     const sol = runScript({ code: e.solution, scenario: e.scenario, tests: e.tests, variants: e.variants })
     if (!sol.passed) {
