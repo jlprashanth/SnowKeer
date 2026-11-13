@@ -362,7 +362,7 @@ const macros = {
       h: '⚡ Macros ante?',
       body: [
         'ServiceNow script editor (Syntax Editor) lo konni short words type chesi Tab press chesthe pedda code snippet expand avtundi. Udaharana: "vargr" + Tab → GlideRecord template.',
-        'Konni macros (memory nunchi — confirm chesuko): vargr (GlideRecord query), vargror (query with OR condition), for / while / if snippets, info (gs.info), doc (comment block). Editor lo "help" + Tab type chesthe ippudu unna macros list vastundi.',
+        'Mana PDI lo unna macros (tested): vargr (GlideRecord query), vargror (query with OR condition), for (loop snippet), method (function template), info (gs.info), doc (comment block). While / if macros levu. Editor lo "help" + Tab type chesthe ippudu unna macros list vastundi (idi nuvve confirm chey).',
         'Idi typing save chestundi + typos taggistundi. Business Rule / Script Include editor lo try chey.',
       ],
       code: `vargr<Tab>  →
@@ -396,7 +396,7 @@ while (gr.next()) {
       scenario: '"help" type chesi Tab press chesi available macros list chudu, 3 macros note chesuko.',
       hint: 'Same editor lo.',
       steps: ['Editor lo help type chesi Tab.', 'List lo macros chadivi 3 note chesuko.'],
-      answer: 'Macro names + descriptions list vastundi (vargr, vargror, for, if ... version batti).',
+      answer: 'Macro names + descriptions list vastundi (vargr, vargror, for, method, info, doc ... version batti).',
       cleanup: 'Em marchaledu.',
     }),
     jx('cs-macros', 3, 'Snippet tho query rayi', 'medium', {
@@ -579,9 +579,9 @@ const uipages2 = {
     {
       h: '📝 Form + Processing script',
       body: [
-        'HTML lo <g:ui_form> tag tho form. Input fields name tho. Submit ayinappudu Processing script server lo run avtundi — akkada GlideRecord tho records create / update chestam. Form values g_request.getParameter("field_name") tho chaduvutam.',
+        'HTML lo <g:ui_form> tag tho form. Input fields name tho. Submit ayinappudu Processing script server lo run avtundi — akkada GlideRecord tho records create / update chestam. Form values request.getParameter("field_name") tho chaduvutam (g_request kaadu — PDI lo out-of-box UI Pages anni "request" ne vaadutunnaru).',
         'Dialog buttons: <g:dialog_buttons_ok_cancel ok="return validate()" ok_type="button" /> — OK click mundu client validate() run avtundi (false return chesthe aagipotundi).',
-        '⚠️ Exact tag attributes / g_request memory nunchi — nee PDI lo out-of-box UI Pages (e.g. search "dialog") chusi confirm chesuko.',
+        '✅ PDI lo out-of-box UI Pages (e.g. add_catalog_item) processing script lo request.getParameter("...") vaadutunnaru. ⚠️ Exact tag attributes memory nunchi — nee PDI lo out-of-box UI Pages (e.g. search "dialog") chusi confirm chesuko.',
       ],
       code: `// HTML
 <g:ui_form>
@@ -598,7 +598,7 @@ function validate() {
 // Processing script
 var gr = new GlideRecord('incident');
 gr.initialize();
-gr.short_description = g_request.getParameter('short_desc');
+gr.short_description = request.getParameter('short_desc');
 gr.insert();`,
     },
     {
@@ -607,7 +607,7 @@ gr.insert();`,
     },
   ],
   quiz: [
-    q('Form values processing script lo?', ['g_request.getParameter("name")', 'g_form.getValue', 'current', 'gs.getParam'], 0, 'g_request.getParameter (confirm chesuko).'),
+    q('Form values processing script lo?', ['request.getParameter("name")', 'g_form.getValue', 'current', 'gs.getParam'], 0, 'request.getParameter (PDI lo out-of-box UI Pages lo ila ne vaadutunnaru).'),
     q('OK click mundu client validation?', ['ok="return validate()"', 'onsubmit server', 'Business Rule', 'Condition'], 0, 'dialog_buttons ok attribute lo validate().'),
     q('Validate() false return chesthe?', ['Submit aagipotundi', 'Submit avtundi', 'Error page', 'Reload'], 0, 'validate() false return chesthe OK button submit aagipotundi — user form lone untadu.'),
     q('Processing script ekkada run?', ['Server', 'Browser', 'Both', 'Mobile'], 0, 'Processing script server lo run avtundi — records create/update ikkade chestam.'),

@@ -72,7 +72,7 @@ function onLoad() {
       body: [
         'Client lo field value ellappudu string. g_form.getValue("priority") → "1" (number kaadu).',
         'Client lo gs.info() work avvadu — debug ki jslog() / console.log() / g_form.addInfoMessage() vaadu.',
-        '⚠️ Memory nunchi rasina details (nee PDI lo confirm chesuko): hasRole(…) admin ki true ravadam, g_user properties list — Brazil lo same ani anukuntunna.',
+        '✅ Mana PDI lo test chesam: hasRole("edaina") admin ki true (role ledu ante kuda), hasRoleExactly exact role matrame; g_user properties: userName, firstName, lastName, fullName, userID (g_user.email / g_user.active levu). Nee release lo kuda ila ne ani check chesuko.',
       ],
     },
   ],
