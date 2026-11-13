@@ -97,3 +97,24 @@ export function pageTermKeys(lesson) {
   const stage = lesson.stage || 2
   return [...out].filter((k) => stage >= 3 || !GLOSSARY_JS[k]?.s)
 }
+
+// Terms for ONE learn card (the "📘 Ee topic lo words" sub-box).
+// A hand-written card.terms list always wins; otherwise the card's own code + text is scanned.
+// Plain JavaScript words (var, return, ===) are left out — the sub-box is for the ServiceNow words and methods that
+// card introduces. Cards with fewer than 2 such terms get no box; at most `max` are shown.
+export function cardTermKeys(card, stage = 2, max = 6) {
+  if (card.terms) return card.terms.filter((k) => KNOWN.has(k))
+  const code = card.code || ''
+  const prose = [].concat(card.body || []).join('\n')
+  const found = new Set()
+  for (const k of scanCalls(code + '\n' + prose).keys) found.add(k)
+  for (const k of scanWords(code, prose)) found.add(k)
+  for (const k of scanPhrases(code + '\n' + prose)) found.add(k)
+  const keys = [...found].filter((k) => {
+    const e = GLOSSARY_JS[k]
+    return e && e.g !== 'js' && (stage >= 3 || !e.s)
+  })
+  // an overview entry (g_form, gs) is dropped when the card already shows that object's own methods (g_form.setValue(), gs.info)
+  const specific = keys.filter((k) => !keys.some((o) => o !== k && o.startsWith(k + '.')))
+  return specific.length >= 2 ? specific.slice(0, max) : []
+}

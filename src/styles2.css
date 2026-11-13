@@ -269,6 +269,10 @@
 /* Learn-card sub-box: term -> meaning (gs, gr, methods) */
 .term-box { background: #f1f7fb; border: 1px solid #b9d3ea; border-left: 4px solid #2e6fa8; border-radius: 6px; padding: 10px 14px; margin: 10px 0; }
 .term-title { font-weight: 600; color: #1e4566; margin-bottom: 6px; font-size: 14px; }
+/* collapsible card sub-box: just the title row + count when closed */
+.term-fold > summary { cursor: pointer; margin-bottom: 0; }
+.term-fold > summary:hover { text-decoration: underline; }
+.term-fold[open] > summary { margin-bottom: 8px; }
 .term-list { margin: 0; display: grid; gap: 8px; }
 .term-row { display: grid; grid-template-columns: 170px 1fr; gap: 10px; align-items: start; border-top: 1px dashed #cfe0ee; padding-top: 8px; }
 .term-row:first-child { border-top: 0; padding-top: 0; }

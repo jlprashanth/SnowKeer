@@ -4,7 +4,7 @@
 // 3) Stage 2 pages never list Stage 3-only entries; every page term is a real glossary key; prints the count per lesson
 import { JS_LESSONS } from '../src/data/lessons-js.js'
 import { CS_LESSONS } from '../src/data/lessons-cs.js'
-import { scanCalls, pageTermKeys } from '../src/data/glossary-scan.js'
+import { scanCalls, pageTermKeys, cardTermKeys } from '../src/data/glossary-scan.js'
 import { GLOSSARY_JS } from '../src/data/glossary-js.js'
 
 let bad = 0
@@ -35,6 +35,25 @@ const fakeKeys = pageTermKeys(fake)
 for (const k of ['g_form.setMandatory()', 'g_form.flash()', 'addNullQuery', 'g_form']) {
   if (fakeKeys.includes(k)) fail(`solution/hint leaked into page terms: ${k}`)
 }
+
+// 4) per-card sub-box: hand-written terms win; auto picks skip JS words, respect the stage, stay within 6, need 2+
+const hand = cardTermKeys({ terms: ['GlideAjax', 'nope-not-a-key'], body: [], code: '' }, 3)
+if (hand.join() !== 'GlideAjax') fail('hand-written card.terms should win and drop unknown keys')
+let cardBoxes = 0
+for (const l of [...JS_LESSONS, ...CS_LESSONS]) {
+  for (const c of l.learn) {
+    const keys = cardTermKeys(c, l.stage)
+    if (keys.length) cardBoxes++
+    if (!c.terms && keys.length === 1) fail(`${l.id}: auto card box should have 2+ terms: ${c.h}`)
+    if (!c.terms && keys.length > 6) fail(`${l.id}: auto card box has more than 6 terms: ${c.h}`)
+    for (const k of keys) {
+      if (!GLOSSARY_JS[k]) fail(`${l.id}: card key "${k}" is not in glossary`)
+      if (!c.terms && GLOSSARY_JS[k]?.g === 'js') fail(`${l.id}: auto card box lists a plain JS word "${k}"`)
+      if ((l.stage || 2) < 3 && GLOSSARY_JS[k]?.s) fail(`${l.id}: Stage 2 card lists Stage 3-only entry "${k}"`)
+    }
+  }
+}
+console.log(`card sub-boxes: ${cardBoxes}`)
 
 // 3) Stage 2 pages leave out Stage 3-only entries; every key is real; print counts
 const report = []
