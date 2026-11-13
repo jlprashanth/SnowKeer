@@ -35,6 +35,7 @@ const basics = {
       body: [
         'ServiceNow fields anni JavaScript lo ee types ga vastayi: string (text), number, boolean (true/false), null (value ledu), undefined (variable ki value pettaledu), array (list), object ({ key: value }).',
         'typeof tho oka value type chudochu.',
+        '⚠️ Gotcha: typeof null = "object" ani vastundi! Idi JavaScript lo pateka (old) quirk — null nijanga object kaadu, "value ledu" ane artham. Anduke value null ah ani check cheyyalante typeof kaadu, === null vaadali. (Array kuda typeof tho "object" ani vastundi.)',
       ],
       code: `var number = 'INC0010002';          // string
 var priority = 1;                   // number
@@ -45,7 +46,9 @@ var tags = ['vpn', 'network'];      // array
 var caller = { name: 'Abel Tuter', vip: false };  // object
 
 gs.info(typeof priority);           // number
-gs.info(typeof number);             // string`,
+gs.info(typeof number);             // string
+gs.info(typeof assignedTo);         // object  (null ki kuda "object" vastundi — JS quirk!)
+gs.info(assignedTo === null);       // true    (null check ki idi vaadu)`,
     },
     {
       h: '📦 Variables — var, let, const',

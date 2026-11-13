@@ -6,7 +6,7 @@ import { q } from './lessonKit.js'
 export const QUIZ_EXTRA_JS = {
   /* 1 — Comments, data types, variables */
   'js-basics': [
-    q(`typeof 'INC0010002' — result?`, [`'string'`, `'number'`, `'object'`, `'text'`], 0, `Quotes lo unna anni values string. Incident number text kabatti string.`),
+    q(`var assignedTo = null; gs.info(typeof assignedTo); — em print avtundi?`, [`object`, `null`, `undefined`, `string`], 0, `JavaScript quirk: typeof null = "object". Null check kosam typeof kaadu, assignedTo === null vaadali.`),
     q(`Business Rule lo form lo unna incident record ki ready ga unna object peru?`, [`current`, `gr (automatic ga untundi)`, `GlideRecord`, `record`], 0, `Business Rule lo ServiceNow record ni current lo ready ga istundi — new GlideRecord avasaram ledu. gr anedi nuvve pettukune peru (Background Script, Script Include lo).`),
     q(`var gr = new GlideRecord('incident'); — ee line lo 'new' enti?`, [`JavaScript word — kotha object create chestundi`, `ServiceNow table peru`, `Incident number`, `ServiceNow method`], 0, `new = JavaScript keyword. GlideRecord = ServiceNow tool, 'incident' = table peru, gr = nuvvu pettukune variable peru.`),
     q(`var assignedTo = null; — null ante?`, [`Value ledu (intentionally empty)`, `Value 0`, `Empty string ""`, `Variable declare avvaledu`], 0, `null = "evaru ledu / value ledu". Value ye pettaledu ante undefined; null mathram nuvve pettina "empty".`),
