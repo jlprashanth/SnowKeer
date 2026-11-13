@@ -271,7 +271,7 @@ export default function App() {
           <JsLesson key={jsLesson.id} lesson={jsLesson} progress={progress} onBack={toHub} onQuizFinish={finishJsQuiz} onExerciseDone={markJsDone} onExerciseToggle={toggleJsDone} />
         </Suspense>
       )}
-      {view === 'exercises' && <Exercises lessonId={exFilter} progress={progress} onToggle={toggleExercise} onBack={toHub} />}
+      {view === 'exercises' && <Exercises lessonId={exFilter} progress={progress} onToggle={toggleExercise} onJsToggle={toggleJsDone} onOpenJs={openJs} onBack={toHub} />}
       {view === 'quiz' && lesson && <Quiz lesson={lesson} onFinish={finishQuiz} />}
 
       {view === 'sim' && (

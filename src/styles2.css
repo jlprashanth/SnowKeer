@@ -310,3 +310,17 @@
 :root[data-theme="dark"] .app.themed .gl-panel { background: var(--surface); border-color: var(--line); }
 :root[data-theme="dark"] .app.themed .gl-head { border-color: var(--line); }
 :root[data-theme="dark"] .app.themed .gl-head { color: var(--text, inherit); }
+
+/* ===== Hands-on Practice: expandable stage / lesson / exercise rows ===== */
+.fold { border: 1px solid #d9e2e6; border-radius: 8px; background: #fff; margin: 8px 0; }
+.fold-top { border-left: 4px solid var(--accent); border-radius: 12px; margin-top: 18px; }
+.fold-nested { margin: 6px 0 6px 12px; }
+.fold-head { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; background: none; border: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.fold-top .fold-head { padding: 14px 18px; }
+.fold-title { flex: 1; min-width: 0; font-weight: 600; }
+.fold-top .fold-title { font-size: 16px; }
+.fold-meta { font-size: 12px; white-space: nowrap; opacity: .8; }
+.fold-chev { flex: none; transition: transform .2s; }
+.fold-head[aria-expanded="true"] .fold-chev { transform: rotate(180deg); }
+.fold-body { padding: 0 12px 12px; }
+:root[data-theme="dark"] .fold { background: var(--surface); border-color: var(--line); }

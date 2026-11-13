@@ -30,7 +30,9 @@ export default function Hub({ progress, onStart, onFreePlay, onExercises, onOpen
   const toggle = (k) => setOpen((o) => ({ ...o, [k]: !o[k] }))
   const jsDone = progress.jsDone || {}
   const exDone = progress.exercises || {}
-  const exDoneCount = EXERCISES.filter((e) => exDone[e.id]).length
+  // All stages' exercise ids are unique, so one count covers Stage 1 (exDone) + Stage 2/3 (jsDone)
+  const ALL_EXERCISES = [...EXERCISES, ...JS_LESSONS.flatMap((l) => l.exercises), ...CS_LESSONS.flatMap((l) => l.exercises)]
+  const exDoneCount = ALL_EXERCISES.filter((e) => exDone[e.id] || jsDone[e.id]).length
   const doneCount = LESSONS.filter((l) => progress[l.id]?.done).length
   const next = LESSONS.find((l) => !progress[l.id]?.done) || LESSONS[0]
   return (
@@ -49,7 +51,7 @@ export default function Hub({ progress, onStart, onFreePlay, onExercises, onOpen
             🧪 Free Play (guide lekunda)
           </button>
           <button className="btn big" onClick={() => onExercises()}>
-            🛠 Hands-on Practice ({exDoneCount}/{EXERCISES.length})
+            🛠 Hands-on Practice ({exDoneCount}/{ALL_EXERCISES.length})
           </button>
         </div>
         <div className="muted small">
