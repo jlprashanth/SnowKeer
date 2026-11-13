@@ -226,7 +226,7 @@ const clientScripts = {
     {
       h: '🧩 Client Script record',
       body: [
-        'System Definition → Client Scripts lo create chestam. Important fields: Name, Table (incident), UI Type (Desktop / Mobile / All), Type (onLoad / onChange / onSubmit / onCellEdit), Field name (onChange ki matrame), Active, Script.',
+        'System Definition → Client Scripts lo create chestam. Important fields: Name, Table (incident), UI Type (Desktop / Mobile / All), Type (onLoad / onChange / onSubmit / onCellEdit), Field name (onChange mariyu onCellEdit ki), Active, Script.',
         'ServiceNow template function ichestundi — adi marchakunda andulo code rayali: function onLoad() { }, function onChange(control, oldValue, newValue, isLoading, isTemplate) { }, function onSubmit() { }.',
       ],
     },

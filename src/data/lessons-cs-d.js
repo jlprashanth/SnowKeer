@@ -40,7 +40,7 @@ action.setRedirectURL(current);`,
     {
       h: '⚠️ Gurtupettukovali',
       body: [
-        'Server-side UI Action click chesinappudu form save avtundi mundu (form values server ki veltayi) — tarvata nee script run avtundi.',
+        'Server-side UI Action click chesinappudu form values server ki veltayi, aa values current lo untayi — kani record automatic ga save avvadu (nenu anukuntunnadi: nee script lo current.update() pilichinappude save avtundi). Nee PDI lo oka test UI Action tho confirm chesuko.',
         'Ee exercises lo "current" ivvabadindi. Real lo mandatory fields fail ayithe script run avvadu. Memory nunchi rasina details — nee PDI lo oka test UI Action tho confirm chesuko (nee PDI lo marpulu reverse cheyyi!).',
       ],
     },
@@ -60,7 +60,7 @@ action.setRedirectURL(current);`,
       starter: '// UI Action: Resolve (server)\n// TODO',
       hint: "current.setValue('state', 6); current.setValue('description', 'Resolved by UI Action'); current.update(); action.setRedirectURL(current);",
       solution: "current.setValue('state', 6);\ncurrent.setValue('description', 'Resolved by UI Action');\ncurrent.update();\naction.setRedirectURL(current);",
-      explain: 'current = form lo record. update() tho save, redirect tho form malli open.',
+      explain: 'current = form lo record. update() tho save, redirect tho form malli open. (Real PDI lo Resolved ki Resolution code + notes kuda mandatory — ee practice lo simple ga unchamu; nee PDI lo try chesetappudu avi kuda set chey.)',
       tests: [
         { label: 'state = 6', expr: "current.getValue('state')", expect: '6' },
         { label: 'description', expr: "current.getValue('description')", expect: 'Resolved by UI Action' },
@@ -409,9 +409,9 @@ const ua5 = {
       body: [
         'List lo 3 types: List banner button (list paina button), List choice ("Actions on selected rows" dropdown), List context menu (row right-click). Same UI Action record lo checkbox tho enable chestam.',
         'List choice / context menu server script lo current = prathi selected record (script prathi row ki oka sari run avtundi anukuntunna). ⚠️ Memory nunchi — nee PDI lo test chesi confirm chesuko.',
-        'List banner button (client) lo g_list.getChecked() vaadi, gsftSubmit tho server ki pampi, server lo GlideRecord tho sys_idIN query vaadatam.',
+        'List banner button (client) lo g_list.getChecked() vaadi selected ids teesukovachu; server ki ela pampalo (gsftSubmit leda GlideAjax) nee PDI lo confirm chesuko. Server lo ids tho GlideRecord sys_id IN query vaadatam.',
       ],
-      code: `// List banner button (server): selected ids unnayi anukundam
+      code: `// Server: selectedIds = 'id1,id2' (ee site lo already ivvabadindi — real lo ela vastayo PDI lo confirm chesuko)
 var gr = new GlideRecord('incident');
 gr.addQuery('sys_id', 'IN', selectedIds);
 gr.query();
@@ -446,7 +446,7 @@ while (gr.next()) {
       starter: 'function closeSelected() {\n  // TODO\n}',
       hint: "var ids = g_list.getChecked(); if (ids == '') { alert('Select incidents first'); return; } if (!confirm('Close selected?')) return; gsftSubmit(...)",
       solution: "function closeSelected() {\n  var ids = g_list.getChecked();\n  if (ids == '') {\n    alert('Select incidents first');\n    return;\n  }\n  if (!confirm('Close selected?')) {\n    return;\n  }\n  gsftSubmit(null, g_form.getFormElement(), 'close_selected');\n}",
-      explain: 'Real lo list banner button lo gsftSubmit(null, g_list.getListElement?..) vaadatam — exact form nee PDI lo out-of-box list actions chusi confirm chesuko. Logic same: validate → confirm → submit.',
+      explain: 'Ee practice lo g_form.getFormElement() vaadam, kani real list lo g_form ledu — list UI Actions lo submit ela cheyyalo exact pattern naaku teliyadu. Nee PDI lo out-of-box list banner / list choice UI Actions chusi confirm chesuko. Logic same: validate → confirm → submit.',
       tests: [{ label: 'submitted close_selected', expr: '__x.submitted', expect: 'close_selected' }],
     }),
     jx('cs-ua5', 3, 'Server: set In Progress', 'medium', {

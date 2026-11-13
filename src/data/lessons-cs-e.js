@@ -447,7 +447,7 @@ g_form.setReadOnly('short_description', true);`,
     q('Show/hide/mandatory simple cases ki?', ['UI Policy', 'Client Script always', 'Business Rule', 'Flow'], 0, 'UI Policy first.'),
     q('DOM manipulation enduku vaddu?', ['Upgrades / Workspace lo break avtundi', 'Slow kaadu', 'Illegal', 'Server lo work'], 0, 'Unsupported & fragile.'),
     q('Server data client ki?', ['g_scratchpad / GlideAjax (callback)', 'Synchronous GlideRecord', 'DOM', 'alert'], 0, 'Async patterns.'),
-    q('getReference ki?', ['Callback vaadu', 'Callback vaddu', 'Loop', 'gs'], 0, 'Callback ellappudu.'),
+    q('getReference ni ela vaadali?', ['Callback function tho', 'Callback lekunda (synchronous)', 'Loop lo', 'gs tho'], 0, 'Callback ellappudu — lekapothe browser freeze.'),
     q('Security ki?', ['ACL / Business Rule (server)', 'Client script', 'UI Policy', 'Hide field'], 0, 'Client side bypass cheyochu.'),
   ],
   exercises: [
@@ -651,17 +651,13 @@ const uimacros = {
       h: '🧱 UI Macro ante?',
       body: [
         'UI Macro = reusable Jelly snippet (System UI → UI Macros). Oka sari rasi, UI Pages lo (leda forms lo) tag laaga pilavochu. Udaharana: custom badge, formatted block, repeated header.',
-        'Macro name "snowkeer_badge" ayithe UI Page lo <g:snowkeer_badge /> ani vaadatam (namespace g: tho, macro peru tag peru). Parameters attributes ga pampochu, macro lo ${jvar_...} / ${...} tho chaduvutam.',
+        'Paina code ni UI Macro lo XML field ki paste chey (motham — <?xml ...> nundi </j:jelly> varaku). Macro name "snowkeer_badge" ayithe UI Page lo <g:snowkeer_badge /> ani vaadatam (namespace g: tho, macro peru tag peru). Parameters attributes ga pampochu, macro lo ${jvar_...} / ${...} tho chaduvutam.',
         '⚠️ Parameter passing syntax memory nunchi — nee PDI lo out-of-box UI Macro chusi confirm chesuko.',
       ],
-      code: `<!-- UI Macro: snowkeer_badge -->
-<?xml version="1.0" encoding="utf-8" ?>
+      code: `<?xml version="1.0" encoding="utf-8" ?>
 <j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide">
   <span style="background:#2a7; color:#fff; padding:2px 8px; border-radius:8px;">SnowKeer</span>
-</j:jelly>
-
-<!-- UI Page lo -->
-<g:snowkeer_badge />`,
+</j:jelly>`,
     },
     {
       h: '🆚 UI Page vs UI Macro',
