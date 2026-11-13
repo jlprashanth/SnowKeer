@@ -284,3 +284,25 @@
 :root[data-theme="dark"] .app.themed .term-box { background: var(--surface); border-color: var(--line); }
 :root[data-theme="dark"] .app.themed .term-row dt code { background: var(--bg); }
 :root[data-theme="dark"] .app.themed .glossary { background: var(--surface); border-color: var(--line); }
+
+/* Floating lesson glossary: button on the right edge + side card (never on the Quiz tab) */
+.gl-fab { position: fixed; right: 12px; bottom: 16px; z-index: 50; border: 1px solid var(--accent); background: var(--accent); color: #fff; border-radius: 999px; padding: 9px 14px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(20,40,50,.2); }
+.gl-fab:hover { background: var(--accent-dark, var(--accent)); }
+.gl-panel { position: fixed; right: 12px; bottom: 64px; z-index: 50; width: min(440px, calc(100vw - 24px)); max-height: 78vh; display: flex; flex-direction: column; background: #fff; border: 1px solid #d9e2e6; border-radius: 12px; box-shadow: 0 10px 28px rgba(20,40,50,.25); overflow: hidden; }
+.gl-head { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #d9e2e6; color: #1e4566; font-size: 15px; }
+.gl-close { border: none; background: none; font-size: 16px; cursor: pointer; color: inherit; }
+.gl-body { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 12px 16px 16px; }
+.gl-body > .term-box { margin-top: 0; }
+.gl-body .glossary { margin: 12px 0 0; padding: 8px 12px; }
+
+/* Inside the narrow panel: term on top, meaning below (no side-by-side columns), examples wrap instead of scrolling sideways */
+.gl-panel .term-row { grid-template-columns: 1fr; gap: 4px; }
+.gl-panel .term-row dt, .gl-panel .term-row dd { min-width: 0; overflow-wrap: anywhere; }
+.gl-panel .term-ex { white-space: pre-wrap; overflow-x: visible; overflow-wrap: anywhere; }
+/* full glossary: the group heading already names the group, so drop the repeated box + title */
+.gl-panel .glossary .term-box { background: none; border: 0; padding: 0; margin: 0; }
+.gl-panel .glossary .term-title { display: none; }
+.gl-panel .glossary .term-row { padding-top: 8px; }
+:root[data-theme="dark"] .app.themed .gl-panel { background: var(--surface); border-color: var(--line); }
+:root[data-theme="dark"] .app.themed .gl-head { border-color: var(--line); }
+:root[data-theme="dark"] .app.themed .gl-head { color: var(--text, inherit); }

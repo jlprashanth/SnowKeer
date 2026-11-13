@@ -2,12 +2,12 @@ import { GLOSSARY_GROUPS, GLOSSARY_JS, termsFor } from '../data/glossary-js.js'
 
 // Sub-box inside a learn card: "📘 Ee topic lo words" — term → meaning rows.
 // keys = glossary keys listed on the card, e.g. ['gs', 'GlideRecord', 'gr'].
-export function TermBox({ keys }) {
+export function TermBox({ keys, title = '📘 Ee topic lo words' }) {
   const items = termsFor(keys)
   if (!items.length) return null
   return (
     <div className="term-box">
-      <div className="term-title">📘 Ee topic lo words</div>
+      <div className="term-title">{title}</div>
       <dl className="term-list">
         {items.map((t) => (
           <div className="term-row" key={t.term}>
