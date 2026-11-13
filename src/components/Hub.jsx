@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { LESSONS } from '../data/lessons.js'
 import { EXERCISES, exercisesFor } from '../data/exercises.js'
 import { JS_LESSONS } from '../data/lessons-js.js'
+import { GlossaryPanel } from './TermBox.jsx'
 import { CS_LESSONS } from '../data/lessons-cs.js'
 
 // Reusable collapsible stage header — use one per stage (Stage 3+ too)
@@ -91,6 +92,7 @@ export default function Hub({ progress, onStart, onFreePlay, onExercises, onOpen
       <div className="muted small" style={{ marginBottom: 8 }}>
         Idi generic JavaScript kaadu — anni examples ServiceNow lo (gs, GlideRecord, incident) nunchi. Code ikkade rayi run cheyochu.
       </div>
+      <GlossaryPanel />
       <div className="lesson-grid">
         {JS_LESSONS.map((l, n) => {
           const p = progress[l.id]

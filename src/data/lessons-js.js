@@ -37,6 +37,7 @@ const basics = {
         'typeof tho oka value type chudochu.',
         '⚠️ Gotcha: typeof null = "object" ani vastundi! Idi JavaScript lo pateka (old) quirk — null nijanga object kaadu, "value ledu" ane artham. Anduke value null ah ani check cheyyalante typeof kaadu, === null vaadali. (Array kuda typeof tho "object" ani vastundi.)',
       ],
+      terms: ['typeof', 'null', 'undefined', '==='],
       code: `var number = 'INC0010002';          // string
 var priority = 1;                   // number
 var active = true;                  // boolean
@@ -54,16 +55,17 @@ gs.info(assignedTo === null);       // true    (null check ki idi vaadu)`,
       h: '📦 Variables — var, let, const',
       body: [
         'Variable = value ni store chese box. "var" tho declare chestam. Classic ServiceNow scripts anni "var" vaadatayi — mundu ide nerchuko.',
-        'Newer instances lo "ES12 mode" on chesthe let, const kuda vaadochu. let = marchagalige value, const = marchaleni value.',
+        'let = marchagalige value, const = marchaleni value. Tested on our PDI: const default ga work avtundi, kaani let ki "ES12 mode" on cheyyali (lekapothe "let is an ECMAScript 6 feature - not supported" error vastundi). Nee instance lo kuda ila check cheyyi.',
         'Peru camelCase lo pettu: shortDesc, assignedTo, incNumber. Space ledha "-" pettakudadu.',
       ],
+      terms: ['var', 'let', 'const'],
       code: `var incNumber = 'INC0010002';
 var priority = 1;
 priority = 2;                       // marchochu
 
-// ES12 mode lo:
-// const table = 'incident';        // marchaleru
-// let count = 0;                   // marchochu`,
+const table = 'incident';           // const: marchaleru (PDI lo default ga work avtundi)
+// ES12 mode lo matrame:
+// let count = 0;                   // let: marchochu`,
     },
     {
       h: '🖨 gs.info — result ela chudali?',
@@ -71,6 +73,7 @@ priority = 2;                       // marchochu
         'Server script lo console ledu. gs.info("...") tho log lo print chestam. Real instance lo ide "System Logs → System Log → Script Log Statements" lo kanipistundi. SnowKeer lo kinda "Script Log" panel lo.',
         '{0} placeholder tho values pettochu: gs.info("Hello {0}", name).',
       ],
+      terms: ['gs', 'gs.info', 'gs.warn', 'gs.error'],
       code: `var name = 'Abel';
 gs.info('Hello ' + name);           // Hello Abel
 gs.info('Hello {0}, priority {1}', name, 1);`,
@@ -79,11 +82,10 @@ gs.info('Hello {0}, priority {1}', name, 1);`,
       h: '🧰 ServiceNow words — "new GlideRecord" ante enti?',
       body: [
         'Script lo rendu rakala words untayi. (1) JavaScript words — var, new, if, for, function: ivi JavaScript lo untayi. (2) ServiceNow words — GlideRecord, gs, current, getValue, setValue: ivi ServiceNow isse built-in tools. Mundu ee rendu difference telusukunte confusion undadu.',
-        'Excel laaga anuko: GlideRecord = "table (sheet) ni open chese tool". new = "aa tool tho kotha cursor tayaru chey" (idi JavaScript word). gr = aa cursor ki nuvvu pettukune peru (edaina pettochu: gr, incGR, inc — gr anedi convention). ("incident") = e table — label kaadu, database peru (incident, problem, sys_user...).',
-        'gs = GlideSystem ki short form. ServiceNow ready ga ichche utility object — new tho create cheyyakkarledu, script lo ekkadaina direct ga vaadochu: gs.info("...") (log), gs.getUserName() (ippudu login ayina user) laanti pani kosam. gs.info lo "gs" ante idi.',
-        'gr = GlideRecord ki short form. Idi ServiceNow word kaadu — nuvve pettukune variable peru (GlideRecord object ni pattukuntundi). Anduke gr ki badulu incGR, inc ani edaina pettochu; chala mandi gr ani vaadatharu, kabatti ade convention.',
+        'Ee card lo "new", "GlideRecord", "gs", "gr" laanti words meanings kinda sub-box lo unnayi (📘). Vaatini chadivi, tarvata code chudu.',
         'Server script lo almost eppudu ide 5-step pattern: table open → record load → value chadavadam → value marchadam → save.',
       ],
+      terms: ['new', 'GlideRecord', 'gs', 'gr', 'get', 'getValue', 'setValue', 'update'],
       code: `var gr = new GlideRecord('incident');    // 1. table open  (new = JS word, GlideRecord = ServiceNow tool)
 gr.get('number', 'INC0010004');           // 2. number = INC0010004 unna record load
 gs.info(gr.getValue('priority'));         // 3. field value chadavadam  (string vastundi)
@@ -99,6 +101,7 @@ gr.update();                              // 5. database lo save (idi lekapothe 
         'Field meeda em pani kavali? Value kavali → current.getValue("priority") (string vastundi). Value marchali → current.setValue("priority", 1). Field ki special pani (marindaa? empty ah? display name?) → current.priority.changes(), current.assigned_to.nil(), current.assigned_to.getDisplayValue() — ikkada current.priority oka GlideElement object (string kaadu), anduke daaniki ee special methods untayi.',
         'Gurtu: value teesukovadaniki method peru getValue("number") — getRecord("number") laanti peru kaadu. Doubt vaste mundu "value kavala? marchala? special pani ah?" ani adugu.',
       ],
+      terms: ['current', 'GlideRecord', 'gr', 'GlideElement', 'getValue', 'setValue', 'changes', 'nil', 'getDisplayValue'],
       code: `// Business Rule lo — current ready ga undi
 var num = current.getValue('number');        // value (string)
 current.setValue('priority', 1);             // value marchadam
@@ -117,6 +120,7 @@ gs.info(gr.getValue('number'));`,
         'Chala important! gr.getValue("priority") ela use chesina "1" (STRING) vastundi — number kaadu. Anduke "1" + 1 = "11" avtundi.',
         'Number ga marchali ante Number(...) ledha parseInt(..., 10) vaadu.',
       ],
+      terms: ['getValue', 'Number()', 'parseInt', 'String()'],
       code: `var gr = new GlideRecord('incident');
 gr.get('number', 'INC0010002');
 
@@ -132,6 +136,7 @@ gs.info(Number(p) + 1);             // 2    (correct)`,
         '2) Autocomplete: real ServiceNow script editor lo "gr." type chesi aagite (leka Ctrl + Space) available methods list vastundi. Peru gurtu lekapoyina list lo chusi pick cheyochu. (Memory nundi rasanu — nee PDI lo try chesi confirm chey.)',
         '3) Oka line ardham kakapothe mukkalu chesi chudu: prathi word "JavaScript worda? ServiceNow worda?" ani adugu. Kinda example.',
       ],
+      terms: ['GlideRecord', 'new', 'query', 'next', 'get', 'getValue', 'setValue', 'update', 'addQuery', 'gs.info'],
       code: `var gr = new GlideRecord('incident');
 //  |   |   |           |
 //  |   |   |           table peru (database name)

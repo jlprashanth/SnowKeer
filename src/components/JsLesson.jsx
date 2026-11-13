@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Quiz from './Quiz.jsx'
 import ScriptRunner from './ScriptRunner.jsx'
 import { Card as PdiCard } from './Exercises.jsx'
+import { TermBox } from './TermBox.jsx'
 
 const RANK = { easy: 0, medium: 1, hard: 2 }
 const LEVEL = { easy: '🟢 Easy', medium: '🟡 Medium', hard: '🔴 Hard' }
@@ -35,6 +36,7 @@ export default function JsLesson({ lesson, progress, onBack, onQuizFinish, onExe
             <div key={i} className="learn-card">
               <h3>{c.h}</h3>
               {c.body.map((p, j) => <p key={j}>{p}</p>)}
+              {c.terms && <TermBox keys={c.terms} />}
               {c.code && <pre className="code-sample">{c.code}</pre>}
             </div>
           ))}
