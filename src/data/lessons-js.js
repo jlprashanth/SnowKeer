@@ -73,6 +73,40 @@ gs.info('Hello ' + name);           // Hello Abel
 gs.info('Hello {0}, priority {1}', name, 1);`,
     },
     {
+      h: '🧰 ServiceNow words — "new GlideRecord" ante enti?',
+      body: [
+        'Script lo rendu rakala words untayi. (1) JavaScript words — var, new, if, for, function: ivi JavaScript lo untayi. (2) ServiceNow words — GlideRecord, gs, current, getValue, setValue: ivi ServiceNow isse built-in tools. Mundu ee rendu difference telusukunte confusion undadu.',
+        'Excel laaga anuko: GlideRecord = "table (sheet) ni open chese tool". new = "aa tool tho kotha cursor tayaru chey" (idi JavaScript word). gr = aa cursor ki nuvvu pettukune peru (edaina pettochu: gr, incGR, inc — gr anedi convention). ("incident") = e table — label kaadu, database peru (incident, problem, sys_user...).',
+        'Server script lo almost eppudu ide 5-step pattern: table open → record load → value chadavadam → value marchadam → save.',
+      ],
+      code: `var gr = new GlideRecord('incident');    // 1. table open  (new = JS word, GlideRecord = ServiceNow tool)
+gr.get('number', 'INC0010004');           // 2. number = INC0010004 unna record load
+gs.info(gr.getValue('priority'));         // 3. field value chadavadam  (string vastundi)
+gr.setValue('priority', 1);               // 4. value marchadam (memory lo matrame)
+gr.update();                              // 5. database lo save (idi lekapothe marpu save avvadu)`,
+    },
+    {
+      h: '🎯 gr vs current — ekkada edi vaadali?',
+      body: [
+        'gr = nuvve create chesina record object (new GlideRecord(...)). Background Script, Script Include, Scheduled Job laanti chotla nuvvu table open chesi record teeskovali — appudu gr (leka nuvvu pettina peru).',
+        'current = ServiceNow ready ga ichche record. Business Rule lo form lo unna record already current lo untundi — new GlideRecord avasaram ledu. current kuda GlideRecord ye, kabatti same methods (getValue, setValue, update...) work avtayi.',
+        'Thumb rule: "record ni nenu vethakali" → new GlideRecord + get / query. "Ee form / Business Rule lo unna record meeda pani" → current.',
+        'Field meeda em pani kavali? Value kavali → current.getValue("priority") (string vastundi). Value marchali → current.setValue("priority", 1). Field ki special pani (marindaa? empty ah? display name?) → current.priority.changes(), current.assigned_to.nil(), current.assigned_to.getDisplayValue() — ikkada current.priority oka GlideElement object (string kaadu), anduke daaniki ee special methods untayi.',
+        'Gurtu: value teesukovadaniki method peru getValue("number") — getRecord("number") laanti peru kaadu. Doubt vaste mundu "value kavala? marchala? special pani ah?" ani adugu.',
+      ],
+      code: `// Business Rule lo — current ready ga undi
+var num = current.getValue('number');        // value (string)
+current.setValue('priority', 1);             // value marchadam
+if (current.priority.changes()) {            // field meeda special pani
+  gs.info('Priority marindi');
+}
+
+// Background Script lo — current ledu, nuvve teeskovali
+var gr = new GlideRecord('incident');
+gr.get('number', 'INC0010004');
+gs.info(gr.getValue('number'));`,
+    },
+    {
       h: '⚠️ ServiceNow gotcha: getValue() string istundi',
       body: [
         'Chala important! gr.getValue("priority") ela use chesina "1" (STRING) vastundi — number kaadu. Anduke "1" + 1 = "11" avtundi.',
@@ -84,6 +118,21 @@ gr.get('number', 'INC0010002');
 var p = gr.getValue('priority');    // '1'  (string!)
 gs.info(p + 1);                     // 11   (text joining)
 gs.info(Number(p) + 1);             // 2    (correct)`,
+    },
+    {
+      h: '🔎 Ee words nuvve ela kanukkovali?',
+      body: [
+        'Anni words memorize cheyyakkarledu. Modata 10 chalu: GlideRecord, new, query, next, get, getValue, setValue, update, addQuery, gs.info. Migilavi avasaram vachinappudu vethuko.',
+        '1) Official docs: developer.servicenow.com lo API Reference → Server APIs lo "GlideRecord" (leka GlideSystem, GlideElement) open chey. Prathi method ki explanation + example untundi — "ee pani ki ye method?" ani ikkade vethakochu. (Menu peru release batti maaradam undochu — nee PDI / site lo confirm chesuko.)',
+        '2) Autocomplete: real ServiceNow script editor lo "gr." type chesi aagite (leka Ctrl + Space) available methods list vastundi. Peru gurtu lekapoyina list lo chusi pick cheyochu. (Memory nundi rasanu — nee PDI lo try chesi confirm chey.)',
+        '3) Oka line ardham kakapothe mukkalu chesi chudu: prathi word "JavaScript worda? ServiceNow worda?" ani adugu. Kinda example.',
+      ],
+      code: `var gr = new GlideRecord('incident');
+//  |   |   |           |
+//  |   |   |           table peru (database name)
+//  |   |   ServiceNow tool (class) — table tho matladataniki
+//  |   JavaScript word: "kotha object create chey"
+//  nuvvu pettina peru (variable)`,
     },
   ],
   quiz: [
@@ -137,11 +186,13 @@ var assignedTo = null;`,
       ],
     }),
     jx('js-basics', 3, 'getValue gotcha: priority + 1', 'medium', {
-      task: 'INC0010004 incident teesuko (GlideRecord tho). Daani priority ni getValue tho p lo petti, Number ga marchi 1 add chesi nextP lo pettu. Chivarlo gs.info("Next priority: " + nextP) tho log chey. (Priority 2 undi → 3 ravali)',
-      starter: `var gr = new GlideRecord('incident');
+      task: 'INC0010004 incident teesuko (GlideRecord tho). Daani priority ni getValue tho p lo petti, Number ga marchi 1 add chesi nextP lo pettu. Chivarlo gs.info("Next priority: " + nextP) tho log chey. (Priority 2 undi → 3 ravali) 🧰 Vaade words: GlideRecord, get(), getValue(), Number() — Learn tab lo "ServiceNow words" card chudu.',
+      starter: `// new GlideRecord('incident') = incident table open chese cursor
+var gr = new GlideRecord('incident');
+// gr.get('number', 'INC0010004') = number INC0010004 unna record ni load chestundi
 gr.get('number', 'INC0010004');
 
-// TODO: p lo gr.getValue('priority') pettu  (idi STRING!)
+// TODO: p lo gr.getValue('priority') pettu  (value kavali kabatti getValue — idi STRING!)
 var p;
 
 // TODO: nextP = p ni number ga marchi + 1
@@ -149,7 +200,7 @@ var nextP;
 
 gs.info('Next priority: ' + nextP);
 `,
-      hint: 'Number(p) + 1  — Number() lekapothe "2" + 1 = "21" avtundi.',
+      hint: 'Lopala nundi: gr.getValue("priority") mundu string istundi ("2"), tarvata Number(p) + 1. Number() lekapothe "2" + 1 = "21" avtundi.',
       solution: `var gr = new GlideRecord('incident');
 gr.get('number', 'INC0010004');
 
@@ -166,8 +217,9 @@ gs.info('Next priority: ' + nextP);`,
     }),
     jx('js-basics', 4, 'Incident escalate chey (current)', 'hard', {
       scenario: { current: { table: 'incident', values: { number: 'INC0010050', priority: '2', short_description: 'Payroll job failed', state: '2' } } },
-      task: 'Business Rule lo laaga `current` record undi (INC0010050, priority 2). 1) number, priority (Number ga), shortDesc variables teesuko. 2) "Escalating INC0010050 (P2): Payroll job failed" ani log chey. 3) newPriority = priority - 1, current.setValue("priority", newPriority). 4) "New priority: 1" ani log chey.',
-      starter: `// current = form lo unna incident record (Business Rule lo laaga)
+      task: 'Business Rule lo laaga `current` record undi (INC0010050, priority 2). 1) number, priority (Number ga), shortDesc variables teesuko. 2) "Escalating INC0010050 (P2): Payroll job failed" ani log chey. 3) newPriority = priority - 1, current.setValue("priority", newPriority). 4) "New priority: 1" ani log chey. 🧰 Vaade words: current, getValue(), setValue(), Number() — Learn tab lo "gr vs current" card chudu.',
+      starter: `// current = ServiceNow ready ga ichina record (Business Rule lo laaga) — new GlideRecord avasaram ledu, current kuda GlideRecord ye.
+// Value kavali → current.getValue('field')   |   Value marchali → current.setValue('field', value)
 var number;
 var priority;      // Number ga marchali!
 var shortDesc;
@@ -180,7 +232,7 @@ var shortDesc;
 
 // TODO: 'New priority: ' + current.getValue('priority') log chey
 `,
-      hint: 'Message: gs.info("Escalating " + number + " (P" + priority + "): " + shortDesc);',
+      hint: 'Value kavali kabatti current.getValue("number") (current.number kaadu — adi object). Priority ni Number(current.getValue("priority")) ga marchu. Message: gs.info("Escalating " + number + " (P" + priority + "): " + shortDesc);',
       solution: `var number = current.getValue('number');
 var priority = Number(current.getValue('priority'));
 var shortDesc = current.getValue('short_description');

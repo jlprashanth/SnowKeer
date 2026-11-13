@@ -51,6 +51,25 @@ if (urgent && unassigned) {
 var needsLook = urgent || state === '3';`,
     },
     {
+      h: '🧅 Nested calls — lopala nundi bayatiki chadvu',
+      body: [
+        'Oka line lo function lopala function untey, JavaScript eppudu LOPALA unnadi mundu run chestundi, tarvata bayata unnadi. Ullipaya tholu laaga — mundu lopali layer.',
+        'Priority <= 2 check ki correct line: Number(gr.getValue("priority")) <= 2. Order: (1) gr.getValue("priority") → "1" (string) (2) Number("1") → 1 (3) 1 <= 2 → true.',
+        '❌ Common mistake: gr.getValue(number("priority")) <= 2. Ikkada lopala number("priority") mundu run avtundi — kani (a) JavaScript case-sensitive: number ane function ledu, Number (capital N) undi → "number is not defined" error. (b) Capital N rasina (getValue(Number("priority"))) error radu, kani Number("priority") = NaN, endukante "priority" field PERU (text), number kaadu. getValue ki NaN velthundi → priority value raadu, result tappu avtundi — error lekunda tappu result ravadam inka danger. Rule: getValue ki field peru string ga ivvali, daani RESULT ni bayata Number() lo pettali.',
+        'Easy ga undali ante rendu lines ga rayochu — logic same, kani chadavadam easy: var p = gr.getValue("priority"); var urgent = Number(p) <= 2;',
+      ],
+      code: `// ❌ Tappu — lopala number('priority') mundu run avtundi
+var urgent = gr.getValue(number('priority')) <= 2;
+//   ReferenceError: number is not defined
+
+// ✅ Correct — oka line lo
+var urgent = Number(gr.getValue('priority')) <= 2;
+
+// ✅ Correct — rendu lines lo (same logic, easy ga chadavochu)
+var p = gr.getValue('priority');      // '1'  (string)
+var urgent2 = Number(p) <= 2;         // 1 <= 2 → true`,
+    },
+    {
       h: '❓ Ternary & assignment',
       body: [
         'condition ? a : b = chinna if/else oka line lo. Compound assignment: += -= *= tho value ni update chestam.',

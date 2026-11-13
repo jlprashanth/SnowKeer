@@ -7,8 +7,8 @@ export const QUIZ_EXTRA_JS = {
   /* 1 — Comments, data types, variables */
   'js-basics': [
     q(`typeof 'INC0010002' — result?`, [`'string'`, `'number'`, `'object'`, `'text'`], 0, `Quotes lo unna anni values string. Incident number text kabatti string.`),
-    q(`var priority = 1; gs.info(typeof priority); — em print avtundi?`, [`number`, `string`, `integer`, `boolean`], 0, `Quotes lekunda rasina 1 number type. (JavaScript lo "integer" ane separate type ledu.)`),
-    q(`var isActive = true; gs.info(typeof isActive); — result?`, [`boolean`, `string`, `number`, `true`], 0, `true / false = boolean values.`),
+    q(`Business Rule lo form lo unna incident record ki ready ga unna object peru?`, [`current`, `gr (automatic ga untundi)`, `GlideRecord`, `record`], 0, `Business Rule lo ServiceNow record ni current lo ready ga istundi — new GlideRecord avasaram ledu. gr anedi nuvve pettukune peru (Background Script, Script Include lo).`),
+    q(`var gr = new GlideRecord('incident'); — ee line lo 'new' enti?`, [`JavaScript word — kotha object create chestundi`, `ServiceNow table peru`, `Incident number`, `ServiceNow method`], 0, `new = JavaScript keyword. GlideRecord = ServiceNow tool, 'incident' = table peru, gr = nuvvu pettukune variable peru.`),
     q(`var assignedTo = null; — null ante?`, [`Value ledu (intentionally empty)`, `Value 0`, `Empty string ""`, `Variable declare avvaledu`], 0, `null = "evaru ledu / value ledu". Value ye pettaledu ante undefined; null mathram nuvve pettina "empty".`),
     q(`Multi-line comment ela start avtundi, end avtundi?`, [`/* ... */`, `// ... //`, `<!-- ... -->`, `## ... ##`], 0, `/* tho start, */ tho end. Business Rule header comments ila rastharu.`),
     q(`// gs.info('A');  (next line)  gs.info('B');  — log lo em print avtundi?`, [`B matrame`, `A matrame`, `A, B rendu`, `Emi print avvadu`], 0, `// tho start ayina line anta comment — run avvadu. Next line normal ga run avtundi.`),
@@ -28,7 +28,7 @@ export const QUIZ_EXTRA_JS = {
     q(`gs.info(10 / 4); — result?`, [`2.5`, `2`, `3`, `2.0 (string)`], 0, `JavaScript lo / decimal istundi: 2.5. Round cheyyalante Math.floor / Math.round.`),
     q(`Math.floor(10 / 4) — result?`, [`2`, `2.5`, `3`, `1`], 0, `Math.floor kinda ki round chestundi → 2.`),
     q(`var n = 5; n += 3; n *= 2; gs.info(n); — result?`, [`16`, `13`, `11`, `10`], 0, `5 + 3 = 8, 8 * 2 = 16.`),
-    q(`var count = 5; count++; gs.info(count); — result?`, [`6`, `5`, `51`, `Error`], 0, `count++ = count ni 1 penchutundi → 6.`),
+    q(`Number(gr.getValue('priority')) <= 2 — ee line lo MUNDU edi run avtundi?`, [`gr.getValue('priority')`, `Number(...)`, `<= 2`, `Anni okesari`], 0, `Lopala unnadi mundu: getValue → '1' (string), tarvata Number('1') → 1, chivarlo 1 <= 2. Anduke getValue(number('priority')) tappu.`),
     q(`'5' == 5 — result?`, [`true`, `false`, `undefined`, `Error`], 0, `== type marchi compare chestundi, anduke true. === ayithe false. Anduke === safe.`),
     q(`var p = '2'; gs.info(Number(p) <= 2); — result?`, [`true`, `false`, `'2'`, `NaN`], 0, `Number('2') = 2, 2 <= 2 true.`),
     q(`var assignee = gr.getValue('assigned_to') || 'Unassigned'; — assigned_to empty ayithe assignee?`, [`'Unassigned'`, `''  (empty)`, `null`, `false`], 0, `|| left side falsy (empty) ayithe right side value istundi — default values ki chala useful.`),
