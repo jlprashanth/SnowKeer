@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import CodeEditor from './CodeEditor.jsx'
+// ?worker&inline → classic (non-module) worker embedded as a Blob: works on older browsers, no separate file to fail loading
+import RunnerWorker from '../js/runner.worker.js?worker&inline'
 
 const TIMEOUT_MS = 3000
 const show = (v) => (typeof v === 'string' ? JSON.stringify(v) : JSON.stringify(v) ?? String(v))
@@ -31,34 +33,52 @@ export default function ScriptRunner({ exercise, starter, done, onPass, scenario
     stop()
     setRunning(true)
     setOut(null)
-    const w = new Worker(new URL('../js/runner.worker.js', import.meta.url), { type: 'module' })
+    const payload = {
+      code,
+      scenario: scen,
+      tests: interactive ? [] : exercise?.tests || [],
+      variants: interactive ? undefined : exercise?.variants,
+      client: clientCfg ? (interactive ? { ...clientCfg, ...interactive, interactive: true } : clientCfg) : undefined,
+    }
+    const finish = (data) => {
+      stop()
+      setRunning(false)
+      setOut(data)
+      if (!interactive && data.passed && !passed.current) {
+        passed.current = true
+        onPass?.()
+      }
+    }
+    // Fallback: this browser could not start the Web Worker → run on the page itself (no infinite-loop protection)
+    const runOnPage = async () => {
+      try {
+        const { runScript } = await import('../js/runScript.js')
+        const data = runScript(payload)
+        finish(JSON.parse(JSON.stringify(data, (k, v) => (v === undefined ? null : v))))
+      } catch (err) {
+        finish({ logs: [], results: [], error: String(err) })
+      }
+    }
+    let w
+    try {
+      w = new RunnerWorker()
+    } catch {
+      runOnPage()
+      return
+    }
     worker.current = w
     timer.current = setTimeout(() => {
       stop()
       setRunning(false)
       setOut({ logs: [], results: [], error: `${TIMEOUT_MS / 1000} sec lo complete avvaledu — infinite loop (while(true)) undi emo chudu.` })
     }, TIMEOUT_MS)
-    w.onmessage = (e) => {
-      stop()
-      setRunning(false)
-      setOut(e.data)
-      if (!interactive && e.data.passed && !passed.current) {
-        passed.current = true
-        onPass?.()
-      }
-    }
+    w.onmessage = (e) => finish(e.data)
     w.onerror = (e) => {
-      stop()
-      setRunning(false)
-      setOut({ logs: [], results: [], error: e.message || 'Runner error' })
+      // a script error is reported by the worker itself; an event with no message = the worker failed to start
+      if (e.message) finish({ logs: [], results: [], error: e.message })
+      else { stop(); runOnPage() }
     }
-    w.postMessage({
-      code,
-      scenario: scen,
-      tests: interactive ? [] : exercise?.tests || [],
-      variants: interactive ? undefined : exercise?.variants,
-      client: clientCfg ? (interactive ? { ...clientCfg, ...interactive, interactive: true } : clientCfg) : undefined,
-    })
+    w.postMessage(payload)
   }
 
   const editField = (name, value) => {

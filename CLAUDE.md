@@ -42,7 +42,7 @@ React 18 + Vite 5, plain JS/JSX, no router, no backend, no CSS framework. Progre
 - `src/data/exercises.js` — Stage 1 hands-on exercises done in the **real PDI** (scenario / hint / steps / answer / cleanup revealed on click; `Exercises.jsx`).
   IDs are `lessonId-n` and are stored in progress — **never renumber existing exercises**.
 - **Stage 2 code runner:** `src/js/` — `snowMock.js` (mock `gs`, `GlideRecord`, GlideElement), `snowData.js` (fixed practice data: 8 incidents,
-  users, groups), `runScript.js` (runs code + tests, also provides `Class.create`), `runner.worker.js` (Web Worker, 3 s timeout in `ScriptRunner.jsx`).
+  users, groups), `runScript.js` (runs code + tests, also provides `Class.create`), `runner.worker.js` (Web Worker, 3 s timeout in `ScriptRunner.jsx`; imported with `?worker&inline` = classic Blob worker so old browsers work, and `ScriptRunner` falls back to running on the page if the worker cannot start).
   Lessons: `src/data/lessons-js.js`, `lessons-js-b.js`, `lessons-js-c.js`. UI: `JsLesson.jsx` (Learn / Quiz / Code tabs),
   `ScriptRunner.jsx`, `CodeEditor.jsx` (CodeMirror 6; lazy-loaded because it is large).
 - Practice exercise shape: `jx(lessonId, n, title, level, { task, starter, hint, solution, explain, scenario?, tests })`;
@@ -54,6 +54,7 @@ React 18 + Vite 5, plain JS/JSX, no router, no backend, no CSS framework. Progre
 ## How to test
 - `node dev-tools/check-js.mjs` — every Stage 2 reference solution must pass all tests and every starter must FAIL. Run after any change to `src/js/` or JS lessons.
 - `node dev-tools/check-mock.mjs` — mock API checks (dot-walking `gr.caller_id.email`, `changes()/changesTo()/changesFrom()` vs `previous`, `gs.getUser()`, setVisible vs setDisplay space). Run after editing `src/js/*Mock.js`.
+- `node dev-tools/check-quiz.mjs` — Stage 2 quizzes: 20 questions per lesson (5 original in `lessons-js*.js` + 15 in `src/data/quiz-extra-js.js`, merged in `lessons-js.js`), unique options, valid answers. Stage 3 / Stage 1 quizzes still have ~5 each.
 - `node dev-tools/check-exercises.mjs` — Stage 1 exercise data sanity (ids, lessonIds, prerequisite notes on Practice Task exercises).
 - `dev-tools/test-driver.js` — auto-plays Stage 1 guided lessons (sets `window.__run`). Not loaded by the app: with the dev server running,
   load it in the page (e.g. `await import('/dev-tools/test-driver.js')` in the console), then `await __run('<lessonId>')`. It does not play

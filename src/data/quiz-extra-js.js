@@ -1,0 +1,158 @@
+// Stage 2 · extra quiz questions (15 per lesson → 20 total with the original 5 in each lessons-js*.js file).
+// Merged in lessons-js.js. The right answer is always listed first here; Quiz.jsx shuffles options at render time.
+// Keep every question on ONE line (rendered in an <h2>) and every option within a question unique.
+import { q } from './lessonKit.js'
+
+export const QUIZ_EXTRA_JS = {
+  /* 1 — Comments, data types, variables */
+  'js-basics': [
+    q(`typeof 'INC0010002' — result?`, [`'string'`, `'number'`, `'object'`, `'text'`], 0, `Quotes lo unna anni values string. Incident number text kabatti string.`),
+    q(`var priority = 1; gs.info(typeof priority); — em print avtundi?`, [`number`, `string`, `integer`, `boolean`], 0, `Quotes lekunda rasina 1 number type. (JavaScript lo "integer" ane separate type ledu.)`),
+    q(`var isActive = true; gs.info(typeof isActive); — result?`, [`boolean`, `string`, `number`, `true`], 0, `true / false = boolean values.`),
+    q(`var assignedTo = null; — null ante?`, [`Value ledu (intentionally empty)`, `Value 0`, `Empty string ""`, `Variable declare avvaledu`], 0, `null = "evaru ledu / value ledu". Value ye pettaledu ante undefined; null mathram nuvve pettina "empty".`),
+    q(`Multi-line comment ela start avtundi, end avtundi?`, [`/* ... */`, `// ... //`, `<!-- ... -->`, `## ... ##`], 0, `/* tho start, */ tho end. Business Rule header comments ila rastharu.`),
+    q(`// gs.info('A');  (next line)  gs.info('B');  — log lo em print avtundi?`, [`B matrame`, `A matrame`, `A, B rendu`, `Emi print avvadu`], 0, `// tho start ayina line anta comment — run avvadu. Next line normal ga run avtundi.`),
+    q(`Edi valid variable name (classic script lo)?`, [`shortDesc`, `short-desc`, `short desc`, `2ndIncident`], 0, `Name lo "-" leka space undakudadu, number tho start avvakudadu. camelCase best: shortDesc.`),
+    q(`gs.info('Hello {0}, priority {1}', 'Abel', 1); — print?`, [`Hello Abel, priority 1`, `Hello {0}, priority {1}`, `Hello Abel`, `Hello 0, priority 1`], 0, `{0}, {1} placeholders ki arguments order lo replace avtayi.`),
+    q(`var priority = 1; priority = 2; gs.info(priority); — result?`, [`2`, `1`, `12`, `Error`], 0, `var variable value ni marchochu — chivari value 2.`),
+    q(`const eppudu vaadali (ES12 mode on unte)?`, [`Value marchani vaatiki, e.g. const table = 'incident'`, `Eppudu marche counters ki, e.g. count++`, `Loop variables ki matrame`, `Number values ki matrame`], 0, `const = marchaleni value. Marche values ki let / var.`),
+    q(`var p = gr.getValue('priority'); (p = '2')  gs.info(Number(p) + 1); — result?`, [`3`, `21`, `"21"`, `NaN`], 0, `Number('2') = 2, + 1 = 3. Number() lekapothe "2" + 1 = "21".`),
+    q(`gs.warn(...) / gs.error(...) endhuku?`, [`Warning / error level lo log cheyyadaniki`, `Update set lo record add cheyyadaniki`, `Form meeda message chupinchadaniki`, `Script ni aapadaniki`], 0, `gs.info / gs.warn / gs.error — log level marchi Script Log lo severity chupistayi.`),
+    q(`Variable peru convention ServiceNow scripts lo?`, [`camelCase (incNumber, shortDesc)`, `UPPER-CASE with dashes`, `Spaces tho (inc number)`, `Numbers tho start (1stInc)`], 0, `camelCase vaadadam standard: incNumber, assignedTo, shortDesc.`),
+    q(`Number('') — result? (empty field ni Number() ki ichthe)`, [`0`, `NaN`, `undefined`, `Error`], 0, `Empty string Number() lo 0 avtundi. Anduke empty field ni Number() chese mundu empty ah ani check chey.`),
+    q(`parseInt('2 - High', 10) — result?`, [`2`, `NaN`, `'2'`, `'High'`], 0, `parseInt start nundi digits chaduvutundi, number kaani character daggara aagipotundi → 2. (Number('2 - High') ayithe NaN.)`),
+  ],
+
+  /* 2 — Operators */
+  'js-operators': [
+    q(`gs.info(10 / 4); — result?`, [`2.5`, `2`, `3`, `2.0 (string)`], 0, `JavaScript lo / decimal istundi: 2.5. Round cheyyalante Math.floor / Math.round.`),
+    q(`Math.floor(10 / 4) — result?`, [`2`, `2.5`, `3`, `1`], 0, `Math.floor kinda ki round chestundi → 2.`),
+    q(`var n = 5; n += 3; n *= 2; gs.info(n); — result?`, [`16`, `13`, `11`, `10`], 0, `5 + 3 = 8, 8 * 2 = 16.`),
+    q(`var count = 5; count++; gs.info(count); — result?`, [`6`, `5`, `51`, `Error`], 0, `count++ = count ni 1 penchutundi → 6.`),
+    q(`'5' == 5 — result?`, [`true`, `false`, `undefined`, `Error`], 0, `== type marchi compare chestundi, anduke true. === ayithe false. Anduke === safe.`),
+    q(`var p = '2'; gs.info(Number(p) <= 2); — result?`, [`true`, `false`, `'2'`, `NaN`], 0, `Number('2') = 2, 2 <= 2 true.`),
+    q(`var assignee = gr.getValue('assigned_to') || 'Unassigned'; — assigned_to empty ayithe assignee?`, [`'Unassigned'`, `''  (empty)`, `null`, `false`], 0, `|| left side falsy (empty) ayithe right side value istundi — default values ki chala useful.`),
+    q(`var urgent = false; var state = '3'; gs.info(urgent || state === '3'); — result?`, [`true`, `false`, `'3'`, `undefined`], 0, `|| lo edaina okati true ayithe chalu. state === '3' true.`),
+    q(`var priority = 3; var label = priority <= 2 ? 'High' : 'Normal'; — label?`, [`'Normal'`, `'High'`, `true`, `3`], 0, `3 <= 2 false → ? : lo rendo value 'Normal'.`),
+    q(`gs.info('10' > '9'); — result? (rendu strings)`, [`false`, `true`, `NaN`, `Error`], 0, `Rendu strings ayithe dictionary order lo compare avtayi: '1' < '9' kabatti false. getValue() string istundi — compare mundu Number() chey.`),
+    q(`gs.info('1' != 1); — result?`, [`false`, `true`, `undefined`, `Error`], 0, `!= kuda == laage type marchi compare chestundi: '1' == 1 true, kabatti != false. Strict version !==.`),
+    q(`isNaN(Number('High')) — result?`, [`true`, `false`, `'High'`, `0`], 0, `'High' number kaadu → Number('High') = NaN, isNaN(NaN) = true.`),
+    q(`var impact = 1; var urgency = 2; gs.info(impact + urgency * 2); — result?`, [`5`, `6`, `4`, `12`], 0, `Mundu * (urgency * 2 = 4), tarvata + → 1 + 4 = 5. Order marchalante brackets: (impact + urgency) * 2 = 6.`),
+    q(`gs.info(1 + 2 + 'INC'); — result?`, [`3INC`, `12INC`, `INC3`, `1INC2`], 0, `Left nundi right ki: 1 + 2 = 3 (number), tarvata 3 + 'INC' = '3INC'.`),
+    q(`var caller = null; gs.info(caller && caller.name); — result?`, [`null`, `Error: cannot read name of null`, `undefined`, `''  (empty)`], 0, `&& lo left side falsy ayithe akkade aagipotundi (right side run avvadu) — anduke null-safe check ki vaadatharu.`),
+  ],
+
+  /* 3 — String methods */
+  'js-strings': [
+    q(`'VPN is down'.length — result?`, [`11`, `10`, `3`, `12`], 0, `Spaces kuda count avtayi: VPN(3) + space + is(2) + space + down(4) = 11.`),
+    q(`'vpn'.toUpperCase() — result?`, [`'VPN'`, `'vpn'`, `'Vpn'`, `undefined`], 0, `toUpperCase anni letters ni capital chestundi (kotha string return chestundi).`),
+    q(`'Printer jam'.indexOf('PRINTER') — result?`, [`-1`, `0`, `true`, `7`], 0, `indexOf case-sensitive. 'PRINTER' != 'Printer' kabatti dorakadu → -1.`),
+    q(`short_description lo 'vpn' undo ledo case-insensitive ga check cheyyadaniki (ES5 safe)?`, [`s.toLowerCase().indexOf('vpn') !== -1`, `s.indexOf('VPN') > 0`, `s.contains('vpn')`, `s === 'vpn'`], 0, `Mundu toLowerCase(), tarvata indexOf(...) !== -1. (> 0 tho check chesthe 0th position lo unte miss avtundi.)`),
+    q(`'INC0010004'.slice(0, 3) — result?`, [`'INC'`, `'0010004'`, `'INC0'`, `'NC0'`], 0, `slice(start, end): index 0 nundi 3 varaku (3 include kaadu) → 'INC'.`),
+    q(`'abel.tuter@example.com'.split('@')[0] — result?`, [`'abel.tuter'`, `'example.com'`, `'@'`, `'abel'`], 0, `split('@') = ['abel.tuter', 'example.com'], [0] = modati part.`),
+    q(`'a,b,c'.split(',').length — result?`, [`3`, `5`, `1`, `2`], 0, `split chesaka ['a','b','c'] array → length 3.`),
+    q(`'Hello Abel Abel'.replace('Abel', 'Ravi') — result?`, [`'Hello Ravi Abel'`, `'Hello Ravi Ravi'`, `'Hello Abel Abel'`, `'Ravi'`], 0, `replace(a, b) first match ni matrame marchutundi.`),
+    q(`'INC' + String(42).padStart(7, '0') — result?`, [`'INC0000042'`, `'INC4200000'`, `'INC42'`, `'INC0042'`], 0, `padStart(7,'0') = total 7 chars varaku left lo 0 nimputundi: 0000042.`),
+    q(`ES5 (classic) script lo padStart ledu — safe alternative: ('0000000' + 42).slice(-7) — result?`, [`'0000042'`, `'0000000'`, `'00000042'`, `'42'`], 0, `'000000042' lo chivari 7 characters (slice(-7)) = '0000042'.`),
+    q(`Classic ES5 script lo d.includes('VPN') vaadithe?`, [`"is not a function" error vastundi`, `true / false correct ga vastundi`, `-1 vastundi`, `Emi jaragadu, ignore avtundi`], 0, `includes / startsWith / padStart newer JS (ES6+). ES12 mode off unte undavu. Safe: indexOf !== -1.`),
+    q(`gr.short_description ni string ga teesukovadaniki safe way?`, [`gr.getValue('short_description') leka String(gr.short_description)`, `gr.short_description.length matrame`, `gr.short_description + 0`, `gr['short_description'] ni compare cheyyali`], 0, `Field oka GlideElement object — mundu getValue() leka String() tho string ga marchu, tarvata string methods vaadu.`),
+    q(`var s = '  a  '; s = s.trim(); gs.info(s.length); — result?`, [`1`, `5`, `3`, `0`], 0, `Result ni s ki assign chesam (strings immutable kabatti assign avasaram). trim() tarvata 'a' = length 1.`),
+    q(`'INC0010002'.slice(-3) — result?`, [`'002'`, `'INC'`, `'0010002'`, `'-3'`], 0, `Negative index = chivari nundi count. Chivari 3 characters = '002'.`),
+    q(`'   '.trim() === '' — result? (short_description lo spaces matrame unte validation)`, [`true`, `false`, `undefined`, `Error`], 0, `Spaces anni teesesaka empty string migulutundi — "empty or spaces only" check ki trim() vaadatharu.`),
+  ],
+
+  /* 4 — Arrays */
+  'js-arrays': [
+    q(`var a = ['x', 'y', 'z']; gs.info(a[1]); — result?`, [`y`, `x`, `z`, `undefined`], 0, `Array index 0 nundi start: a[0]='x', a[1]='y'.`),
+    q(`var a = ['x', 'y', 'z']; gs.info(a[3]); — result?`, [`undefined`, `z`, `Error`, `null`], 0, `Lekapoyina index undefined istundi (error kaadu). Last index = length - 1.`),
+    q(`var a = ['x', 'y', 'z']; gs.info(a.pop()); — print?`, [`z`, `x`, `3`, `['x','y']`], 0, `pop() chivari item ni teesi return chestundi (array lo migilindi x, y).`),
+    q(`[3, 1, 2].sort(function (a, b) { return a - b; }).join(',') — result?`, [`'1,2,3'`, `'3,2,1'`, `'3,1,2'`, `'123'`], 0, `a - b compare function → ascending numeric order.`),
+    q(`[10, 9, 1].sort(function (a, b) { return b - a; }).join(',') — result?`, [`'10,9,1'`, `'1,9,10'`, `'1,10,9'`, `'9,10,1'`], 0, `b - a = descending (pedda numbers mundu).`),
+    q(`[1, 2, 3].map(function (n) { return n * 2; }).join(',') — result?`, [`'2,4,6'`, `'1,2,3'`, `'6'`, `'2,3,4'`], 0, `map prathi item meeda function run chesi kotha array istundi.`),
+    q(`[1, 2, 3, 4].filter(function (n) { return n % 2 === 0; }).length — result?`, [`2`, `4`, `1`, `3`], 0, `Even numbers 2, 4 matrame match avtayi → length 2.`),
+    q(`var nums = [1, 2, 3]; nums.filter(function (n) { return n > 1; }); gs.info(nums.length); — result?`, [`3`, `2`, `1`, `undefined`], 0, `filter kotha array return chestundi, original nums ni marchadu — result ni variable lo pettaledu kabatti nums inka 3 items.`),
+    q(`GlideRecord query lo records levu ayithe ids.join(', ') (ids = []) — result?`, [`'' (empty string)`, `null`, `undefined`, `Error`], 0, `Empty array join chesthe empty string. Anduke IN query ki ichche mundu ids.length check chey.`),
+    q(`Collect chesina sys_ids array nundi 'IN' query pettadam ela?`, [`gr.addQuery('sys_id', 'IN', ids.join(','))`, `gr.addQuery('sys_id', 'IN', ids.length)`, `gr.addQuery('sys_id', ids)`, `gr.addQuery('IN', ids)`], 0, `IN condition ki comma-separated string kavali — join(',') tho.`),
+    q(`Classic ES5 server script lo array callback ela rayali?`, [`function (x) { ... }`, `(x) => { ... }`, `x => x * 2`, `lambda x: ...`], 0, `Arrow functions (=>) ES12 mode lo matrame. Classic scripts lo function (x) { } vaadali.`),
+    q(`['a', 'b', 'c'].slice(1).join(',') — result?`, [`'b,c'`, `'a,b'`, `'a'`, `'c'`], 0, `slice(1) = index 1 nundi migilina anni.`),
+    q(`ES5 script lo array lo value undo ledo check cheyyadam?`, [`arr.indexOf(value) !== -1`, `arr.includes(value)`, `arr.has(value)`, `arr.contains(value)`], 0, `includes ES6 — classic ES5 lo undadu. indexOf !== -1 safe.`),
+    q(`Variable array ah kaada ani check cheyyadaniki? (e.g. GlideAjax result)`, [`Array.isArray(x)`, `typeof x === 'array'`, `x.isArray`, `x instanceof List`], 0, `typeof array ki 'object' istundi — Array.isArray(x) correct way.`),
+    q(`var groups = ['Service Desk', 'Network', 'Database']; last item ela teesukovali?`, [`groups[groups.length - 1]`, `groups[groups.length]`, `groups[-1]`, `groups.last()`], 0, `Last index = length - 1. groups[groups.length] undefined istundi.`),
+  ],
+
+  /* 5 — Objects */
+  'js-objects': [
+    q(`var inc = { state: 'New' }; var field = 'state'; — value ela access?`, [`inc[field]`, `inc.field`, `inc(field)`, `inc->field`], 0, `Key peru variable lo unte bracket notation vaadali. inc.field = 'field' ane key vethukutundi (undefined).`),
+    q(`var inc = { number: 'INC1' }; gs.info('number' in inc); — result?`, [`true`, `false`, `'INC1'`, `undefined`], 0, `"key" in obj = property undo ledo (true / false).`),
+    q(`inc.hasOwnProperty('assigned_to') — inc lo assigned_to key ledu ayithe?`, [`false`, `undefined`, `null`, `Error`], 0, `hasOwnProperty true / false istundi.`),
+    q(`JSON.stringify({ a: 1, b: 'x' }) — result?`, [`'{"a":1,"b":"x"}'`, `'[object Object]'`, `{ a: 1, b: 'x' }`, `'a=1,b=x'`], 0, `stringify object ni JSON text ga marchutundi (strings ki double quotes).`),
+    q(`JSON.parse('{"result":{"number":"INC1"}}').result.number — result?`, [`'INC1'`, `undefined`, `'{"number":"INC1"}'`, `Error`], 0, `parse chesaka normal object — dot tho result → number.`),
+    q(`JSON.parse('{bad json') — em avtundi?`, [`Error throw chestundi (try/catch kavali)`, `null istundi`, `undefined istundi`, `{} (empty object) istundi`], 0, `Invalid JSON ki exception vastundi. Integrations lo try { } catch (e) { } tho protect chey.`),
+    q(`var data = {}; gs.info(data.result.number); — em avtundi?`, [`Error: cannot read property of undefined`, `undefined print avtundi`, `null print avtundi`, `'' print avtundi`], 0, `data.result undefined, daani meeda .number access cheste error. Mundu check chey.`),
+    q(`REST response lo result undo ledo safe ga check?`, [`if (data && data.result) { ... }`, `if (data.result.number) { ... }`, `if (data.result == 0) { ... }`, `try ledu, direct access`], 0, `Mundu parent undo check chesi tarvata child access chey.`),
+    q(`var o = { a: 1 }; gs.info(typeof o.b === 'undefined'); — result?`, [`true`, `false`, `'undefined'`, `Error`], 0, `Lekapoyina key undefined — typeof tho check cheyyochu.`),
+    q(`for (var k in { a: 1, b: 2 }) { gs.info(k); } — print?`, [`a, tarvata b`, `1, tarvata 2`, `{a:1}, {b:2}`, `Emi kaadu`], 0, `for...in keys istundi (a, b). Values kosam obj[k].`),
+    q(`var a = { x: 1 }; var b = a; b.x = 2; gs.info(a.x); — result?`, [`2`, `1`, `undefined`, `Error`], 0, `Objects reference tho copy avtayi — a, b rendu same object ni point chestayi. Kotha copy kosam JSON.parse(JSON.stringify(a)).`),
+    q(`REST call response body (getBody()) nundi fields teeskovadaniki?`, [`JSON.parse(body)`, `JSON.stringify(body)`, `Object.keys(body)`, `body.parse()`], 0, `Body TEXT ga vastundi — JSON.parse tho object chesi tarvata fields access.`),
+    q(`Key lo hyphen / space unte (e.g. 'short-desc') access ela?`, [`obj['short-desc']`, `obj.short-desc`, `obj.(short-desc)`, `obj->short-desc`], 0, `Dot notation ki valid name kavali. Special characters unte bracket notation.`),
+    q(`var inc = { caller: { name: 'Abel', vip: true } }; gs.info(inc.caller.vip); — result?`, [`true`, `'Abel'`, `undefined`, `{ name: 'Abel' }`], 0, `Nested objects ki dot chain: inc.caller.vip.`),
+    q(`var inc = { state: 'New' }; delete inc.state; gs.info(inc.state); — result?`, [`undefined`, `'New'`, `null`, `Error`], 0, `delete tarvata property ledu → undefined.`),
+  ],
+
+  /* 6 — Conditions */
+  'js-conditions': [
+    q(`var p = '3'; if (p === '1') label = 'Critical'; else if (p === '3') label = 'Moderate'; else label = 'Low'; — label?`, [`'Moderate'`, `'Critical'`, `'Low'`, `undefined`], 0, `p = '3' ki 2nd branch match avtundi.`),
+    q(`var p = gr.getValue('priority'); (= '1')  if (p === 1) { ... } else { ... } — ye branch run avtundi?`, [`else (string '1' !== number 1)`, `if branch`, `Rendu`, `Emi kaadu`], 0, `getValue string istundi. === type kuda chusthundi kabatti '1' !== 1.`),
+    q(`getValue('active') = 'false' ayithe: if (gr.getValue('active')) { ... } — em avtundi?`, [`if branch run avtundi ('false' non-empty string = truthy)`, `else branch run avtundi`, `Error vastundi`, `Emi run avvadu`], 0, `'false' oka non-empty STRING, anduke truthy! Boolean laaga vaadakudadu.`),
+    q(`getValue('active') correct ga check cheyyadam ela?`, [`gr.getValue('active') === 'true'`, `gr.getValue('active') === true`, `gr.getValue('active') == 1.0`, `if (gr.getValue('active'))`], 0, `String ni string tho compare chey: === 'true'.`),
+    q(`var assignedTo = ''; if (!assignedTo) { gs.info('Unassigned'); } — print avtunda?`, [`Avtundi (empty string falsy)`, `Avvadu`, `Error`, `Undefined print avtundi`], 0, `'' falsy, ! tho true avtundi.`),
+    q(`var count = 0; if (count) { gs.info('Has records'); } else { gs.info('None'); } — print?`, [`None`, `Has records`, `Rendu`, `Error`], 0, `0 falsy kabatti else branch.`),
+    q(`switch (state) lo state = '9' (case lu '1','2','6' matrame) — em run avtundi?`, [`default branch`, `case '6'`, `Error`, `Emi run avvadu (default undadu)`], 0, `Evvi match avvakapothe default run avtundi.`),
+    q(`switch (s) { case '6': case '7': gs.info('Closed-ish'); break; ... } — s = '6' ayithe?`, [`'Closed-ish' print avtundi`, `Emi avvadu (case '6' lo code ledu)`, `Error`, `Default run avtundi`], 0, `Empty case '6' next case code ki fall-through avtundi — grouping ki idi useful.`),
+    q(`if (p === '1' && !assigned) — p = '1', assigned = 'Abel' ayithe?`, [`false`, `true`, `'Abel'`, `Error`], 0, `&& lo rendu true undali. !assigned = !'Abel' = false.`),
+    q(`if (state === '6' || state === '7') — state = '7' ayithe?`, [`true`, `false`, `'7'`, `Error`], 0, `|| lo okati true ayithe chalu.`),
+    q(`x = false; if (x) gs.info('A'); gs.info('B'); (braces ledu) — print?`, [`B matrame`, `A, B`, `A matrame`, `Emi kaadu`], 0, `Braces lekapothe if ki next oka statement matrame belong avtundi. gs.info('B') eppudu run avtundi. Anduke always { } vaadu.`),
+    q(`var p = 1; if (p <= 3) label = 'Moderate or above'; else if (p === 1) label = 'Critical'; — label?`, [`'Moderate or above'`, `'Critical'`, `undefined`, `Rendu`], 0, `Mundu match ayina branch matrame run avtundi. Specific conditions (p === 1) ni mundu pettali.`),
+    q(`var s = '1'; switch (s) { case '1': gs.info('New'); case '2': gs.info('In Progress'); break; } — print?`, [`New, tarvata In Progress`, `New matrame`, `In Progress matrame`, `Emi kaadu`], 0, `case '1' lo break ledu → case '2' code kuda run avtundi.`),
+    q(`Field empty ah ani ServiceNow helper tho check cheyyadaniki?`, [`gs.nil(gr.assigned_to)`, `gs.empty(gr.assigned_to)`, `gs.isBlank(gr.assigned_to)`, `gr.assigned_to === null`], 0, `gs.nil(x) null / undefined / empty string anni cover chestundi.`),
+    q(`var p = gr.getValue('priority'); (= '1')  if (Number(p) <= 2) { ... } — branch run avtunda?`, [`Avtundi (1 <= 2)`, `Avvadu`, `Error`, `Undefined`], 0, `Number() tho marchi compare chesam — High / Critical rendu catch avtayi.`),
+  ],
+
+  /* 7 — Loops */
+  'js-loops': [
+    q(`for (var i = 0; i < 3; i++) { gs.info(i); } — chivarlo log ayye value?`, [`2`, `3`, `1`, `0`], 0, `i = 0, 1, 2 — i < 3 false ayinappudu aagipotundi, so chivari log 2.`),
+    q(`var groups = ['A', 'B', 'C', 'D']; for (var i = 0; i < groups.length; i++) { ... } — entha sarlu run avtundi?`, [`4`, `3`, `5`, `1`], 0, `i = 0..3 → 4 sarlu (groups.length = 4).`),
+    q(`Records ayipoyaka gr.next() em istundi?`, [`false (loop aagipotundi)`, `null`, `undefined`, `Error`], 0, `next() next record unte true, ledhante false.`),
+    q(`First P1 dorikaka break pettakapothe loop em chestundi?`, [`Migilina anni records kuda loop chestundi`, `Automatic ga aagipotundi`, `Error istundi`, `Malli modati nundi start avtundi`], 0, `break leka pothe loop last record varaku velthundi (kani logic correct ga undochu, just waste).`),
+    q(`for (var i = 1; i <= 5; i++) { if (i === 3) continue; gs.info(i); } — entha lines log avtayi?`, [`4 (1, 2, 4, 5)`, `5`, `2`, `3`], 0, `i = 3 ki continue tho skip. Migilina 4 log avtayi.`),
+    q(`for (var i = 1; i <= 5; i++) { if (i === 3) break; gs.info(i); } — entha lines log avtayi?`, [`2 (1, 2)`, `4`, `5`, `3`], 0, `i = 3 ki break tho loop aagipotundi. Mundu 1, 2 matrame.`),
+    q(`var i = 0; while (i < 3) { gs.info(i); } — problem?`, [`i++ ledu → infinite loop`, `Syntax error`, `Emi run avvadu`, `3 sarlu run avtundi`], 0, `i marchaledu kabatti condition eppudu true — infinite loop. Real instance lo transaction cancel avvali.`),
+    q(`Loop lo prathi incident ki vere GlideRecord query chesthe (N+1) — better way?`, [`Okka query tho teesukovali (IN condition / GlideAggregate)`, `Loop lo inka ekkuva queries`, `Records ni 2 sarlu query chey`, `gs.sleep() pettu`], 0, `Prathi iteration lo DB query = slow. Ideal ga okka query (addQuery IN) leka GlideAggregate count kosam.`),
+    q(`array.forEach(function (x) { ... }) lo break vaadochu?`, [`Kaadu — aapalante normal for loop vaadali`, `Avunu, normal ga`, `Avunu, continue tho`, `Avunu, stop() tho`], 0, `forEach ni break tho aapaleru. Early exit kavali ante for / while loop.`),
+    q(`var total = 0; for (var i = 1; i <= 4; i++) { total += i; } gs.info(total); — result?`, [`10`, `4`, `24`, `1234`], 0, `1 + 2 + 3 + 4 = 10.`),
+    q(`while (gr.next()) { if (gr.getValue('priority') === 1) { ... } } — problem?`, [`getValue string istundi kabatti '1' !== 1 — branch eppudu run avvadu`, `Syntax error`, `Infinite loop avtundi`, `gr.next() true avvadu`], 0, `=== 1 ki number kavali, getValue string. '1' ani compare cheyyali (leka Number() tho marchali).`),
+    q(`Loop ki max 5 records matrame kavali ante?`, [`gr.setLimit(5) (query() mundu)`, `gr.limit = 5`, `gr.next(5)`, `gr.query(5)`], 0, `setLimit(n) query() ki mundu pettali.`),
+    q(`Newest incident mundu randoms loop avvalante?`, [`gr.orderByDesc('sys_created_on') (query() mundu)`, `gr.orderBy('sys_created_on') matrame`, `gr.reverse()`, `gr.sort('new')`], 0, `orderByDesc = descending. orderBy = ascending (oldest first).`),
+    q(`for (var i = 0; i < 3; i++) { } gs.info(i); — loop bayata i value?`, [`3`, `2`, `undefined`, `Error (i loop lo matrame)`], 0, `var function-scoped (block-scoped kaadu), anduke loop tarvata kuda i = 3.`),
+    q(`for (var i = 0; i < 2; i++) { for (var j = 0; j < 3; j++) { gs.info('x'); } } — entha 'x' log avtayi?`, [`6`, `5`, `3`, `2`], 0, `Outer 2 × inner 3 = 6.`),
+  ],
+
+  /* 8 — Functions */
+  'js-functions': [
+    q(`function getCount() { return 5; }  gs.info(getCount); — (brackets lekunda) print?`, [`Function reference (code text) — call avvaledu`, `5`, `undefined`, `Error`], 0, `getCount = function ni refer chestundi. getCount() = call chesi result teesukovadam. Brackets marchipokandi.`),
+    q(`function f() { return 1; gs.info('after'); } f(); — 'after' log avtunda?`, [`Avvadu (return tarvata code run avvadu)`, `Avtundi`, `Error`, `Aa line comment ga marutundi`], 0, `return function ni akkade aapestundi.`),
+    q(`function f(a, b) { return b; } gs.info(f(1)); — result?`, [`undefined`, `1`, `null`, `Error`], 0, `Arguments ivvakapothe aa parameter undefined (error kaadu).`),
+    q(`function add(a, b) { return a + b; } gs.info(add('1', 2)); — result?`, [`'12'`, `3`, `NaN`, `Error`], 0, `Oka side string ayithe + text join chestundi. getValue values add chese mundu Number() chey.`),
+    q(`function isP1(p) { return Number(p) === 1; } — isP1('1') mariyu isP1(1)?`, [`Rendu true`, `'1' false, 1 true`, `'1' true, 1 false`, `Rendu false`], 0, `Number() rendu cases ni number 1 ga marchutundi.`),
+    q(`function getInfo() { return { count: 2, label: 'Network' }; } — getInfo().label?`, [`'Network'`, `2`, `undefined`, `Error`], 0, `Rendu values return cheyyalante object (leka array) return chey.`),
+    q(`var IncidentUtil = Class.create(); — Script Include peru 'IncidentUtils' ayithe?`, [`Mismatch — Script Include peru, class peru exact same undali`, `Parledu, edaina work avtundi`, `Auto ga correct avtundi`, `Name ki sambandham ledu`], 0, `Script Include name = class name exact match avvali (case kuda).`),
+    q(`IncidentUtils.getP1Count() — (new lekunda) call chesthe?`, [`"is not a function" error — new IncidentUtils() tho instance create chey`, `Normal ga work avtundi`, `0 istundi`, `null istundi`], 0, `Methods prototype lo untayi, kabatti mundu new IncidentUtils() tho object create cheyyali.`),
+    q(`initialize: function (table) { this.table = table; }  var u = new Util('incident'); gs.info(u.table); — result?`, [`incident`, `undefined`, `Util`, `Error`], 0, `new ivvadam tho initialize run avtundi, parameters ikkade vastayi. this.table property ga save avtundi.`),
+    q(`Script Include prototype lo methods madhya em pettali?`, [`Comma (,)`, `Semicolon (;)`, `Emi avasaram ledu`, `Colon (:)`], 0, `prototype oka object — properties comma tho separate avtayi. Comma marchipothe syntax error.`),
+    q(`function f() { x = 5; } f(); gs.info(x); — em avtundi?`, [`5 (var lekunda rasthe global avtundi — bad practice)`, `ReferenceError, x ledu`, `undefined`, `null`], 0, `var marchipothe variable global ga leak avtundi. Anduke eppudu var vaadu.`),
+    q(`function double(n) { return n * 2; } gs.info(double(double(2))); — result?`, [`8`, `4`, `16`, `2`], 0, `double(2) = 4, double(4) = 8.`),
+    q(`getCount('network') lo gr.getRowCount() return chesthe — typeof getCount('network')?`, [`'number'`, `'string'`, `'object'`, `'undefined'`], 0, `getRowCount() number istundi.`),
+    q(`Same GlideRecord query code ni 3 chotla copy-paste badulu?`, [`Function (leka Script Include) lo petti reuse chey`, `Comments pettu`, `Variables ni global cheyyi`, `Loop lo petti`], 0, `Reuse = function / Script Include. Bug fix cheste okka chota marchali.`),
+    q(`Function nundi rendu values (count, label) return cheyyalante?`, [`Object leka array return chey`, `return rendu sarlu rayali`, `Rendu functions raayali`, `Global variables vaadali`], 0, `Oka return oke value istundi — object { count, label } return chey.`),
+  ],
+}

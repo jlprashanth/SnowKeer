@@ -3,6 +3,7 @@
 import { q, jx } from './lessonKit.js'
 import { LESSONS_JS_B } from './lessons-js-b.js'
 import { LESSONS_JS_C } from './lessons-js-c.js'
+import { QUIZ_EXTRA_JS } from './quiz-extra-js.js'
 
 /* 1 — Comments, data types, variables */
 const basics = {
@@ -201,4 +202,5 @@ gs.info('New priority: ' + current.getValue('priority'));`,
 }
 
 // order = the Udemy video order
-export const JS_LESSONS = [basics, ...LESSONS_JS_B, ...LESSONS_JS_C].map((l) => ({ stage: 2, section: 'JavaScript', ...l }))
+// each lesson's quiz = its original 5 questions + the extra ones from quiz-extra-js.js (20 total)
+export const JS_LESSONS = [basics, ...LESSONS_JS_B, ...LESSONS_JS_C].map((l) => ({ stage: 2, section: 'JavaScript', ...l, quiz: [...l.quiz, ...(QUIZ_EXTRA_JS[l.id] || [])] }))
