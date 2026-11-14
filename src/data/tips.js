@@ -36,7 +36,11 @@ export const TIPS = {
     body: 'Ippudu e page lo unnavo adi ikkada chupistundi. Pakkana star ☆ click chesthe aa page ni Favorites lo save chesukovachu.',
     real: 'Real lo star green ga marutundi — favorite ayyindi ani.',
   },
-  language: { title: 'Language', body: 'UI language marchukovadaniki.', real: 'Idi optional — manam English vadatham.' },
+  scopePicker: {
+    title: 'Application scope & Update set picker (globe)',
+    body: 'Ippudu e application scope (Global...) lo, e update set lo panichestunnavo chupistundi — ikkade nundi marchochu.',
+    real: 'Nee PDI (Next Experience) header lo globe 🌐 icon click chesthe "Application scope: Global", "Update set: Default [Global]" kanipistayi — ikkade scope / update set marchochu. Ee mock lo current update set paina banner lo kuda chupistunnam.',
+  },
   chat: { title: 'Connect chat', body: 'Teammates tho ServiceNow lone chat cheyyadaniki.', real: 'PDI lo kuda untundi.' },
   uiSwitch: { title: 'Workspace / UI switcher', body: 'Different UIs / workspaces ki switch avvadaniki.', real: 'Ekkuva ga use cheyyam, just telusukunte chaalu.' },
   fChannel: { title: 'Channel', body: 'Incident ela vachindi — Phone, Email, Self-service laaga.', real: 'Reporting ki use avtundi.' },
@@ -47,13 +51,13 @@ export const TIPS = {
   },
   listBreadcrumb: {
     title: 'Breadcrumb (filter)',
-    body: 'Ee list ki ippudu e filter apply ayyindo ikkada chupistundi. "All" ante filter ledu — anni records.',
+    body: 'Ee list ki ippudu e filter apply ayyindo ikkada chupistundi. "All" ante filter ledu — anni records. "> " = AND, ".or." = OR (paina condition ki alternative).',
     real: 'Filter pettaka ikkada conditions kanipistayi, vatini click chesi remove cheyochu.',
   },
   curSet: {
     title: 'Current Update Set',
     body: 'Nuvvu ippudu e update set lo working chestunnavo idi chupistundi. Nuvvu chese configuration changes (table, UI policy, menu...) anni ee set lo capture avtayi.',
-    real: 'Real lo idi gear icon → Developer tab lo untundi. (Ikkada easy kosam banner lo pettam.)',
+    real: 'Nee PDI (Next Experience) lo header lo globe 🌐 icon (application scope & update set picker) click chesthe "Update set: Default [Global]" laaga current update set kanipistundi, akkade marchochu. (Ikkada easy kosam banner lo pettam.)',
   },
   navStar: {
     title: 'Favorite (star)',
@@ -67,8 +71,8 @@ export const TIPS = {
   },
   fMenu: {
     title: 'Form context menu (☰)',
-    body: 'Form lo options anni ikkade: Save, Insert, Delete, View marchadam, Configure (Dictionary, Form Layout...). Admin ki idi chala important menu.',
-    real: 'Real lo header meeda right-click chesthe kuda ide menu vastundi.',
+    body: 'Form lo options anni ikkade: Save, Insert / Insert and Stay (open record ni copy chestayi — task tables lo kanipinchavu), Delete, View marchadam, Configure (Dictionary, Form Layout...). Admin ki idi chala important menu.',
+    real: 'Nee PDI lo ☰ (leda form header right-click) lo: Save, Configure ▸ (Form Builder, Form Design, Form Layout, Dictionary, UI Policies...), View ▸, History ▸, Show XML, Copy sys_id, Enable Field Watcher, Reload form. Incident lo "Copy Incident" untundi (Insert levu); Delete form button ga untundi.',
   },
   fUpdate: {
     title: 'Update',
@@ -77,12 +81,16 @@ export const TIPS = {
   },
   flow: {
     title: 'Process Flow',
-    body: 'Record ippudu e stage lo undo chupinche chevron bar. Stage meeda click chesthe State marutundi.',
-    real: 'Form Layout lo "Process Flow" formatter add chesthe idi vastundi.',
+    body: 'Record ippudu e stage lo undo chupinche chevron bar — display matrame (stage meeda click chesthe emi maradu). Prathi stage oka Process Flow record (Table, Label, Order, Condition); Condition match ayina stage highlight avtundi.',
+    real: 'Stages: System UI → Process Flow. Form lo bar kavalante Form Layout lo "Process Flow" formatter add cheyyali. Kani adi Available lo raavalante aa table ki Formatter record undali (System UI → Formatters: Formatter "process_flow.xml", Table = aa table) — nee PDI lo problem, change laanti konni tables ki matrame undi; custom table ki nuvve create cheyyali.',
   },
   'dd-label': { title: 'Column label', body: 'Users ki form lo kanipinche peru. Column name (database peru) idi nundi auto ga "u_..." ga vastundi.' },
   'dd-maxlen': { title: 'Max length', body: 'String field lo entha characters type cheyochu. Default 40.' },
-  'dd-choices': { title: 'Choices', body: 'Choice field lo dropdown options. Oka line ki oka choice. Dependent ayithe "Label | parentValue" ila rayyali.' },
+  'dd-choices': {
+    title: 'Choices',
+    body: 'Choice field lo dropdown options. Oka line ki oka choice. Dependent ayithe "Label | parentValue" ila rayyali.',
+    real: 'Real PDI lo ee box undadu: column save chesaaka, aa dictionary entry lo kinda "Choices" related list lo New tho add chestav. (Form lo field label right-click lo "Configure Choices" kuda undi.)',
+  },
   'dd-default': { title: 'Default value', body: 'Kotha record open chesinappudu ee field lo already unde value. Ex: Status = Planned.', real: 'Existing records ki apply avvadu — kotha records ki matrame.' },
   'dd-dependent': { title: 'Dependent', body: 'Ee field choices inkoka field meeda depend avtayi. Ex: Category = Software ayithe Subcategory lo Email, OS matrame.', real: 'Dependent field = parent field value batti options filter avtayi.' },
   'dd-mandatory': { title: 'Mandatory', body: 'Check chesthe idi lekunda record save cheyyalem. Form lo red ∗ kanipistundi.', real: 'Idi dictionary level — anni forms ki, anni views ki apply avtundi.' },
@@ -108,7 +116,7 @@ export const TIPS = {
   profile: {
     title: 'User profile menu',
     body: 'Nee profile. Ikkade nundi Preferences, Impersonate User (vere user laaga login avvadam — testing ki super useful!), Logout untayi.',
-    real: 'Impersonate user admin ki matrame — roles test cheyadaniki ekkuva vadatharu.',
+    real: 'Nee PDI avatar menu: Profile, Preferences, Keyboard shortcuts, Impersonate user, Elevate role, Printer friendly version, Log out. Impersonate user admin ki matrame — roles test cheyadaniki ekkuva vadatharu.',
   },
   navFilter: {
     title: 'Filter navigator',

@@ -1,21 +1,24 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Quiz from './Quiz.jsx'
 import ScriptRunner from './ScriptRunner.jsx'
-import { Card as PdiCard } from './Exercises.jsx'
+import { Card as PdiCard, LEVEL, SolvedTag } from './Exercises.jsx'
 import { TermBox } from './TermBox.jsx'
 import LessonGlossary from './LessonGlossary.jsx'
 import { cardTermKeys } from '../data/glossary-scan.js'
 
-const RANK = { easy: 0, medium: 1, 'medium+': 1.5, hard: 2 }
-const LEVEL = { easy: '🟢 Easy', medium: '🟡 Medium', 'medium+': '🟠 Medium+', hard: '🔴 Hard' }
-
-export default function JsLesson({ lesson, progress, onBack, onQuizFinish, onExerciseDone, onExerciseToggle }) {
+// openExerciseId (deep link from Hands-on Practice / hub "Continue"): start on the Code tab with that exercise open and scrolled into view
+export default function JsLesson({ lesson, progress, onBack, backLabel = '← Course ki back', openExerciseId, onQuizFinish, onExerciseDone, onExerciseToggle }) {
   const pdi = lesson.mode === 'pdi'
-  const [tab, setTab] = useState('learn')
-  const [open, setOpen] = useState(null)
+  const deepLink = lesson.exercises.some((e) => e.id === openExerciseId) ? openExerciseId : null
+  const [tab, setTab] = useState(deepLink ? 'code' : 'learn')
+  const [open, setOpen] = useState(deepLink)
   const doneMap = progress.jsDone || {}
-  const exs = [...lesson.exercises].sort((a, b) => RANK[a.level] - RANK[b.level])
+  const exs = lesson.exercises // ARRAY order = the order she should do them (no sorting by level)
   const doneCount = exs.filter((e) => doneMap[e.id]).length
+
+  useEffect(() => {
+    if (deepLink) document.getElementById('ex-' + deepLink)?.scrollIntoView({ block: 'start' })
+  }, [deepLink])
 
   const tabBtn = (id, label) => (
     <button className={'tab' + (tab === id ? ' on' : '')} onClick={() => setTab(id)}>{label}</button>
@@ -23,7 +26,7 @@ export default function JsLesson({ lesson, progress, onBack, onQuizFinish, onExe
 
   return (
     <div className="js-page">
-      <button className="btn small" onClick={onBack}>← Course ki back</button>
+      <button className="btn small" onClick={onBack}>{backLabel}</button>
       <h2>{lesson.title}</h2>
       <div className="muted small">🎬 Video: <b>{lesson.video}</b></div>
       <div className="tabs">
@@ -59,8 +62,13 @@ export default function JsLesson({ lesson, progress, onBack, onQuizFinish, onExe
         <Quiz
           key="quiz"
           lesson={lesson}
+          best={progress[lesson.id]?.score}
           finishLabel={pdi ? 'PDI practice ki →' : 'Code exercises ki →'}
-          tip="Next: Code tab lo ServiceNow scripts rayi practice chey."
+          tip={
+            pdi
+              ? 'Next: "🛠 PDI Practice" tab lo tasks nee real PDI lo chey — steps / answer / cleanup akkade unnayi.'
+              : 'Next: Code tab lo ServiceNow scripts rayi practice chey.'
+          }
           onFinish={(score) => {
             onQuizFinish(lesson.id, score)
             setTab('code')
@@ -71,7 +79,11 @@ export default function JsLesson({ lesson, progress, onBack, onQuizFinish, onExe
       {tab === 'code' && pdi && (
         <div>
           <p className="muted">Ivi nee <b>real PDI</b> lo cheyyali — steps / answer / cleanup ikkada chudochu. Cleanup marchipoku!</p>
-          {exs.map((e) => <PdiCard key={e.id} e={e} done={!!doneMap[e.id]} onToggle={onExerciseToggle} />)}
+          {exs.map((e) => (
+            <div key={e.id} id={'ex-' + e.id}>
+              <PdiCard e={e} done={!!doneMap[e.id]} onToggle={onExerciseToggle} />
+            </div>
+          ))}
         </div>
       )}
 
@@ -81,15 +93,15 @@ export default function JsLesson({ lesson, progress, onBack, onQuizFinish, onExe
             Prathi exercise ki code rayyi → <b>Run</b> → tests pass avvali. Struck ayithe Hint, last lo Solution.
           </p>
           {exs.map((e) => (
-            <div key={e.id} className={'ex-card' + (doneMap[e.id] ? ' done' : '')}>
+            <div key={e.id} id={'ex-' + e.id} className={'ex-card' + (doneMap[e.id] ? ' done' : '')}>
               <div className="ex-head" onClick={() => setOpen(open === e.id ? null : e.id)} style={{ cursor: 'pointer' }}>
-                <h3>{doneMap[e.id] ? '✔ ' : ''}{e.title}</h3>
+                <h3>{doneMap[e.id] ? '✔ ' : ''}{e.title} <SolvedTag v={doneMap[e.id]} /></h3>
                 <span className="ex-level">{LEVEL[e.level]} {open === e.id ? '▲' : '▼'}</span>
               </div>
               {open === e.id && (
                 <>
                   <p className="ex-scenario">{e.task}</p>
-                  <ScriptRunner exercise={e} done={!!doneMap[e.id]} onPass={() => onExerciseDone(e.id)} />
+                  <ScriptRunner exercise={e} done={!!doneMap[e.id]} onPass={(info) => onExerciseDone(e.id, info)} />
                 </>
               )}
             </div>

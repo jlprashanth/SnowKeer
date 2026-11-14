@@ -8,10 +8,21 @@ import { CS_LESSONS_C } from './lessons-cs-c.js'
 import { CS_LESSONS_D } from './lessons-cs-d.js'
 import { CS_LESSONS_E } from './lessons-cs-e.js'
 import { VARIANTS_CS } from './variants-cs.js'
+import { VARIANTS_CS_UA } from './variants-cs-ua.js'
+import { QUIZ_EXTRA_CS } from './quiz-extra-cs.js'
+import { QUIZ_EXTRA_CS_UI } from './quiz-extra-cs-ui.js'
 
 const LOAD = { trigger: { type: 'onLoad' } }
 const onChangeOf = (field, oldValue, newValue) => ({ trigger: { type: 'onChange', field, oldValue, newValue } })
 const MSGS = '__msgs.map(function (m) { return m.text })'
+const OPTS = (f) => `__f.${f}.choices.map(function (c) { return c.value + '=' + c.label })`
+// Practice setup for the "option malli pettu" exercises (cs-glform-7 / -4): when the form already shows impact <v>, the user
+// picked <v> earlier and HER onChange ran once — the block replays that run with her own function, so the variant
+// "impact <v> → 2" really tests whether the script puts the option back (variants-cs.js).
+const REPLAY = (v) =>
+  `// Practice setup (ee if block marchaku): form lo impact ippude '${v}' ga undi ante, user mundu impact ${v} pettinappudu\n` +
+  `// nee onChange okasari run ayyindi — aa run ni ikkada replay chestunnam, appude "malli pettu" part test avtundi.\n` +
+  `if (g_form.getValue('impact') == '${v}') {\n  onChange(null, '2', '${v}', false, false);\n}\n\n`
 
 /* 2 — What is client and server, GlideUser API */
 const gluser = {
@@ -43,7 +54,7 @@ g_scratchpad.xyz               current.short_description`,
       h: '👤 g_user — ippudu login ayina user gurinchi',
       body: [
         'g_user object lo ippudu logged-in user info untundi. Server ki round trip avasaram ledu, anduke fast.',
-        'Properties: g_user.userName, g_user.firstName, g_user.lastName, g_user.userID (sys_id). Methods: g_user.hasRole("itil"), g_user.hasRoleExactly("admin"), g_user.hasRoles(), g_user.hasRoleFromList("itil,admin").',
+        'Properties: g_user.userName, g_user.firstName, g_user.lastName, g_user.fullName, g_user.userID — idi sys_id. Methods: g_user.getFullName(), g_user.hasRole("itil"), g_user.hasRoleExactly("admin"), g_user.hasRoles(), g_user.hasRoleFromList("itil,admin").',
         '⚠️ g_user.hasRole("x") admin users ki ellappudu true istundi (admin ki anni roles untayi anukuntundi). Exact check kavalante hasRoleExactly vaadu.',
       ],
       code: `function onLoad() {
@@ -80,8 +91,8 @@ function onLoad() {
     q('Client Script ekkada run avtundi?', ['ServiceNow server lo', 'User browser lo', 'Database lo', 'MID Server lo'], 1, 'Client Scripts browser lo run avtayi.'),
     q('Client script lo current user first name ela teesukuntam?', ['gs.getUserName()', 'g_user.firstName', 'current.firstName', 'g_form.getValue("firstName")'], 1, 'Client lo g_user.firstName. gs. server only.'),
     q('g_user.hasRole("itil") — admin user ki em istundi?', ['false', 'true', 'error', 'undefined'], 1, 'Admin ki hasRole ellappudu true. Exact kavali ante hasRoleExactly.'),
-    q('Server data ni client ki extra call lekunda ela pampali?', ['g_scratchpad (Display BR)', 'g_user.userID', 'gs.getProperty', 'Update Set'], 0, 'Display Business Rule lo g_scratchpad lo values pettali.'),
-    q('Client script lo gs.info("hi") rasthe?', ['Script Log lo vastundi', 'Error — gs client lo ledu', 'Form lo message', 'Em jaragadu'], 1, 'gs server API. Client lo adi available ledu.'),
+    q('Server data ni client ki extra call lekunda ela pampali?', ['g_scratchpad (Display BR)', 'g_user.userID property', 'gs.getProperty() call', 'Update Set lo record pampu'], 0, 'Display Business Rule lo g_scratchpad lo values pettali — form tho paatu client ki vastayi, extra call ledu.'),
+    q('Client script lo gs.info("hi") rasthe?', ['Script Log lo vastundi', 'Error — gs client lo ledu', 'Form paina blue info message', 'Em jaragadu, silent ga'], 1, 'gs server API. Client lo adi available ledu.'),
   ],
   exercises: [
     jx('cs-gluser', 1, 'User ki welcome message', 'easy', {
@@ -91,7 +102,7 @@ function onLoad() {
       starter: 'function onLoad() {\n  // TODO: g_form.addInfoMessage("Welcome " + ...)\n}',
       hint: 'g_form.addInfoMessage("Welcome " + g_user.firstName);',
       solution: "function onLoad() {\n  g_form.addInfoMessage('Welcome ' + g_user.firstName);\n}",
-      explain: 'g_user.firstName current user peru istundi. addInfoMessage form paina blue message chupistundi.',
+      explain: 'g_user.firstName current user peru istundi. addInfoMessage form paina blue message chupistundi. Vere user login ayithe vaalla peru vastundi — anduke hardcode kaadu.',
       tests: [{ label: 'Message: Welcome Abel', expr: MSGS, expect: ['Welcome Abel'] }],
     }),
     jx('cs-gluser', 2, 'Role lekapote read-only', 'easy', {
@@ -107,18 +118,18 @@ function onLoad() {
     jx('cs-gluser', 3, 'New incident lo caller = nenu', 'medium', {
       scenario: { form: { isNew: true, values: {} }, user: { firstName: 'Abel', lastName: 'Tuter', userName: 'abel.tuter', userID: 'u_abel', roles: ['itil'] } },
       client: LOAD,
-      task: 'New incident form lo caller_id empty ga undi. onLoad lo: form new record ayithe (g_form.isNewRecord()) mariyu caller empty ayithe, caller_id ni current user (g_user.userID) tho set chey.',
+      task: 'New incident form lo caller_id empty ga undi. onLoad lo: form new record ayithe (g_form.isNewRecord()) mariyu caller empty ayithe, caller_id ni current user tho set chey: value ga g_user.userID ivvu — adi user sys_id; 3rd argument ga display value g_user.getFullName() kuda ivvu.',
       starter: 'function onLoad() {\n  // TODO\n}',
       hint: [
         'Rendu conditions kavali: form kotha record aa? caller inka empty aa? Rendu true ayithe matrame caller ni current user tho fill chey.',
-        'g_form.isNewRecord() true/false istundi; empty check: g_form.getValue("caller_id") == "". Reference field ki sys_id ivvali — adi g_user.userID lo undi.',
-        'if (g_form.isNewRecord() && g_form.getValue("caller_id") == "") { g_form.setValue("caller_id", g_user.userID); }',
+        'g_form.isNewRecord() true/false istundi; empty check: g_form.getValue("caller_id") == "". Reference field ki sys_id ivvali — adi g_user.userID lo undi; display value g_user.getFullName().',
+        'if (g_form.isNewRecord() && g_form.getValue("caller_id") == "") { g_form.setValue("caller_id", g_user.userID, g_user.getFullName()); }',
       ],
-      solution: "function onLoad() {\n  if (g_form.isNewRecord() && g_form.getValue('caller_id') == '') {\n    g_form.setValue('caller_id', g_user.userID);\n  }\n}",
-      explain: 'Reference field ki setValue lo sys_id istam — g_user.userID sys_id. Empty check lekapothe existing caller ni overwrite chestav.',
+      solution: "function onLoad() {\n  if (g_form.isNewRecord() && g_form.getValue('caller_id') == '') {\n    g_form.setValue('caller_id', g_user.userID, g_user.getFullName());\n  }\n}",
+      explain: 'Reference field ki setValue lo sys_id istam — g_user.userID sys_id. 3rd argument (display value) ivvakapothe browser "Abel Tuter" peru kosam malli server ki velutundi; isthe aa extra round trip ledu (ServiceNow docs best practice). Empty check lekapothe existing caller ni overwrite chestav.',
       tests: [{ label: 'caller_id = u_abel', expr: "g_form.getValue('caller_id')", expect: 'u_abel' }],
     }),
-    // ---- Medium+ ladder: one new idea at a time, building up to exercise 4 ----
+    // ---- Medium+ ladder: one new idea at a time, building up to the hard 'VIP caller (g_scratchpad)' ----
     jx('cs-gluser', 5, 'g_scratchpad nundi value chaduvu', 'medium+', {
       scenario: { scratchpad: { callerGroup: 'Network' }, user: { firstName: 'Abel', userName: 'abel.tuter', userID: 'u_abel', roles: ['itil'] } },
       client: LOAD,
@@ -158,7 +169,7 @@ function onLoad() {
         'g_form.setValue("urgency", "1");   g_form.addInfoMessage("VIP caller — " + g_user.firstName + ", please check");',
       ],
       solution: "function onLoad() {\n  if (g_scratchpad.callerIsVip) {\n    g_form.setValue('urgency', '1');\n    g_form.addInfoMessage('VIP caller — ' + g_user.firstName + ', please check');\n  }\n}",
-      explain: 'Okate if lo enni actions aina pettochu. Exercise 4 lo inko action (mandatory) kalipi full VIP script rastam.',
+      explain: 'Okate if lo enni actions aina pettochu. Hard exercise "VIP caller (g_scratchpad)" lo inko action (mandatory) kalipi full VIP script rastam.',
       tests: [
         { label: 'urgency = 1', expr: "g_form.getValue('urgency')", expect: '1' },
         { label: 'Message', expr: MSGS, expect: ['VIP caller — Abel, please check'] },
@@ -175,7 +186,7 @@ function onLoad() {
         'if (g_scratchpad.callerIsVip) { g_form.addInfoMessage("VIP caller — handle fast!"); g_form.setValue("urgency", "1"); g_form.setMandatory("short_description", true); }',
       ],
       solution: "function onLoad() {\n  if (g_scratchpad.callerIsVip) {\n    g_form.addInfoMessage('VIP caller — handle fast!');\n    g_form.setValue('urgency', '1');\n    g_form.setMandatory('short_description', true);\n  }\n}",
-      explain: 'g_scratchpad lo values server (Display BR) nunchi vastayi, client lo extra GlideRecord/GlideAjax avasaram ledu.',
+      explain: 'g_scratchpad lo values server (Display BR) nunchi vastayi, client lo extra GlideRecord/GlideAjax avasaram ledu. Nee PDI lo OOB onChange client script "Highlight VIP Caller" (field caller_id) ide VIP idea ni getReference(callback) tho chestundi — callback lo caller.vip == "true" (string tho compare; PDI lo verified). System Definition → Client Scripts lo open chesi chadivi chudu (marchaku).',
       tests: [
         { label: 'Info message', expr: MSGS, expect: ['VIP caller — handle fast!'] },
         { label: 'urgency = 1', expr: "g_form.getValue('urgency')", expect: '1' },
@@ -203,24 +214,29 @@ const glform = {
       h: '📝 Values — getValue / setValue / clearValue',
       body: [
         'g_form.getValue("field") ellappudu STRING istundi. g_form.setValue("field", value) field ni marchutundi. clearValue field ni empty chestundi.',
-        'Reference field ki setValue lo sys_id istam: g_form.setValue("assignment_group", "g_net"). Number kavali ante g_form.getIntValue("priority"), true/false kavali ante getBooleanValue.',
+        'Reference field ki setValue lo sys_id istam. Best practice (ServiceNow docs): 3rd argument ga display value kuda ivvu — g_form.setValue("assignment_group", "g_net", "Network"). Display value lekapothe browser aa peru kosam malli server ki velutundi (extra round trip).',
+        'Number kavali ante g_form.getIntValue("priority"), true/false kavali ante getBooleanValue.',
       ],
       code: `var p = g_form.getValue('priority');      // "1" (string!)
 if (p == '1') { ... }                      // idi work avtundi
 g_form.setValue('urgency', '1');
+g_form.setValue('assignment_group', 'g_net', 'Network'); // sys_id + display value
 g_form.clearValue('assigned_to');`,
     },
     {
       h: '🔒 Mandatory / Read-only / Visible',
       body: [
-        'g_form.setMandatory("field", true|false) — red * vastundi, empty ayithe submit avvadu.',
+        'g_form.setMandatory("field", true|false) — red * vastundi, empty ayithe submit avvadu. g_form.isMandatory("field") — ippudu mandatory na ani check.',
         'g_form.setReadOnly("field", true) / setDisabled — edit cheyyaleru. g_form.setVisible("field", false) — field hide (space migilistundi), g_form.setDisplay("field", false) — hide + space kuda teesestundi.',
-        'g_form.isMandatory("field") — ippudu mandatory na ani check.',
+        '✅ PDI lo test chesam — "mandatory wins": field EMPTY + MANDATORY ga unte setReadOnly(true), setDisplay(false) IGNORE avtayi (field editable ga, kanipistu untundi; error kuda raadu). Hide / read-only kavali ante MUNDU g_form.setMandatory(field, false).',
+        '✅ Form lo leni field peru (typo: "short_desc") ichina g_form error ivvadu — silent ga emi jaragadu. Script emi cheyyakapothe mundu field name spelling check chey.',
         '⚠️ UI Policy kuda ide chestundi — simple cases ki UI Policy better, complex logic ki Client Script. (Stage 1 lo chusam.)',
       ],
       code: `g_form.setMandatory('assignment_group', true);
 g_form.setReadOnly('number', true);
-g_form.setDisplay('assigned_to', false);`,
+// empty + mandatory field ni hide cheyyali ante — mundu mandatory teeseyyi
+g_form.setMandatory('hold_reason', false);
+g_form.setDisplay('hold_reason', false);`,
     },
     {
       h: '💬 Messages',
@@ -234,19 +250,21 @@ g_form.showFieldMsg('category', 'Hardware ayithe asset tag kuda rayi', 'info');`
     {
       h: '🔽 Choice list options',
       body: [
-        'g_form.addOption("field", "value", "Label") — choice add. g_form.removeOption("field", "value") — teeseyyadam. g_form.clearOptions("field") — anni teeseyyadam.',
-        'Use case: impact Low ayithe urgency lo "1 - High" option teesestam.',
-        '⚠️ Memory nunchi rasina method list — oka method peru nee PDI lo work avvakapote, SN Utils lo / docs lo confirm chesuko.',
+        'g_form.addOption("field", "value", "Label") — choice add (list chivara). 4th argument position: addOption("category", "cloud", "Cloud", 0) → top lo. g_form.removeOption("field", "value") — teeseyyadam. g_form.clearOptions("field") — anni teeseyyadam.',
+        'Use case: impact Low ayithe urgency lo "1 - High" option teesestam. ⚠️ Teesesina option condition marinappudu taanantata tirigi raadu — nuvve malli pettali. Safe way: clearOptions chesi list motham addOption tho malli build chey (order correct ga untundi).',
+        '✅ Nee PDI lo test chesam: list lo already unna value ni addOption chesthe duplicate raadu — emi maradu (urgency 1, 2, 3 ala ne undi). Position kuda maradu — anduke order kavali ante clearOptions tho kotha ga build chey.',
       ],
-      code: `g_form.removeOption('urgency', '1');
-g_form.addOption('category', 'cloud', 'Cloud');`,
+      code: `g_form.removeOption('urgency', '1');              // teeseyyi
+g_form.clearOptions('category');                  // list motham khali
+g_form.addOption('category', 'network', 'Network');
+g_form.addOption('category', 'cloud', 'Cloud', 0); // 0 = top position`,
     },
   ],
   quiz: [
     q('g_form.getValue("priority") em type istundi?', ['number', 'string', 'boolean', 'object'], 1, 'Client lo getValue ellappudu string.'),
     q('Field ni hide chesi, aa space kuda teeseyyali ante?', ['setVisible(f,false)', 'setDisplay(f,false)', 'setReadOnly(f,true)', 'setMandatory(f,false)'], 1, 'setDisplay hide + space remove. setVisible space migilistundi.'),
-    q('Field ki red error message kinda chupinchali ante?', ['g_form.addInfoMessage', 'g_form.showFieldMsg(f, msg, "error")', 'gs.addErrorMessage', 'alert()'], 1, 'showFieldMsg field kinda message chupistundi.'),
-    q('Reference field assignment_group ki setValue lo em istam?', ['Group name', 'Group sys_id', 'Group description', 'Table name'], 1, 'Reference fields ki sys_id istam.'),
+    q('Field KINDA (field daggara) red error message chupinchali ante?', ['g_form.addInfoMessage(msg)', 'g_form.showFieldMsg(f, msg, "error")', 'g_form.addErrorMessage(msg)', 'g_form.flash(f, "#ff0000", 0)'], 1, 'showFieldMsg field kinda message chupistundi. addErrorMessage form PAINA banner — field kinda kaadu.'),
+    q('Reference field assignment_group ki setValue lo em istam?', ['Group name', 'Group sys_id', 'Group description', 'Table name'], 1, 'Reference fields ki sys_id istam (3rd argument ga display value kuda ivvochu).'),
     q('Choice list nunchi oka option teeseyyadaniki?', ['g_form.removeOption', 'g_form.clearValue', 'g_form.deleteOption', 'g_form.hideOption'], 0, 'removeOption(field, value).'),
   ],
   exercises: [
@@ -270,7 +288,7 @@ g_form.addOption('category', 'cloud', 'Cloud');`,
       starter: "function onChange(control, oldValue, newValue, isLoading, isTemplate) {\n  if (isLoading || newValue === '') {\n    return;\n  }\n  // TODO\n}",
       hint: 'g_form.setMandatory("assignment_group", newValue == "1");',
       solution: "function onChange(control, oldValue, newValue, isLoading, isTemplate) {\n  if (isLoading || newValue === '') {\n    return;\n  }\n  g_form.setMandatory('assignment_group', newValue == '1');\n}",
-      explain: 'newValue string ("1"). Condition result (true/false) ni direct ga setMandatory ki pampochu — if/else avasaram ledu.',
+      explain: 'newValue string ("1"). Condition result (true/false) ni direct ga setMandatory ki pampochu — if/else avasaram ledu. Nee PDI lo OOB client script "Worknotes mandatory onChange of priority" kuda ide idea (PDI lo chadivi verified): guard if (isLoading || newValue === "" || g_form.isNewRecord()) return; tarvata newValue == oldValue ayithe g_form.setMandatory("work_notes", false), lekapothe true — ante priority form LOAD value nunchi marithe Work notes mandatory, load value ki tirigi vasthe mandatory teesestundi. Open chesi chadivi chudu (marchaku).',
       tests: [{ label: 'assignment_group mandatory', expr: "g_form.isMandatory('assignment_group')", expect: true }],
     }),
     jx('cs-glform', 3, 'Resolved ayithe group hide', 'medium', {
@@ -284,13 +302,13 @@ g_form.addOption('category', 'cloud', 'Cloud');`,
         'if (g_form.getValue("state") == "6") { g_form.setDisplay("assignment_group", false); g_form.addInfoMessage("Incident already resolved"); }',
       ],
       solution: "function onLoad() {\n  if (g_form.getValue('state') == '6') {\n    g_form.setDisplay('assignment_group', false);\n    g_form.addInfoMessage('Incident already resolved');\n  }\n}",
-      explain: 'getValue("state") "6" string tho compare chesam.',
+      explain: 'getValue("state") "6" string tho compare chesam. Gurtu: assignment_group empty + mandatory ayi unte setDisplay(false) PDI lo ignore avtundi ("mandatory wins") — ikkada group value undi kabatti hide avtundi.',
       tests: [
         { label: 'assignment_group hidden', expr: '__f.assignment_group.visible', expect: false },
         { label: 'Info message', expr: MSGS, expect: ['Incident already resolved'] },
       ],
     }),
-    // ---- Medium+ ladder: one new idea at a time, building up to exercise 4 ----
+    // ---- Medium+ ladder: one new idea at a time, building up to the hard 'Impact Low → urgency High teeseyyi' ----
     jx('cs-glform', 5, 'Choice list nundi option teeseyyi', 'medium+', {
       scenario: { form: { values: { category: 'software' } } },
       client: LOAD,
@@ -309,7 +327,7 @@ g_form.addOption('category', 'cloud', 'Cloud');`,
       scenario: { form: { values: { short_description: '' } } },
       client: LOAD,
       task: 'onLoad lo: short_description empty ayithe, aa field kinda "Problem ni okka line lo rayi" ani info field message chupinchu (form paina banner kaadu — field kinda). 🧰 Vaade words: g_form.getValue(), g_form.showFieldMsg()',
-      starter: "function onLoad() {\n  // Step 1: short_description empty aa? (getValue == '')\n  // Step 2: g_form.showFieldMsg(field, text, 'info')\n}",
+      starter: "function onLoad() {\n  // Step 1: short_description empty aa? — g_form.getValue(...) == ''\n  // Step 2: g_form.showFieldMsg(field, text, 'info')\n}",
       hint: [
         'addInfoMessage form paina banner chupistundi. Ikkada oka field kinda message kavali — vere g_form method.',
         'if (g_form.getValue("short_description") == "") { ... }   lopala g_form.showFieldMsg(field, text, "info").',
@@ -322,35 +340,35 @@ g_form.addOption('category', 'cloud', 'Cloud');`,
         { label: 'Form banner ledu', expr: MSGS, expect: [] },
       ],
     }),
-    jx('cs-glform', 7, 'onChange lo newValue batti option teeseyyi', 'medium+', {
+    jx('cs-glform', 7, 'Option teeseyyi, malli pettu (clearOptions)', 'medium+', {
       scenario: { form: { values: { impact: '2', urgency: '2' } } },
       client: onChangeOf('impact', '2', '1'),
-      task: 'onChange (impact) rayi: impact "1" (High) ki maarithe urgency choice list nundi "3" (Low) option teeseyyi. (Guard: isLoading leda newValue empty ayithe return.) 🧰 Vaade words: onChange, newValue, g_form.removeOption()',
-      starter: "function onChange(control, oldValue, newValue, isLoading, isTemplate) {\n  if (isLoading || newValue === '') {\n    return;\n  }\n  // Step 1: newValue == '1' aa?\n  // Step 2: urgency nundi '3' option teeseyyi\n}",
+      task: 'onChange (impact) rayi: impact "1" (High) ayithe urgency list lo "3 - Low" undakudadu; vere value ki marite list malli full ga (1, 2, 3) undali. Easy way: prathi sari g_form.clearOptions("urgency") chesi list ni addOption tho malli build chey — "1 - High", "2 - Medium" ellappudu, "3 - Low" impact "1" kaakapothe matrame. (Starter lo top block practice setup — marchaku.) 🧰 Vaade words: g_form.clearOptions(), g_form.addOption(), newValue',
+      starter: REPLAY('1') + "function onChange(control, oldValue, newValue, isLoading, isTemplate) {\n  if (isLoading || newValue === '') {\n    return;\n  }\n  // Step 1: urgency list motham khali chey\n\n  // Step 2: '1 - High', '2 - Medium' add chey (value, label)\n\n  // Step 3: newValue '1' KAAKAPOTHE matrame '3 - Low' kuda add chey\n}",
       hint: [
-        'onChange lo kotha value newValue lo undi (string). Adi "1" ayithe matrame option teeseyyi.',
-        'if (newValue == "1") { ... }   lopala g_form.removeOption(field, value).',
-        'if (newValue == "1") { g_form.removeOption("urgency", "3"); }',
+        'removeOption tho teesesina option malli taanantata raadu — condition marite nuvve pettali. Simple + safe: list ni prathi sari kotha ga build chey.',
+        'g_form.clearOptions("urgency");   g_form.addOption("urgency", "1", "1 - High");   …   if (newValue != "1") { …"3 - Low"… }',
+        'g_form.clearOptions("urgency"); g_form.addOption("urgency", "1", "1 - High"); g_form.addOption("urgency", "2", "2 - Medium"); if (newValue != "1") { g_form.addOption("urgency", "3", "3 - Low"); }',
       ],
-      solution: "function onChange(control, oldValue, newValue, isLoading, isTemplate) {\n  if (isLoading || newValue === '') {\n    return;\n  }\n  if (newValue == '1') {\n    g_form.removeOption('urgency', '3');\n  }\n}",
-      explain: 'newValue = user ippude select chesina value. Exercise 4 lo ide pattern ki field message kuda kaluputham.',
-      tests: [{ label: 'urgency options = 1,2', expr: '__f.urgency.choices.map(function (c) { return c.value })', expect: ['1', '2'] }],
+      solution: REPLAY('1') + "function onChange(control, oldValue, newValue, isLoading, isTemplate) {\n  if (isLoading || newValue === '') {\n    return;\n  }\n  g_form.clearOptions('urgency');\n  g_form.addOption('urgency', '1', '1 - High');\n  g_form.addOption('urgency', '2', '2 - Medium');\n  if (newValue != '1') {\n    g_form.addOption('urgency', '3', '3 - Low');\n  }\n}",
+      explain: 'removeOption matrame chesi vadilesthe, user impact ni malli marchina "3 - Low" form reload varaku raadu — bug. clearOptions + addOption tho prathi sari list kotha ga build chesthe rendu cases (teeseyyadam / malli pettadam) oke code tho. addOption ki value + label rendu ivvali. ✅ Nee PDI lo test chesam: already unna value ni malli addOption chesthe duplicate raadu — emi maradu (position kuda maradu). Anduke list order correct ga kavali ante clearOptions tho mundu nunchi build cheyyadam safe.',
+      tests: [{ label: 'urgency options = 1, 2', expr: OPTS('urgency'), expect: ['1=1 - High', '2=2 - Medium'] }],
     }),
-    jx('cs-glform', 4, 'Impact Low → urgency High teeseyyi', 'hard', {
+    jx('cs-glform', 4, 'Impact Low → urgency High teeseyyi (malli pettu kuda)', 'hard', {
       scenario: { form: { values: { impact: '2', urgency: '2' } } },
       client: onChangeOf('impact', '2', '3'),
-      task: 'onChange (impact) rayi: impact "3" (Low) ayithe urgency choice list nunchi "1" (High) option teeseyyi, urgency field kinda "High urgency Low impact ki vaddu" ani info field message chupinchu. (Guard marchipoku.)',
-      starter: "function onChange(control, oldValue, newValue, isLoading, isTemplate) {\n  if (isLoading || newValue === '') {\n    return;\n  }\n  // TODO\n}",
+      task: 'onChange (impact) rayi: impact "3" (Low) ayithe urgency list lo "1 - High" undakudadu mariyu urgency kinda "High urgency Low impact ki vaddu" ani info field message chupinchu. Impact vere value ki marite: list malli 1, 2, 3 (aa order lo) undali, field message pokudadu. (Starter top block practice setup — marchaku. Guard marchipoku.)',
+      starter: REPLAY('3') + "function onChange(control, oldValue, newValue, isLoading, isTemplate) {\n  if (isLoading || newValue === '') {\n    return;\n  }\n  // TODO\n}",
       hint: [
-        'Medium+ lo chesina rendu ideas kalupu: newValue check chesi option teeseyyi (ex 7), field kinda message (ex 6).',
-        'if (newValue == "3") { ... }   lopala g_form.removeOption("urgency", <value>) mariyu g_form.showFieldMsg("urgency", text, "info").',
-        'if (newValue == "3") { g_form.removeOption("urgency", "1"); g_form.showFieldMsg("urgency", "High urgency Low impact ki vaddu", "info"); }',
+        'Medium+ "Option teeseyyi, malli pettu (clearOptions)" laage list ni prathi sari build chey — ippudu "1 - High" condition tho. Plus field message: mundu hideFieldMsg (clean), impact "3" ayithe showFieldMsg.',
+        'g_form.hideFieldMsg("urgency"); g_form.clearOptions("urgency"); if (newValue != "3") { …1 - High… } …2, 3…   if (newValue == "3") { showFieldMsg(...) }',
+        'g_form.hideFieldMsg("urgency"); g_form.clearOptions("urgency"); if (newValue != "3") { g_form.addOption("urgency", "1", "1 - High"); } g_form.addOption("urgency", "2", "2 - Medium"); g_form.addOption("urgency", "3", "3 - Low"); if (newValue == "3") { g_form.showFieldMsg("urgency", "High urgency Low impact ki vaddu", "info"); }',
       ],
-      solution: "function onChange(control, oldValue, newValue, isLoading, isTemplate) {\n  if (isLoading || newValue === '') {\n    return;\n  }\n  if (newValue == '3') {\n    g_form.removeOption('urgency', '1');\n    g_form.showFieldMsg('urgency', 'High urgency Low impact ki vaddu', 'info');\n  }\n}",
-      explain: 'removeOption(field, value) — value choice yokka stored value ("1"), label kaadu.',
+      solution: REPLAY('3') + "function onChange(control, oldValue, newValue, isLoading, isTemplate) {\n  if (isLoading || newValue === '') {\n    return;\n  }\n  g_form.hideFieldMsg('urgency');\n  g_form.clearOptions('urgency');\n  if (newValue != '3') {\n    g_form.addOption('urgency', '1', '1 - High');\n  }\n  g_form.addOption('urgency', '2', '2 - Medium');\n  g_form.addOption('urgency', '3', '3 - Low');\n  if (newValue == '3') {\n    g_form.showFieldMsg('urgency', 'High urgency Low impact ki vaddu', 'info');\n  }\n}",
+      explain: 'Clean (hideFieldMsg + clearOptions) → build → message: ee order tho impact enni sarlu marchina list, message correct ga untayi. addOption(field, value, label) list CHIVARA add chestundi — "1 - High" top lo kavali ante clearOptions tho mundu nunchi build chey (leda 4th argument 0). Gurtu: ikkada "newValue == oldValue" guard pettaku — user load value ki tirigi vachinappudu (impact 2 → 3 → 2) kuda list restore avvali.',
       tests: [
-        { label: 'urgency options = 2,3', expr: '__f.urgency.choices.map(function (c) { return c.value })', expect: ['2', '3'] },
-        { label: 'urgency field message', expr: '__f.urgency.msgs.length', expect: 1 },
+        { label: 'urgency options = 2, 3', expr: OPTS('urgency'), expect: ['2=2 - Medium', '3=3 - Low'] },
+        { label: 'urgency field message', expr: '__f.urgency.msgs.map(function (m) { return m.type + ": " + m.text })', expect: ['info: High urgency Low impact ki vaddu'] },
       ],
     }),
   ],
@@ -363,6 +381,10 @@ export const CS_LESSONS = [gluser, glform, ...CS_LESSONS_B, ...CS_LESSONS_C, ...
     stage: 3,
     section: 'Client scripting',
     ...l,
-    // extra test runs (else-branches etc.) live in variants-cs.js, keyed by exercise id
-    exercises: l.exercises.map((e) => (VARIANTS_CS[e.id] ? { ...e, variants: VARIANTS_CS[e.id] } : e)),
+    quiz: [...l.quiz, ...(QUIZ_EXTRA_CS[l.id] || []), ...(QUIZ_EXTRA_CS_UI[l.id] || [])], // more questions: quiz-extra-cs.js / quiz-extra-cs-ui.js
+    // extra test runs (else-branches etc.): inline `variants` on the exercise PLUS variants-cs.js / variants-cs-ua.js, keyed by id
+    exercises: l.exercises.map((e) => {
+      const extra = [...(VARIANTS_CS[e.id] || []), ...(VARIANTS_CS_UA[e.id] || [])]
+      return extra.length ? { ...e, variants: [...(e.variants || []), ...extra] } : e
+    }),
   }))

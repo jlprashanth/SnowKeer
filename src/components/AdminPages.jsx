@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import SlushBucket from './SlushBucket.jsx'
-import { fieldsOf, layoutFor, snake, tableByLabel, viewTitle, chain } from '../engine/ops.js'
+import { fieldsOf, layoutFor, snake, tableByLabel, viewTitle, chain, isTaskTable } from '../engine/ops.js'
+
+// tables that extend `t` (directly or further down)
+const childTablesOf = (d, t) => Object.keys(d.tables).filter((n) => n !== t && chain(d, n).includes(t))
 
 const TYPES = [
-  ['string', 'String'], ['choice', 'Choice'], ['reference', 'Reference'], ['integer', 'Integer'], ['boolean', 'True/False'], ['longtext', 'String (Long text)'],
+  ['string', 'String'], ['choice', 'Choice'], ['reference', 'Reference'], ['integer', 'Integer'], ['boolean', 'True/False'], ['longtext', 'String (Long text)'], ['datetime', 'Date/Time'],
 ]
 const typeLabel = (v) => TYPES.find((t) => t[0] === v)?.[1] || v
 
@@ -33,7 +36,8 @@ export function DictList({ ctx, route }) {
           <tbody>
             {flds.map((x) => (
               <tr key={x.name} data-tour={'dict-row-' + x.name}>
-                <td><a className="lnk" data-tour={'dict-open-' + x.name} onClick={() => go({ name: 'dict.form', table: t, field: x.name })}>{x.label}</a></td>
+                {/* an inherited column's dictionary entry belongs to the PARENT table (that is where Dictionary Overrides live) */}
+                <td><a className="lnk" data-tour={'dict-open-' + x.name} onClick={() => go(x._from === t ? { name: 'dict.form', table: t, field: x.name } : { name: 'dict.form', table: x._from, field: x.name, backTo: { name: 'dict.list', table: t } })}>{x.label}</a></td>
                 <td>{x.name}</td>
                 <td>{typeLabel(x.type)}</td>
                 <td>{x._from}{x._overridden ? ' (overridden)' : ''}</td>
@@ -50,7 +54,9 @@ export function DictList({ ctx, route }) {
   )
 }
 
-/* ---------- Dictionary entry form (and dictionary override for inherited fields) ---------- */
+/* ---------- Dictionary entry form + its "Dictionary Overrides" related list (and the override form) ----------
+   Like the PDI: an override is made from the PARENT column's dictionary entry → Dictionary Overrides → New → Table = child.
+   route.override = show the override form for column route.field of table route.table (route.ovTable = child to edit). */
 export function DictForm({ ctx, route }) {
   const { d, go, mutate, ops } = ctx
   const t = route.table
@@ -58,28 +64,45 @@ export function DictForm({ ctx, route }) {
   const all = fieldsOf(d, t)
   const existing = route.field ? all.find((x) => x.name === route.field) : null
   const inherited = existing && existing._from !== t
+  const base = inherited ? existing._from : t // the table that owns the column
+  const ovMode = !!existing && (!!route.override || inherited)
+  const children = childTablesOf(d, base)
+  const ovOf = (child) => (child && existing ? d.tables[child]?.overrides?.[existing.name] : null) || null
+  const flagsOf = (o) => ({ mandatory: !!o && 'mandatory' in o, readonly: !!o && 'readonly' in o, default: !!o && 'default' in o })
+  const startOv = route.ovTable || (inherited ? t : '')
+  const [ovTable, setOvTable] = useState(startOv)
   const [f, setF] = useState(() =>
     existing
-      ? { ...existing, choicesText: (existing.choices || []).map((c) => (c.dep ? `${c.label} | ${c.dep}` : c.label)).join('\n'), isDisplay: d.tables[existing._from].display === existing.name }
+      ? { ...existing, ...(ovOf(startOv) || {}), choicesText: (existing.choices || []).map((c) => (c.dep ? `${c.label} | ${c.dep}` : c.label)).join('\n'), isDisplay: d.tables[existing._from].display === existing.name }
       : { label: '', type: 'string', maxLength: '', default: '', mandatory: false, readonly: false, dependent: '', ref: '', choicesText: '', isDisplay: false },
   )
-  const [ov, setOv] = useState({ mandatory: false, readonly: false, default: false })
+  const [ov, setOv] = useState(() => flagsOf(ovOf(startOv)))
   const [err, setErr] = useState('')
   const set = (k) => (e) => setF((p) => ({ ...p, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }))
   const colName = existing ? existing.name : f.label ? snake(f.label) : ''
 
-  const back = () => go({ name: 'dict.list', table: t })
+  const back = () => go(route.backTo || { name: 'dict.list', table: t })
+  const toEntry = () => go({ name: 'dict.form', table: base, field: existing.name, backTo: route.backTo, k: Date.now() })
+
+  // switching the Table shows that child's existing override (or the base column values when it has none)
+  const pickOvTable = (child) => {
+    setOvTable(child)
+    const o = ovOf(child)
+    setOv(flagsOf(o))
+    setF((p) => ({ ...p, mandatory: existing.mandatory, readonly: existing.readonly, default: existing.default, ...(o || {}) }))
+  }
 
   const submitOverride = () => {
+    if (!ovTable) return setErr('The following mandatory fields are not filled in: Table')
     const o = {}
     if (ov.mandatory) o.mandatory = !!f.mandatory
     if (ov.readonly) o.readonly = !!f.readonly
-    if (ov.default) o.default = f.default
+    if (ov.default) o.default = String(f.default ?? '').trim()
     mutate((n) => {
-      n.tables[t].overrides = { ...(n.tables[t].overrides || {}), [existing.name]: o }
-      ops.recordConfig(n, 'Dictionary Override', `${t}.${existing.name}`)
+      n.tables[ovTable].overrides = { ...(n.tables[ovTable].overrides || {}), [existing.name]: o }
+      ops.recordConfig(n, 'Dictionary Override', `${ovTable}.${existing.name}`)
     })
-    back()
+    toEntry()
   }
 
   const submit = () => {
@@ -116,22 +139,31 @@ export function DictForm({ ctx, route }) {
 
   const dependents = all.filter((x) => x.name !== colName && x.type === 'choice').map((x) => x.name)
 
-  if (inherited)
+  if (ovMode)
     return (
       <div className="form-page">
         <div className="form-bar">
-          <button className="fb-back" onClick={back} aria-label="Back">‹</button>
-          <div className="fb-title">Dictionary Override<br /><span>{t}.{existing.name}</span></div>
+          <button className="fb-back" onClick={toEntry} aria-label="Back">‹</button>
+          <div className="fb-title">Dictionary Override<br /><span>{ovTable ? `${ovTable}.${existing.name}` : 'New record'}</span></div>
           <div className="spacer" />
           <button className="fb-btn" data-tour="ov-submit" onClick={submitOverride}>Submit</button>
         </div>
         <div className="form-scroll">
+          {err && <div className="form-err">⛔ {err}</div>}
           <div className="note-bar">
-            "{existing.label}" field parent table <b>{existing._from}</b> nundi inherit ayyindi. Child table <b>{tb.label}</b> lo matrame behaviour marchali ante, ikkada Override cheyyali (parent ki effect undadu).
+            "{existing.label}" column <b>{base}</b> (parent) table di. "Table" lo child table select chesi, aa child lo matrame behaviour marchu — parent ki, migatha child tables ki effect undadu.
           </div>
           <div className="fgrid">
-            <div className="frow"><label>Table</label><div className="ro">{tb.label}</div></div>
-            <div className="frow"><label>Base column</label><div className="ro">{existing.label} ({existing.name})</div></div>
+            <div className="frow" data-tour="ov-table">
+              <label><b className="req">∗</b>Table</label>
+              <select value={ovTable} onChange={(e) => pickOvTable(e.target.value)} aria-label="Table">
+                <option value="">-- None --</option>
+                {children.map((n) => <option key={n} value={n}>{d.tables[n].label}</option>)}
+              </select>
+            </div>
+            <div className="frow"><label>Base table</label><div className="ro">{d.tables[base].label} ({base})</div></div>
+            <div className="frow"><label>Column name</label><div className="ro">{existing.label} ({existing.name})</div></div>
+            {!children.length && <div className="frow"><label /><div className="muted small">Ee table ni extend chese child tables inka levu.</div></div>}
             {[['mandatory', 'Mandatory'], ['readonly', 'Read only']].map(([k, lab]) => (
               <div key={k} className="frow check" data-tour={'ov-' + k}>
                 <label>Override {lab.toLowerCase()}</label>
@@ -216,12 +248,48 @@ export function DictForm({ ctx, route }) {
             <input type="checkbox" className="cb" checked={!!f.isDisplay} onChange={set('isDisplay')} />
           </div>
         </div>
+        {existing && (
+          <>
+            <div className="tabs">
+              <button type="button" className="tab on">Dictionary Overrides</button>
+            </div>
+            <div className="tab-body" data-tour="ov-list">
+              <div className="rel">
+                <div className="rel-head">
+                  <b>Dictionary Overrides</b>
+                  <button type="button" className="fb-btn" data-tour="ov-new" onClick={() => go({ name: 'dict.form', table: t, field: existing.name, override: true, backTo: route.backTo, k: Date.now() })}>
+                    New
+                  </button>
+                </div>
+                <table className="mini-grid" data-tour="ov-grid">
+                  <thead>
+                    <tr><th>Table</th><th>Override default value</th><th>Default value</th><th>Override mandatory</th><th>Override read only</th></tr>
+                  </thead>
+                  <tbody>
+                    {children.filter((n) => ovOf(n)).map((n) => {
+                      const o = ovOf(n)
+                      return (
+                        <tr key={n} onClick={() => go({ name: 'dict.form', table: t, field: existing.name, override: true, ovTable: n, backTo: route.backTo, k: Date.now() })}>
+                          <td><a className="lnk">{d.tables[n].label}</a></td><td>{String('default' in o)}</td><td>{String(o.default ?? '')}</td><td>{String('mandatory' in o)}</td><td>{String('readonly' in o)}</td>
+                        </tr>
+                      )
+                    })}
+                    {!children.some((n) => ovOf(n)) && <tr><td colSpan="5" className="center nodata">No records to display</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
 }
 
 /* ---------- Form Layout (slushbucket) ---------- */
+// layout item -> how the PDI's slushbucket shows it (2-column area: begin_split … split … end_split)
+const SPLIT = { '.begin_split': '|- begin_split -|', '.split': '|- split -|', '.end_split': '|- end_split -|' }
+
 export function FormLayout({ ctx, route }) {
   const { d, go, mutate, ops } = ctx
   const t = route.table
@@ -234,11 +302,12 @@ export function FormLayout({ ctx, route }) {
   const [local, setLocal] = useState(null)
   const sections = local || layout
   const flds = fieldsOf(d, t).filter((x) => !x.hidden)
-  const toLabel = (n) => (n.startsWith('--') ? n : n === '#process_flow' ? 'Process Flow' : flds.find((x) => x.name === n)?.label || n)
-  const toName = (l) => (l.startsWith('--') ? l : l === 'Process Flow' ? '#process_flow' : flds.find((x) => x.label === l)?.name || l)
+  const toLabel = (n) => SPLIT[n] || (n === '#process_flow' ? 'Process Flow' : flds.find((x) => x.name === n)?.label || n)
+  const toName = (l) => Object.keys(SPLIT).find((k) => SPLIT[k] === l) || (l === 'Process Flow' ? '#process_flow' : flds.find((x) => x.label === l)?.name || l)
   const sec = sections[Math.min(secIdx, sections.length - 1)]
   const used = new Set(sections.flatMap((s) => s.fields))
-  const available = [...flds.filter((x) => !used.has(x.name)).map((x) => x.label), ...(tb.flow && !used.has('#process_flow') ? ['Process Flow'] : [])]
+  // "Process Flow" is a formatter (not a field) — offered on task tables, like incident
+  const available = [...flds.filter((x) => !used.has(x.name)).map((x) => x.label), ...(isTaskTable(d, t) && !used.has('#process_flow') ? ['Process Flow'] : [])]
 
   const addSection = () => {
     if (!newSec.trim()) return
@@ -292,7 +361,7 @@ export function FormLayout({ ctx, route }) {
           title={`Section: ${sec.name}`}
           available={available}
           selected={sec.fields.map(toLabel)}
-          repeatable={['--split--', '--end_split--']}
+          repeatable={Object.values(SPLIT)}
           ordered
           onSave={save}
           onCancel={() => setLocal(null)}

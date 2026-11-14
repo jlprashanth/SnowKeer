@@ -2,7 +2,7 @@ import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { LESSONS } from './data/lessons.js'
 import { buildSeed } from './engine/schema.js'
 import * as ops from './engine/ops.js'
-import { loadProgress, saveProgress, loadThemeMode, saveThemeMode } from './progress.js'
+import { loadProgress, saveProgress, loadThemeMode, saveThemeMode, clearSavedCode, importProgress } from './progress.js'
 import { Theme } from '@astryxdesign/core/theme'
 import { neutralTheme } from '@astryxdesign/theme-neutral/built'
 import Header from './components/Header.jsx'
@@ -14,8 +14,7 @@ import Quiz from './components/Quiz.jsx'
 import Exercises from './components/Exercises.jsx'
 // Stage 2 pulls in the CodeMirror editor (big) — only load it when a JS lesson is opened
 const JsLesson = lazy(() => import('./components/JsLesson.jsx'))
-import { JS_LESSONS } from './data/lessons-js.js'
-import { CS_LESSONS } from './data/lessons-cs.js'
+import { findCodeLesson } from './data/stages.js'
 import RecordList from './components/RecordList.jsx'
 import RecordForm from './components/RecordForm.jsx'
 import { DictList, DictForm, FormLayout } from './components/AdminPages.jsx'
@@ -25,11 +24,14 @@ import { Home, Soon } from './components/Pages.jsx'
 const clone = (o) => (typeof structuredClone === 'function' ? structuredClone(o) : JSON.parse(JSON.stringify(o)))
 
 export default function App() {
-  const [view, setView] = useState('hub') // hub | sim | quiz | exercises
+  const [view, setView] = useState('hub') // hub | sim | quiz | exercises | js
   const [lessonId, setLessonId] = useState(null)
+  const [quizOnly, setQuizOnly] = useState(false) // Stage 1 "❓ Quiz matrame": quiz without the guided tour
   const [exFilter, setExFilter] = useState(null) // lesson id, or null = all exercises
-  const [jsId, setJsId] = useState(null) // Stage 2 (JavaScript) lesson being viewed
-  const jsLesson = [...JS_LESSONS, ...CS_LESSONS].find((l) => l.id === jsId) || null
+  const [jsId, setJsId] = useState(null) // code-stage lesson (Stage 2, 3, ...) being viewed
+  const [jsExId, setJsExId] = useState(null) // exercise to open on its Code tab (deep link), or null
+  const [jsFrom, setJsFrom] = useState('hub') // where its back button goes: 'hub' | 'exercises'
+  const jsLesson = findCodeLesson(jsId)
   const [stepIdx, setStepIdx] = useState(0)
   const [progress, setProgress] = useState(loadProgress)
   const [helpOn, setHelpOn] = useState(true)
@@ -38,7 +40,14 @@ export default function App() {
   const resetProgress = () => {
     setProgress({})
     saveProgress({})
+    clearSavedCode() // her saved exercise code goes too
     setConfirmReset(false)
+  }
+  // Hub "⬆ Progress load cheyyi" (already confirmed): replaces progress + saved code; returns { ok, error }
+  const loadBackup = (json) => {
+    const r = importProgress(json)
+    if (r.ok) setProgress(r.progress)
+    return r
   }
   const toggleTheme = () =>
     setThemeMode((m) => {
@@ -93,8 +102,15 @@ export default function App() {
     const l = LESSONS.find((x) => x.id === id)
     resetSim(l)
     setLessonId(id)
+    setQuizOnly(false)
     setStepIdx(0)
     setView('sim')
+  }
+  // Stage 1 lesson done at least once → retake just its quiz (no tour)
+  const openQuiz = (id) => {
+    setLessonId(id)
+    setQuizOnly(true)
+    setView('quiz')
   }
   const freePlay = () => {
     resetSim(null)
@@ -115,31 +131,47 @@ export default function App() {
       return i + 1
     })
   }
-  const finishQuiz = (score, thenExercises) => {
-    const next = { ...progress, [lessonId]: { done: true, score } }
-    setProgress(next)
-    saveProgress(next)
-    if (thenExercises) openExercises(lessonId)
-    else toHub()
-  }
-  const openExercises = (id = null) => {
-    setLessonId(null)
-    setExFilter(id)
-    setView('exercises')
-  }
   const updateProgress = (fn) =>
     setProgress((p) => {
       const n = fn(p)
       saveProgress(n)
       return n
     })
-  const openJs = (id) => {
+  // Stage 1 quiz: keeps the BEST score (a lower retry never overwrites it)
+  const finishQuiz = (score, thenExercises) => {
+    const id = lessonId
+    updateProgress((p) => ({ ...p, [id]: { ...p[id], done: true, score: Math.max(score, p[id]?.score ?? 0) } }))
+    if (thenExercises) openExercises(id)
+    else toHub()
+  }
+  const openExercises = (id = null) => {
+    setLessonId(null)
+    setExFilter(id)
+    setJsExId(null) // fresh visit: no exercise row to re-open (only the lesson's back button keeps it)
+    setView('exercises')
+  }
+  // Open a code-stage lesson; exId = open that exercise on the Code tab (deep link); from = where "back" returns
+  const openJs = (id, exId = null, from = 'hub') => {
     setJsId(id)
+    setJsExId(exId)
+    setJsFrom(from)
     setView('js')
+  }
+  const backFromJs = () => {
+    if (jsFrom === 'exercises') setView('exercises') // same Hands-on Practice page, that exercise's row open again
+    else toHub()
   }
   const finishJsQuiz = (id, score) =>
     updateProgress((p) => ({ ...p, [id]: { ...p[id], done: true, score: Math.max(score, p[id]?.score ?? 0) } }))
-  const markJsDone = (exId) => updateProgress((p) => ({ ...p, jsDone: { ...(p.jsDone || {}), [exId]: true } }))
+  // ScriptRunner calls onPass({ viewedSolution }) on the first passing run: true = solved alone, 'solution' = solved after
+  // opening the solution. Both count as done; an earlier true is never downgraded to 'solution'.
+  const markJsDone = (exId, info) =>
+    updateProgress((p) => {
+      const cur = p.jsDone || {}
+      const val = info?.viewedSolution ? 'solution' : true
+      if (cur[exId] === true || cur[exId] === val) return p
+      return { ...p, jsDone: { ...cur, [exId]: val } }
+    })
   const toggleJsDone = (exId) =>
     updateProgress((p) => {
       const cur = { ...(p.jsDone || {}) }
@@ -256,7 +288,10 @@ export default function App() {
         <div className="modal-back" onClick={() => setConfirmReset(false)}>
           <div className="modal" role="alertdialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
             <h3>⚠ Reset all progress?</h3>
-            <p>Lessons, quizzes, exercises anni clear avtayi. <b>Idi undo cheyyadam kudaradu.</b></p>
+            <p>
+              Lessons, quizzes, exercises, nuvvu rasina saved code anni clear avtayi. <b>Idi undo cheyyadam kudaradu.</b>
+              {' '}Kavalante mundu hub lo "⬇ Progress save cheyyi" tho backup teesuko.
+            </p>
             <div className="modal-actions">
               <button className="btn" onClick={() => setConfirmReset(false)}>No</button>
               <button className="btn danger" onClick={resetProgress}>Yes, reset</button>
@@ -265,14 +300,53 @@ export default function App() {
         </div>
       )}
 
-      {view === 'hub' && <Hub progress={progress} onStart={startLesson} onFreePlay={freePlay} onExercises={openExercises} onOpenJs={openJs} />}
+      {view === 'hub' && (
+        <Hub
+          progress={progress}
+          onStart={startLesson}
+          onQuiz={openQuiz}
+          onFreePlay={freePlay}
+          onExercises={openExercises}
+          onOpenJs={(id, exId) => openJs(id, exId, 'hub')}
+          onLoadBackup={loadBackup}
+        />
+      )}
       {view === 'js' && jsLesson && (
         <Suspense fallback={<div className="js-page muted">Editor load avtundi…</div>}>
-          <JsLesson key={jsLesson.id} lesson={jsLesson} progress={progress} onBack={toHub} onQuizFinish={finishJsQuiz} onExerciseDone={markJsDone} onExerciseToggle={toggleJsDone} />
+          <JsLesson
+            key={jsLesson.id + ':' + (jsExId || '')}
+            lesson={jsLesson}
+            progress={progress}
+            openExerciseId={jsExId}
+            onBack={backFromJs}
+            backLabel={jsFrom === 'exercises' ? '← Hands-on Practice ki back' : '← Course ki back'}
+            onQuizFinish={finishJsQuiz}
+            onExerciseDone={markJsDone}
+            onExerciseToggle={toggleJsDone}
+          />
         </Suspense>
       )}
-      {view === 'exercises' && <Exercises lessonId={exFilter} progress={progress} onToggle={toggleExercise} onJsToggle={toggleJsDone} onOpenJs={openJs} onBack={toHub} />}
-      {view === 'quiz' && lesson && <Quiz lesson={lesson} onFinish={finishQuiz} />}
+      {view === 'exercises' && (
+        <Exercises
+          lessonId={exFilter}
+          focusId={jsFrom === 'exercises' ? jsExId : null}
+          progress={progress}
+          onToggle={toggleExercise}
+          onJsToggle={toggleJsDone}
+          onOpenJs={(id, exId) => openJs(id, exId, 'exercises')}
+          onBack={toHub}
+        />
+      )}
+      {view === 'quiz' && lesson && (
+        <Quiz
+          key={lesson.id}
+          lesson={lesson}
+          best={progress[lesson.id]?.score}
+          title={quizOnly ? 'Quiz complete ✅' : undefined}
+          onExit={quizOnly ? toHub : undefined}
+          onFinish={finishQuiz}
+        />
+      )}
 
       {view === 'sim' && (
         <div className="sim">

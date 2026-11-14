@@ -1,3 +1,5 @@
+// Lists quiz questions whose right answer is much longer than the other options (easy to guess even though options are shuffled).
+// run: node dev-tools/audit-quiz2.mjs [ratio=1.7] [v]   — v = verbose (prints question + options). check-quiz.mjs fails at ratio 1.6.
 import { LESSONS } from '../src/data/lessons.js'
 import { JS_LESSONS } from '../src/data/lessons-js.js'
 import { CS_LESSONS } from '../src/data/lessons-cs.js'

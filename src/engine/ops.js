@@ -1,7 +1,8 @@
 // The "mini ServiceNow" engine. Everything is plain JSON in one `db` object, so the UI can
 // clone it, change it, and a lesson can reset it. All functions here take `d` (a mutable clone).
 
-export const DONE = ['Resolved', 'Closed', 'Canceled']
+// Incident State is stored as its choice VALUE, like her PDI: 1 New, 2 In Progress, 3 On Hold, 6 Resolved, 7 Closed, 8 Canceled.
+export const DONE = ['6', '7', '8']
 export const uid = () => Math.random().toString(36).slice(2, 10)
 export const nowStr = () => new Date().toISOString().slice(0, 19).replace('T', ' ')
 export const snake = (s) =>
@@ -24,7 +25,18 @@ export const CONFIG = {
   sys_ui_view_rule: 'View Rule',
   sysrule_assignment: 'Assignment Rule',
   dl_u_priority: 'Priority Data Lookup Rule',
+  sys_process_flow: 'Process Flow',
 }
+
+// Every new (non-child) table gets these system columns, like the PDI. Hidden on the form; listed in the table's Columns tab.
+export const sysFields = () => [
+  { name: 'sys_id', label: 'Sys ID', type: 'string', readonly: true, hidden: true, maxLength: 32 },
+  { name: 'sys_created_on', label: 'Created', type: 'datetime', readonly: true, hidden: true },
+  { name: 'sys_created_by', label: 'Created by', type: 'string', readonly: true, hidden: true },
+  { name: 'sys_updated_on', label: 'Updated', type: 'datetime', readonly: true, hidden: true },
+  { name: 'sys_updated_by', label: 'Updated by', type: 'string', readonly: true, hidden: true },
+  { name: 'sys_mod_count', label: 'Updates', type: 'integer', readonly: true, hidden: true },
+]
 
 /* ---------- tables, fields, layout ---------- */
 export const chain = (d, t) => {
@@ -41,6 +53,10 @@ export function tableByLabel(d, label) {
   if (!label) return null
   return Object.values(d.tables).find((x) => x.label === label || x.name === label)?.name || null
 }
+
+// Task tables (incident + its children): the global Insert / Insert and Stay UI actions are hidden there
+// (condition !current.instanceOf('task') || glide.ui.task.insert == 'true', and that property is false in her PDI).
+export const isTaskTable = (d, t) => chain(d, t).some((c) => d.tables[c]?.task)
 
 export function fieldsOf(d, t) {
   const ch = chain(d, t)
@@ -99,6 +115,9 @@ export function rowsOf(d, t) {
       name: x.name,
       extends: x.extends ? d.tables[x.extends]?.label || x.extends : '',
       application: 'Global',
+      is_extendable: !!x.extensible,
+      auto_number: !!x.autoNumber,
+      number_prefix: x.autoNumber?.prefix || '',
     }))
   }
   const own = d.rows[t] || []
@@ -117,7 +136,11 @@ export function displayOf(d, t, row) {
 
 export function refOptions(d, fld) {
   if (!fld.ref) return []
-  if (fld.ref === 'sys_db_object') return Object.values(d.tables).map((x) => x.label)
+  if (fld.ref === 'sys_db_object') {
+    const tabs = Object.values(d.tables)
+    // "Extends table" only offers tables that have "Extensible" ticked (like the reference qualifier in the PDI)
+    return (fld.name === 'extends' ? tabs.filter((x) => x.extensible) : tabs).map((x) => x.label)
+  }
   if (fld.ref === 'sys_app_application') return (d.rows.sys_app_application || []).map((r) => r.title)
   return rowsOf(d, fld.ref).map((r) => displayOf(d, fld.ref, r))
 }
@@ -169,21 +192,27 @@ export function opMatch(op, val, target) {
   }
 }
 
+// Terms = [{ field, op, value, or?, nq? }] in order — the same meaning as an encoded query in her PDI:
+//   ^   (plain term)  = AND: a new condition that must ALSO be true
+//   ^OR (or: true)    = joins the condition just before it:  A^B^ORC  =  A AND (B OR C)
+//   ^NQ (nq: true)    = "New Criteria": a separate set of conditions, OR'ed with everything before it
 export function evalTerms(terms, getVal) {
   if (!terms || !terms.length) return true
-  const groups = []
+  const sets = [] // sets[] -> AND-groups[] -> OR-alternatives[]
   for (const tm of terms) {
-    if (tm.or || !groups.length) groups.push([])
-    groups[groups.length - 1].push(tm)
+    if (!sets.length || tm.nq) sets.push([])
+    const set = sets[sets.length - 1]
+    if (tm.or && !tm.nq && set.length) set[set.length - 1].push(tm)
+    else set.push([tm])
   }
-  return groups.some((g) => g.every((tm) => opMatch(tm.op, getVal(tm.field), tm.value)))
+  return sets.some((set) => set.every((alts) => alts.some((tm) => opMatch(tm.op, getVal(tm.field), tm.value))))
 }
 
 const SYM = { is: '=', 'is not': '!=', contains: 'LIKE', 'does not contain': 'NOTLIKE', 'starts with': 'STARTSWITH', 'ends with': 'ENDSWITH' }
 export function toEncoded(terms) {
   return (terms || [])
     .map((t, i) => {
-      const lead = i === 0 ? '' : t.or ? '^OR' : '^'
+      const lead = i === 0 ? '' : t.nq ? '^NQ' : t.or ? '^OR' : '^'
       if (t.op === 'is empty') return `${lead}${t.field}ISEMPTY`
       if (t.op === 'is not empty') return `${lead}${t.field}ISNOTEMPTY`
       return `${lead}${t.field}${SYM[t.op] || '='}${t.value}`
@@ -193,24 +222,30 @@ export function toEncoded(terms) {
 export function fromEncoded(q) {
   if (!q) return []
   const out = []
-  q.split('^').forEach((part, i) => {
+  q.split('^').forEach((part) => {
     let or = false
-    if (part.startsWith('OR')) {
+    let nq = false
+    if (part.startsWith('NQ')) {
+      nq = true
+      part = part.slice(2)
+    } else if (part.startsWith('OR')) {
       or = true
       part = part.slice(2)
     }
+    const first = !out.length
+    if (first) or = nq = false
     let m
-    if ((m = part.match(/^(\w+)ISEMPTY$/))) out.push({ field: m[1], op: 'is empty', value: '', or })
-    else if ((m = part.match(/^(\w+)ISNOTEMPTY$/))) out.push({ field: m[1], op: 'is not empty', value: '', or })
+    if ((m = part.match(/^(\w+)ISEMPTY$/))) out.push({ field: m[1], op: 'is empty', value: '', or, nq })
+    else if ((m = part.match(/^(\w+)ISNOTEMPTY$/))) out.push({ field: m[1], op: 'is not empty', value: '', or, nq })
     else if ((m = part.match(/^(\w+?)(!=|=|NOTLIKE|LIKE|STARTSWITH|ENDSWITH)(.*)$/))) {
       const op = Object.keys(SYM).find((k) => SYM[k] === m[2])
-      out.push({ field: m[1], op, value: m[3], or })
+      out.push({ field: m[1], op, value: m[3], or, nq })
     }
-    if (i === 0) out[out.length - 1] && (out[out.length - 1].or = false)
   })
   return out
 }
 
+// Breadcrumb like the list in her PDI: "All > Priority = 1 - Critical > State = In Progress .or. Category = Network"
 export function crumbText(d, t, terms) {
   const fm = fieldMap(d, t)
   const lbl = (fl, v) => {
@@ -219,15 +254,21 @@ export function crumbText(d, t, terms) {
     return v
   }
   if (!terms || !terms.length) return 'All'
-  return terms
-    .map((tm, i) => {
-      const fl = fm[tm.field]
-      const name = fl?.label || tm.field
-      const val = tm.op === 'is empty' || tm.op === 'is not empty' ? '' : lbl(fl, tm.value)
-      const op = { is: '=', 'is not': '!=' }[tm.op] || tm.op
-      return `${i ? (tm.or ? 'OR ' : '> ') : ''}${name} ${op} ${val}`.trim()
-    })
-    .join(' ')
+  return (
+    'All > ' +
+    terms
+      .map((tm, i) => {
+        const fl = fm[tm.field]
+        const name = fl?.label || tm.field
+        const val = tm.op === 'is empty' || tm.op === 'is not empty' ? '' : lbl(fl, tm.value)
+        const op = { is: '=', 'is not': '!=' }[tm.op] || tm.op
+        const cond = `${name} ${op} ${val}`.trim()
+        if (!i) return cond
+        if (tm.nq) return ` — or (New Criteria) — ${cond}`
+        return (tm.or ? ' .or. ' : ' > ') + cond
+      })
+      .join('')
+  )
 }
 
 /* ---------- computed fields ---------- */
@@ -300,9 +341,9 @@ export function dataPolicyError(d, t, vals, old) {
       if (r.data_policy !== p.short_description) continue
       const label = fm[r.field_name]?.label || r.field_name
       if (r.mandatory === 'True' && String(vals[r.field_name] ?? '').trim() === '')
-        return `Data Policy Exception: ${label} is mandatory`
+        return `Data Policy Exception: The following fields are mandatory: ${label}`
       if (r.disabled === 'True' && old && String(vals[r.field_name] ?? '') !== String(old[r.field_name] ?? ''))
-        return `Data Policy Exception: ${label} is read only`
+        return `Data Policy Exception: The following fields are read only: ${label}`
     }
   }
   return null
@@ -318,6 +359,23 @@ export function viewForRecord(d, t, vals) {
     }
   }
   return 'default'
+}
+
+/* ---------- process flow (System UI > Process Flow) ---------- */
+// Each stage is a sys_process_flow record: Table, Label, Order, Condition. The formatter only DISPLAYS them:
+// the first stage (by Order) whose Condition matches the record is the current one.
+export function flowStages(d, t) {
+  return (d.rows.sys_process_flow || [])
+    .filter((r) => r.active !== false && tableByLabel(d, r.table) === t)
+    .sort((a, b) => Number(a.order) - Number(b.order))
+}
+export const flowCurrent = (stages, vals) => stages.findIndex((s) => evalTerms(s.condition, (f) => String(vals[f] ?? '')))
+
+// Insert / Insert and Stay: the OPEN record's values become a NEW record (new sys_id + number); the original stays unchanged.
+export function copyValues(vals) {
+  const out = { ...vals }
+  for (const k of ['sys_id', 'number', 'opened_at', 'sys_created_on', 'sys_created_by', 'sys_updated_on', 'sys_updated_by', 'sys_mod_count']) delete out[k]
+  return out
 }
 
 /* ---------- update sets ---------- */
@@ -360,7 +418,9 @@ function createTable(d, row) {
   const name = snake(row.label)
   const parent = tableByLabel(d, row.extends)
   const fields = []
-  const auto = row.auto_number
+  const auto = row.auto_number === true || row.auto_number === 'true'
+  // Prefix is typed on the Table form (lesson: "TRQ"); if left empty the mock uses the first 3 letters of the label
+  const prefix = String(row.number_prefix || '').trim() || row.label.replace(/[^a-z]/gi, '').slice(0, 3).toUpperCase()
   const tb = {
     name,
     label: row.label,
@@ -370,11 +430,8 @@ function createTable(d, row) {
     layouts: {},
     listCols: [],
     display: null,
-    autoNumber: auto
-      ? { prefix: row.label.replace(/[^a-z]/gi, '').slice(0, 3).toUpperCase(), start: 1 }
-      : parent
-        ? undefined
-        : undefined,
+    extensible: row.is_extendable === true || row.is_extendable === 'true',
+    autoNumber: auto ? { prefix, start: 1 } : undefined,
   }
   d.tables[name] = tb
   d.rows[name] = []
@@ -382,6 +439,8 @@ function createTable(d, row) {
     fields.push({ name: 'number', label: 'Number', type: 'string', readonly: true, calc: 'number' })
     tb.display = 'number'
   }
+  // a child table inherits the sys_ columns from its parent; an independent table gets its own
+  if (!parent) fields.push(...sysFields())
   recordConfig(d, 'Table', name)
   if (row.create_module !== false) {
     let menu = row.menu
@@ -427,9 +486,13 @@ export function updateRow(d, t, id, vals) {
   const cur = getRow(d, t, id)
   if (!cur) return null
   if (t === 'sys_db_object') {
-    if (d.tables[id]) d.tables[id].label = vals.label || d.tables[id].label
+    const tb = d.tables[id]
+    if (tb) {
+      tb.label = vals.label || tb.label
+      if ('is_extendable' in vals) tb.extensible = vals.is_extendable === true || vals.is_extendable === 'true'
+    }
     recordConfig(d, 'Table', id)
-    return cur
+    return getRow(d, t, id)
   }
   const cls = cur.sys_class_name || t
   const arr = d.rows[cls]

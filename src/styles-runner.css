@@ -1,0 +1,6 @@
+/* Script runner extras: mock "hint" log lines (PDI behaviour notes — never part of a test) and the PDI-syntax warning box */
+.log-line.sys { color: #9fb7c4; font-style: italic; }
+.log-line.sys .log-lvl { color: #c9a5ff; }
+.pdi-warn { background: #fff4e5; border: 1px solid #f3c27a; border-radius: 6px; padding: 8px 10px; margin: 6px 0 8px; font-size: 13px; }
+.pdi-warn ul { margin: 4px 0 0 18px; padding: 0; }
+:root[data-theme="dark"] .app.themed .pdi-warn { background: var(--tint-warn); border-color: var(--tint-warn-line); }

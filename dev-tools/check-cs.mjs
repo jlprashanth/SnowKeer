@@ -2,6 +2,7 @@
 // Every client-script exercise: reference solution must pass ALL tests, starter must NOT pass.
 import { CS_LESSONS } from '../src/data/lessons-cs.js'
 import { runScript } from '../src/js/runScript.js'
+import { brazilSyntaxWarnings } from '../src/js/esCheck.js'
 
 let bad = 0
 let n = 0
@@ -9,7 +10,11 @@ const fail = (m) => { bad++; console.log('FAIL', m) }
 const ids = new Set()
 for (const l of CS_LESSONS) {
   if (!l.learn?.length) fail(l.id + ': no learn cards')
-  if (l.quiz?.length !== 5) fail(l.id + ': quiz should have 5 questions')
+  if (!l.quiz?.length) fail(l.id + ': no quiz') // question count + quality: dev-tools/check-quiz.mjs
+  // coded lessons show exercises in ARRAY order (the doing order) — the level badge must never go down along it.
+  // (PDI lessons follow dependency order instead.)
+  const RANK = { easy: 0, medium: 1, 'medium+': 1.5, hard: 2 }
+  if (l.mode !== 'pdi') l.exercises.forEach((e, i) => { if (i && RANK[e.level] < RANK[l.exercises[i - 1].level]) fail(`${e.id}: level '${e.level}' comes after '${l.exercises[i - 1].level}' — reorder the array or relabel`) })
   if (l.exercises.length < (l.mode === 'pdi' ? 3 : 4)) fail(l.id + ': too few exercises')
   l.quiz.forEach((x, i) => { if (!(x.answer >= 0 && x.answer < x.options.length)) fail(`${l.id} quiz ${i}: bad answer index`) })
   for (const e of l.exercises) {
@@ -26,6 +31,8 @@ for (const l of CS_LESSONS) {
     ids.add(e.id)
     for (const k of ['title', 'task', 'starter', 'solution', 'hint', 'explain']) if (!String(e[k] || '').trim()) fail(`${e.id}: empty ${k}`)
     if (!e.client && !e.server) fail(`${e.id}: needs client trigger or server:true`)
+    // server code must run in her PDI (Brazil, global scope). Client scripts run in the browser, so they are not checked.
+    if (e.server) for (const w of brazilSyntaxWarnings(e.solution)) fail(`${e.id}: solution uses syntax her PDI rejects — ${w}`)
     if (!e.tests?.length) { fail(`${e.id}: no tests`); continue }
     const run = (code) => runScript({ code, scenario: e.scenario, tests: e.tests, client: e.client, variants: e.variants })
     const sol = run(e.solution)
@@ -38,6 +45,8 @@ for (const l of CS_LESSONS) {
   }
 }
 import { VARIANTS_CS } from '../src/data/variants-cs.js'
+import { VARIANTS_CS_UA } from '../src/data/variants-cs-ua.js'
 for (const id of Object.keys(VARIANTS_CS)) if (!ids.has(id)) fail('variants-cs.js: unknown exercise id ' + id)
+for (const id of Object.keys(VARIANTS_CS_UA)) if (!ids.has(id)) fail('variants-cs-ua.js: unknown exercise id ' + id)
 console.log(`${CS_LESSONS.length} lessons, ${n} exercises, ${bad} problems`)
 process.exit(bad ? 1 : 0)

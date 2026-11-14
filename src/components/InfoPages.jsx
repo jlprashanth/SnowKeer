@@ -71,7 +71,7 @@ export function DevPortal({ onDone }) {
           <div className="dp-kv" data-tour="dp-url"><span>URL</span><b>https://dev123456.service-now.com</b></div>
           <div className="dp-kv" data-tour="dp-user"><span>Username</span><b>admin</b></div>
           <div className="dp-kv" data-tour="dp-pass"><span>Password</span><b>••••••••••••</b> <em>(copy chesi safe ga petta)</em></div>
-          <div className="dp-kv" data-tour="dp-hib"><span>Hibernation</span><b>Inactive ga unte ~10 days tarvata sleep avtundi — "Wake up" click chesthe malli start avtundi</b></div>
+          <div className="dp-kv" data-tour="dp-hib"><span>Inactivity</span><b>Konni gantalu idle → hibernate (data safe; "Wake up" tho malli start). ~10 rojulu login lekapothe → reclaim, data motham pothundi ⚠️ (exact policy developer portal lo chudu)</b></div>
           <button className="dp-btn" data-tour="dp-open" onClick={onDone}>Open instance →</button>
         </div>
       )}

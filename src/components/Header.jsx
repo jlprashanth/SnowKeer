@@ -43,7 +43,7 @@ export default function Header({ navOpen, onToggleNav, onHome, title, curSet }) 
         <input placeholder="Search" aria-label="Global search" />
         <span className="sn-search-caret">▾</span>
       </div>
-      <button className="sn-icon" data-tip="language" aria-label="Language">
+      <button className="sn-icon" data-tip="scopePicker" aria-label="Application scope and update set">
         <Icon><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" /></Icon>
       </button>
       <button className="sn-icon" data-tip="chat" aria-label="Connect chat">

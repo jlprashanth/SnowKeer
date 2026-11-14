@@ -1,5 +1,7 @@
+import { DONE } from '../engine/ops.js'
+
 export function Home({ incidents }) {
-  const open = incidents.filter((i) => i.active !== false && !['Resolved', 'Closed', 'Canceled'].includes(i.state)).length
+  const open = incidents.filter((i) => i.active !== false && !DONE.includes(String(i.state))).length
   const crit = incidents.filter((i) => String(i.priority) === '1').length
   return (
     <div className="home">

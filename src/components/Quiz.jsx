@@ -13,7 +13,8 @@ function shuffleQuiz(quiz) {
   })
 }
 
-export default function Quiz({ lesson, onFinish, finishLabel = 'Course ki back', tip }) {
+// best = her saved best score for this quiz (the app keeps the best, never a lower retry); onExit = show a back button
+export default function Quiz({ lesson, onFinish, finishLabel = 'Course ki back', tip, best, title = 'Lesson complete ✅', onExit }) {
   const qs = useMemo(() => shuffleQuiz(lesson.quiz), [lesson])
   const hasExercises = exercisesFor(lesson.id).length > 0
   const [i, setI] = useState(0)
@@ -28,10 +29,15 @@ export default function Quiz({ lesson, onFinish, finishLabel = 'Course ki back',
         : score >= qs.length / 2
           ? 'Bagundi 👍 Oka sari video lo kothaga chusi malli try cheyochu.'
           : 'Parledu 🙂 Lesson malli replay chesi try cheyyi.'
+    const hadBest = typeof best === 'number'
     return (
       <div className="quiz">
-        <h2>Lesson complete ✅</h2>
+        <h2>{title}</h2>
         <div className="score">{score} / {qs.length}</div>
+        {hadBest && best > score && (
+          <p className="quiz-best">🏆 Nee best score <b>{best}/{qs.length}</b> alage save ayyi untundi 👍</p>
+        )}
+        {hadBest && score > best && <p className="quiz-best">🏆 Kotha best score! (mundu {best}/{qs.length})</p>}
         <p>{msg}</p>
         <p className="muted">
           {tip || 'Next step: nee real PDI lo ide try chey — All → filter "incident" → New → Submit.'}
@@ -61,6 +67,7 @@ export default function Quiz({ lesson, onFinish, finishLabel = 'Course ki back',
 
   return (
     <div className="quiz">
+      {onExit && <button className="btn small quiz-exit" onClick={onExit}>← Course ki back</button>}
       <div className="muted small">Question {i + 1} / {qs.length}</div>
       <h2>{q.q}</h2>
       <div className="opts">

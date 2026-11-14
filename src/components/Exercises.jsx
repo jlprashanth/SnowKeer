@@ -1,12 +1,20 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { LESSONS } from '../data/lessons.js'
-import { EXERCISES } from '../data/exercises.js'
-import { JS_LESSONS } from '../data/lessons-js.js'
-import { CS_LESSONS } from '../data/lessons-cs.js'
+import { exercisesFor } from '../data/exercises.js'
+import { STAGES, lessonExercises, exerciseDone } from '../data/stages.js'
 
-const RANK = { easy: 0, medium: 1, 'medium+': 1.5, hard: 2 }
-const LEVEL = { easy: '🟢 Easy', medium: '🟡 Medium', 'medium+': '🟠 Medium+', hard: '🔴 Hard' }
-const byLevel = (list) => [...list].sort((a, b) => RANK[a.level] - RANK[b.level]) // stable: easy → hard
+// Exercises always show in the lesson file's ARRAY order (the order she should do them); the badge just shows the level.
+export const LEVEL = { easy: '🟢 Easy', medium: '🟡 Medium', 'medium+': '🟠 Medium+', hard: '🔴 Hard' }
+
+// Code exercise tick: true = passed on her own, 'solution' = passed after opening the solution (still counts as done)
+export function SolvedTag({ v }) {
+  if (v !== 'solution') return null
+  return (
+    <span className="ex-help" title="Solution chusaka pass ayyindi — konni rojula tarvata sontanga malli try cheyyi">
+      👀 (solution chusi)
+    </span>
+  )
+}
 
 export function Card({ e, done, onToggle }) {
   const [hint, setHint] = useState(false)
@@ -54,9 +62,9 @@ export function Card({ e, done, onToggle }) {
 }
 
 // Expandable row: click the head to show/hide the body
-function Fold({ title, meta, open, onToggle, top = false, nested = false, children }) {
+function Fold({ id, title, meta, open, onToggle, top = false, nested = false, children }) {
   return (
-    <div className={'fold' + (top ? ' fold-top' : '') + (nested ? ' fold-nested' : '')}>
+    <div id={id} className={'fold' + (top ? ' fold-top' : '') + (nested ? ' fold-nested' : '')}>
       <button className="fold-head" aria-expanded={open} onClick={onToggle}>
         <span className="fold-title">{title}</span>
         {meta && <span className="fold-meta">{meta}</span>}
@@ -67,16 +75,38 @@ function Fold({ title, meta, open, onToggle, top = false, nested = false, childr
   )
 }
 
-export default function Exercises({ lessonId, progress, onToggle, onJsToggle, onOpenJs, onBack }) {
+// Fold keys: stage = stage.key, lesson = stage.key + ':' + lesson id, exercise = 'ex:' + exercise id
+const foldsOpenFor = (exId) => {
+  for (const s of STAGES) {
+    for (const l of s.lessons) {
+      if (lessonExercises(s, l).some((e) => e.id === exId)) return { [s.key]: true, [s.key + ':' + l.id]: true, ['ex:' + exId]: true }
+    }
+  }
+  return {}
+}
+
+// "2 & 3", "2, 3 & 4"
+const stageNums = (kind) => {
+  const a = STAGES.filter((s) => s.kind === kind).map((s) => s.num)
+  return a.length > 1 ? a.slice(0, -1).join(', ') + ' & ' + a[a.length - 1] : String(a[0] ?? '')
+}
+
+// focusId = the exercise she opened in a lesson from here (back button) → that row opens again and scrolls into view
+export default function Exercises({ lessonId, focusId, progress, onToggle, onJsToggle, onOpenJs, onBack }) {
   const done = progress.exercises || {} // Stage 1 (real PDI)
-  const jsDone = progress.jsDone || {} // Stage 2 + Stage 3 (code runner + PDI practice)
-  const [open, setOpen] = useState({})
+  const jsDone = progress.jsDone || {} // code stages (code runner + PDI practice)
+  const [open, setOpen] = useState(() => (focusId ? foldsOpenFor(focusId) : {}))
   const flip = (k) => setOpen((o) => ({ ...o, [k]: !o[k] }))
+
+  useEffect(() => {
+    if (!focusId || lessonId) return
+    document.getElementById('fx-' + focusId)?.scrollIntoView({ block: 'center' })
+  }, [focusId, lessonId])
 
   // Opened from a single Stage 1 lesson's "Exercises" button
   if (lessonId) {
     const lesson = LESSONS.find((l) => l.id === lessonId)
-    const list = byLevel(EXERCISES.filter((e) => e.lessonId === lessonId))
+    const list = exercisesFor(lessonId)
     const doneCount = list.filter((e) => done[e.id]).length
     return (
       <div className="ex-page">
@@ -91,34 +121,50 @@ export default function Exercises({ lessonId, progress, onToggle, onJsToggle, on
     )
   }
 
-  // All stages
-  const s2Ex = JS_LESSONS.flatMap((l) => l.exercises)
-  const s3Ex = CS_LESSONS.flatMap((l) => l.exercises)
-  const s1Done = EXERCISES.filter((e) => done[e.id]).length
-  const s2Done = s2Ex.filter((e) => jsDone[e.id]).length
-  const s3Done = s3Ex.filter((e) => jsDone[e.id]).length
-  const totalAll = EXERCISES.length + s2Ex.length + s3Ex.length
-  const doneAll = s1Done + s2Done + s3Done
+  // All stages: one fold per stage (lessons without exercises are left out)
+  const rows = STAGES.map((s) => {
+    const lessons = s.lessons.map((l) => ({ l, exs: lessonExercises(s, l) })).filter((x) => x.exs.length)
+    const total = lessons.reduce((a, x) => a + x.exs.length, 0)
+    const doneN = lessons.reduce((a, x) => a + x.exs.filter((e) => exerciseDone(s, progress, e.id)).length, 0)
+    return { s, lessons, total, doneN }
+  })
+  const totalAll = rows.reduce((a, r) => a + r.total, 0)
+  const doneAll = rows.reduce((a, r) => a + r.doneN, 0)
 
-  // A lesson's exercise list for Stage 2/3: code exercises open the lesson runner, PDI ones expand in place
-  const jsLessonBlock = (l, stageKey) => {
-    const exs = byLevel(l.exercises)
+  // Stage 1 lesson: real-PDI cards (ticks in progress.exercises)
+  const guidedBlock = (s, l, exs) => {
+    const lk = s.key + ':' + l.id
+    const n = exs.filter((e) => done[e.id]).length
+    return (
+      <Fold key={lk} title={l.title} meta={`${n}/${exs.length} done`} open={!!open[lk]} onToggle={() => flip(lk)} nested>
+        {exs.map((e) => <Card key={e.id} e={e} done={!!done[e.id]} onToggle={onToggle} />)}
+      </Fold>
+    )
+  }
+
+  // Code-stage lesson: code exercises open the lesson runner, PDI ones expand in place
+  const codeBlock = (s, l, exs) => {
+    const lk = s.key + ':' + l.id
     const n = exs.filter((e) => jsDone[e.id]).length
-    const lk = stageKey + ':' + l.id
     const isPdi = l.mode === 'pdi'
     return (
       <Fold key={lk} title={l.title} meta={`${n}/${exs.length} done`} open={!!open[lk]} onToggle={() => flip(lk)} nested>
         {exs.map((e) => {
           const ek = 'ex:' + e.id
-          const isDone = !!jsDone[e.id]
+          const v = jsDone[e.id]
+          const title = (
+            <>
+              {v ? '✔ ' : ''}{e.title} <SolvedTag v={v} />
+            </>
+          )
           return (
-            <Fold key={ek} title={(isDone ? '✓ ' : '') + e.title} meta={LEVEL[e.level]} open={!!open[ek]} onToggle={() => flip(ek)} nested>
+            <Fold key={ek} id={'fx-' + e.id} title={title} meta={LEVEL[e.level]} open={!!open[ek]} onToggle={() => flip(ek)} nested>
               {isPdi ? (
-                <Card e={e} done={isDone} onToggle={onJsToggle} />
+                <Card e={e} done={!!v} onToggle={onJsToggle} />
               ) : (
                 <div>
                   <p className="ex-scenario">{e.task}</p>
-                  <button className="btn small" onClick={() => onOpenJs(l.id)}>💻 Lesson lo open cheyyi (code run cheyyi)</button>
+                  <button className="btn small" onClick={() => onOpenJs(l.id, e.id)}>💻 Lesson lo open cheyyi (code run cheyyi)</button>
                 </div>
               )}
             </Fold>
@@ -128,39 +174,27 @@ export default function Exercises({ lessonId, progress, onToggle, onJsToggle, on
     )
   }
 
-  const s1Key = 's1'
-  const s2Key = 's2'
-  const s3Key = 's3'
-
   return (
     <div className="ex-page">
       <button className="btn small" onClick={onBack}>← Course ki back</button>
       <h2>🛠 Hands-on Practice</h2>
       <p className="muted">
-        Anni stages exercises ikkada unnayi. Stage 1 nee <b>own PDI</b> lo cheyyali. Stage 2 & 3 lo code exercises
-        lesson lo run cheyyali; PDI practice ivi ikkade cheyyachu. Total progress: <b>{doneAll}/{totalAll}</b>
+        Anni stages exercises ikkada unnayi. Stage {stageNums('guided')} nee <b>own PDI</b> lo cheyyali. Stage {stageNums('code')} lo code
+        exercises lesson lo run cheyyali; PDI practice ivi ikkade cheyyachu. Total progress: <b>{doneAll}/{totalAll}</b>
       </p>
 
-      <Fold top title="STAGE 1 · Introduction (real PDI)" meta={`${s1Done}/${EXERCISES.length} done`} open={!!open[s1Key]} onToggle={() => flip(s1Key)}>
-        {LESSONS.filter((l) => EXERCISES.some((e) => e.lessonId === l.id)).map((l) => {
-          const list = byLevel(EXERCISES.filter((e) => e.lessonId === l.id))
-          const n = list.filter((e) => done[e.id]).length
-          const lk = 's1:' + l.id
-          return (
-            <Fold key={lk} title={l.title} meta={`${n}/${list.length} done`} open={!!open[lk]} onToggle={() => flip(lk)} nested>
-              {list.map((e) => <Card key={e.id} e={e} done={!!done[e.id]} onToggle={onToggle} />)}
-            </Fold>
-          )
-        })}
-      </Fold>
-
-      <Fold top title="STAGE 2 · JavaScript (ServiceNow style)" meta={`${s2Done}/${s2Ex.length} done`} open={!!open[s2Key]} onToggle={() => flip(s2Key)}>
-        {JS_LESSONS.map((l) => jsLessonBlock(l, 's2'))}
-      </Fold>
-
-      <Fold top title="STAGE 3 · Client scripting & UI" meta={`${s3Done}/${s3Ex.length} done`} open={!!open[s3Key]} onToggle={() => flip(s3Key)}>
-        {CS_LESSONS.filter((l) => l.exercises.length).map((l) => jsLessonBlock(l, 's3'))}
-      </Fold>
+      {rows.map(({ s, lessons, total, doneN }) => (
+        <Fold
+          key={s.key}
+          top
+          title={`STAGE ${s.num} · ${s.title}${s.kind === 'guided' ? ' (real PDI)' : ''}`}
+          meta={`${doneN}/${total} done`}
+          open={!!open[s.key]}
+          onToggle={() => flip(s.key)}
+        >
+          {lessons.map(({ l, exs }) => (s.kind === 'guided' ? guidedBlock(s, l, exs) : codeBlock(s, l, exs)))}
+        </Fold>
+      ))}
     </div>
   )
 }

@@ -1,17 +1,33 @@
 import { useEffect, useRef, useState } from 'react'
 import CodeEditor from './CodeEditor.jsx'
+import { brazilSyntaxWarnings } from '../js/esCheck.js'
 // ?worker&inline → classic (non-module) worker embedded as a Blob: works on older browsers, no separate file to fail loading
 import RunnerWorker from '../js/runner.worker.js?worker&inline'
 
 const TIMEOUT_MS = 3000
 const show = (v) => (typeof v === 'string' ? JSON.stringify(v) : JSON.stringify(v) ?? String(v))
 
+// Her code is saved per exercise in this browser, so switching tab / exercise never loses it (↺ Reset brings the starter back)
+const CODE_KEY = 'snowkeer-code-v1:'
+const loadCode = (id) => { try { return id ? localStorage.getItem(CODE_KEY + id) : null } catch { return null } }
+const saveCode = (id, v) => { try { if (id) localStorage.setItem(CODE_KEY + id, v) } catch { /* storage blocked */ } }
+const dropCode = (id) => { try { if (id) localStorage.removeItem(CODE_KEY + id) } catch { /* storage blocked */ } }
+// "she has looked at the solution" — remembered per exercise until ↺ Reset, so a later plain Run still counts as solved WITH help
+const SOL = ':sol'
+const sawSolution = (id) => { try { return !!id && localStorage.getItem(CODE_KEY + id + SOL) === '1' } catch { return false } }
+const markSolution = (id, on) => { try { if (!id) return; if (on) localStorage.setItem(CODE_KEY + id + SOL, '1'); else localStorage.removeItem(CODE_KEY + id + SOL) } catch { /* storage blocked */ } }
+
 // Editor + Run + Script Log + test results. `exercise` = null → free scratchpad (no tests).
 const HINT_ICONS = ['🧭', '🔧', '📝'] // nudge, tool, almost the answer
 
 export default function ScriptRunner({ exercise, starter, done, onPass, scenario, client }) {
   const initial = exercise ? exercise.starter : starter || ''
-  const [code, setCode] = useState(initial)
+  const exId = exercise?.id
+  const [code, setCodeState] = useState(() => loadCode(exId) ?? initial)
+  const setCode = (v) => {
+    setCodeState(v)
+    saveCode(exId, v)
+  }
   const [out, setOut] = useState(null)
   const [running, setRunning] = useState(false)
   const [hintsShown, setHintsShown] = useState(0) // how many hint steps are revealed
@@ -21,6 +37,7 @@ export default function ScriptRunner({ exercise, starter, done, onPass, scenario
   const worker = useRef(null)
   const timer = useRef(null)
   const passed = useRef(false)
+  const loadValues = useRef(null) // form values when the form "loaded" (last normal Run) — the real onChange oldValue
 
   const stop = () => {
     clearTimeout(timer.current)
@@ -48,9 +65,10 @@ export default function ScriptRunner({ exercise, starter, done, onPass, scenario
       stop()
       setRunning(false)
       setOut(data)
+      if (!interactive && data.initialValues) loadValues.current = data.initialValues
       if (!interactive && data.passed && !passed.current) {
         passed.current = true
-        onPass?.()
+        onPass?.({ viewedSolution: solution || sawSolution(exId) })
       }
     }
     // Fallback: this browser could not start the Web Worker → run on the page itself (no infinite-loop protection)
@@ -85,19 +103,25 @@ export default function ScriptRunner({ exercise, starter, done, onPass, scenario
     w.postMessage(payload)
   }
 
+  // she changed a field on the mock form → run the script as an onChange. oldValue = the value when the form LOADED
+  // (PDI behaviour), not the value just before this edit.
   const editField = (name, value) => {
     const fields = out.form.fields
     const values = Object.fromEntries(fields.map((f) => [f.name, f.value]))
-    const oldValue = values[name]
-    if (oldValue === value) return
+    if (values[name] === value) return
+    const oldValue = loadValues.current && name in loadValues.current ? loadValues.current[name] : values[name]
     delete values[name]
     run({ trigger: { type: 'onChange', field: name, oldValue, newValue: value }, formValues: values })
   }
 
   const reset = () => {
-    setCode(initial)
+    setCodeState(initial)
+    dropCode(exId)
+    markSolution(exId, false) // a fresh attempt from the starter can earn a plain ✔ again
     setOut(null)
   }
+  // server-side code only: syntax that runs here but her PDI (Brazil, global scope) rejects
+  const pdiWarnings = !clientCfg && out ? brazilSyntaxWarnings(code) : []
 
   return (
     <div className="runner">
@@ -110,7 +134,7 @@ export default function ScriptRunner({ exercise, starter, done, onPass, scenario
             {hintList.length > 1 ? `💡 Hint ${hintsShown + 1}/${hintList.length}` : '💡 Hint'}
           </button>
         )}
-        {exercise && !solution && <button className="btn small" onClick={() => setSolution(true)}>✅ Solution chupinchu</button>}
+        {exercise && !solution && <button className="btn small" onClick={() => { setSolution(true); markSolution(exId, true) }}>✅ Solution chupinchu</button>}
         <span className="muted small">Ctrl + Enter = Run</span>
         {done && <span className="runner-done">✔ Done</span>}
       </div>
@@ -123,12 +147,18 @@ export default function ScriptRunner({ exercise, starter, done, onPass, scenario
 
       {out && (
         <div className="runner-out">
+          {pdiWarnings.length > 0 && (
+            <div className="pdi-warn">
+              <b>⚠️ Ikkada run ayyindi, kani nee PDI (Brazil) Background Script lo — leda "ES12 mode" toggle off unna Business Rule / Script Include lo — ee syntax pani cheyyadu:</b>
+              <ul>{pdiWarnings.map((w) => <li key={w}>{w}</li>)}</ul>
+            </div>
+          )}
           <div className="log-title">Script Log</div>
           <div className="log-panel">
             {out.logs.length === 0 && !out.error && <span className="muted small">(log lo emi ledu — gs.info() vaadu)</span>}
             {out.logs.map((l, i) => (
               <div key={i} className={'log-line ' + l.level}>
-                <span className="log-lvl">{l.level}</span> {l.msg}
+                <span className="log-lvl">{l.level === 'sys' ? 'hint' : l.level}</span> {l.msg}
               </div>
             ))}
             {out.error && <div className="log-line error"><span className="log-lvl">error</span> {out.error}</div>}

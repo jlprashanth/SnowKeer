@@ -324,3 +324,16 @@
 .fold-head[aria-expanded="true"] .fold-chev { transform: rotate(180deg); }
 .fold-body { padding: 0 12px 12px; }
 :root[data-theme="dark"] .fold { background: var(--surface); border-color: var(--line); }
+
+/* ===== Hub backup row, solved-with-help tag, quiz best score ===== */
+.hero-stage { font-weight: 400; opacity: .75; }
+.hub-backup { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.hub-backup-note { opacity: .85; }
+.hub-notice { display: inline-block; margin-top: 10px; padding: 6px 12px; border-radius: 8px; font-size: 13px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); }
+/* code exercise passed after opening the solution: "✔ title 👀 (solution chusi)" */
+.ex-help { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 99px; font-size: 12px; font-weight: 500; vertical-align: middle; white-space: nowrap;
+  background: #fff4d6; color: #7a5a00; border: 1px solid #f0d98a; }
+:root[data-theme="dark"] .app.themed .ex-help { background: var(--tint-warn); color: #f3d98b; border-color: var(--tint-warn-line); }
+.quiz-exit { margin-bottom: 12px; }
+.quiz-best { display: inline-block; margin: 6px 0 0; padding: 6px 12px; border-radius: 8px; background: #fff8e1; border: 1px solid #f0d98a; }
+:root[data-theme="dark"] .app.themed .quiz-best { background: var(--tint-warn); border-color: var(--tint-warn-line); }

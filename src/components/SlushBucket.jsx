@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 // "Slushbucket": Available <-> Selected. Used for Roles/Groups, Form Layout, etc.
-// items are strings. `repeatable` items (like --split--) stay in Available after being added.
+// items are strings. `repeatable` items (like |- split -| in Form Layout) stay in Available after being added.
 export default function SlushBucket({ title, available, selected, repeatable = [], ordered, onSave, onCancel, tourPrefix = 'sb' }) {
   const [sel, setSel] = useState(selected)
   const [pickL, setPickL] = useState([])

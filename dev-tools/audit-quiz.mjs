@@ -1,3 +1,6 @@
+// Quiz audit report (not a pass/fail check — dev-tools/check-quiz.mjs is the gate): answer-index spread, duplicate / empty options,
+// short explanations, 4-option rule, "all/none of the above", and how often the right answer is much the longest option.
+// run: node dev-tools/audit-quiz.mjs
 import { LESSONS } from '../src/data/lessons.js'
 import { JS_LESSONS } from '../src/data/lessons-js.js'
 import { CS_LESSONS } from '../src/data/lessons-cs.js'
@@ -11,7 +14,7 @@ for (const [s, ls] of Object.entries(stages)) {
     quiz.forEach((x, i) => {
       total++; pos[x.answer] = (pos[x.answer] || 0) + 1
       const o = x.options.map(String)
-      if (new Set(o.map(t => t.trim().toLowerCase())).size !== o.length) console.log(s, l.id, i, 'DUP OPTION')
+      if (new Set(o.map(t => t.trim())).size !== o.length) console.log(s, l.id, i, 'DUP OPTION') // exact match: 'VPN' vs 'vpn' is a deliberate case question
       if (o.some(t => !t.trim())) console.log(s, l.id, i, 'EMPTY OPTION')
       if (!x.why || x.why.length < 15) console.log(s, l.id, i, 'WEAK WHY')
       const lens = o.map(t => t.length), a = lens[x.answer]

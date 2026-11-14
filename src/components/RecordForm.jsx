@@ -4,8 +4,10 @@ import SlushBucket from './SlushBucket.jsx'
 import { cellOf } from './RecordList.jsx'
 import {
   fieldMap, fieldsOf, layoutFor, derive, defaultsFor, uiEffects, dataPolicyError, getRow, rowsOf,
-  refOptions, displayOf, viewForRecord, viewTitle, tableByLabel, nextNumber,
+  refOptions, displayOf, viewForRecord, viewTitle, tableByLabel, nextNumber, isTaskTable, flowStages, flowCurrent, copyValues,
 } from '../engine/ops.js'
+
+const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
 const dynTip = (fl, tbl) =>
   'dyn:' +
@@ -24,16 +26,19 @@ export default function RecordForm({ ctx, route }) {
   const tbl = existing?.sys_class_name || table
   const tb = d.tables[tbl]
 
-  const [vals, setVals] = useState(() => {
+  // values when the form was loaded (a new record's defaults) — the Process Flow formatter is drawn from these, not from unsaved edits
+  const [loadVals] = useState(() => {
     if (existing) return { ...existing }
     const base = { ...defaultsFor(d, table), ...(preset || {}) }
     if (fieldsOf(d, table).some((x) => x.calc === 'number')) base.number = nextNumber(d, table)
     return base
   })
+  const [vals, setVals] = useState(loadVals)
   const [view, setView] = useState(() => route.view || (existing ? viewForRecord(d, tbl, existing) : 'default'))
   const [err, setErr] = useState('')
   const [info, setInfo] = useState(route.msg || '')
-  const [tab, setTab] = useState(0)
+  // index, or a tab title (coming back from a related list's New form opens that related list again)
+  const [tab, setTab] = useState(route.tab ?? 0)
   const [menu, setMenu] = useState(false)
   const [slush, setSlush] = useState(null)
 
@@ -63,15 +68,28 @@ export default function RecordForm({ ctx, route }) {
   const isVisible = (fl) => fx[fl.name]?.visible !== false
 
   // ---------- save logic ----------
-  const validate = (ignore = []) => {
+  // asNew = the values are saved as a NEW record (Submit, or Insert / Insert and Stay copying an open record)
+  const validate = (asNew = !isExisting) => {
     const missing = Object.values(fm).filter(
-      (fl) => isVisible(fl) && isMandatory(fl) && !ignore.includes(fl.name) && String(dv[fl.name] ?? '').trim() === '' && fl.type !== 'boolean',
+      (fl) => isVisible(fl) && isMandatory(fl) && String(dv[fl.name] ?? '').trim() === '' && fl.type !== 'boolean',
     )
     if (missing.length) {
       setErr('The following mandatory fields are not filled in: ' + missing.map((m) => m.label).join(', '))
       return false
     }
-    const dp = dataPolicyError(d, tbl, dv, existing)
+    // "Extends table" only accepts a table that has "Extensible" ticked
+    if (tbl === 'sys_db_object' && asNew && String(dv.extends ?? '') !== '') {
+      const p = tableByLabel(d, dv.extends)
+      if (!p) {
+        setErr(`Invalid reference: "${dv.extends}" ane table ledu.`)
+        return false
+      }
+      if (!d.tables[p].extensible) {
+        setErr(`Invalid reference: "${dv.extends}" table "Extensible" kaadu — mundu aa table record lo "Extensible" tick chesi Update cheyyi.`)
+        return false
+      }
+    }
+    const dp = dataPolicyError(d, tbl, dv, asNew ? null : existing)
     if (dp) {
       setErr(dp)
       return false
@@ -86,14 +104,15 @@ export default function RecordForm({ ctx, route }) {
     return out
   }
 
-  const insert = (after) => {
-    if (!validate()) return
+  // copy = Insert / Insert and Stay on an OPEN record: its (edited) values go into a NEW record; the original is not updated
+  const insert = (after, copy = false) => {
+    if (!validate(true)) return
     let row
     mutate((n) => {
-      row = ops.insertRow(n, tbl, clean())
+      row = ops.insertRow(n, tbl, copy ? copyValues(clean()) : clean())
       if (after === 'makeCurrent') n.currentSet = row.name
     })
-    if (after === 'stay') go({ name: 'form', table: tbl, id: row.sys_id, msg: 'Record inserted' })
+    if (after === 'stay') go({ name: 'form', table: tbl, id: row.sys_id, msg: copy ? 'Record inserted — idi kotha copy. Original record maraledu.' : 'Record inserted' })
     else backToList()
   }
   const save = () => {
@@ -116,7 +135,7 @@ export default function RecordForm({ ctx, route }) {
       setErr('The following mandatory fields are not filled in: Resolution code, Resolution notes')
       return
     }
-    const next = { ...clean(), state: 'Resolved' }
+    const next = { ...clean(), state: '6' } // 6 = Resolved
     mutate((n) => (isExisting ? ops.updateRow(n, tbl, id, next) : ops.insertRow(n, tbl, next)))
     backToList()
   }
@@ -213,7 +232,7 @@ export default function RecordForm({ ctx, route }) {
   }
 
   const field = (name, wide) => {
-    if (name === '#process_flow') return null
+    if (name === '#process_flow' || name.startsWith('.')) return null
     const fl = fm[name]
     if (!fl || !isVisible(fl)) return <div key={name} className="frow-empty" />
     const isCheck = fl.type === 'boolean'
@@ -230,43 +249,52 @@ export default function RecordForm({ ctx, route }) {
     )
   }
 
+  // Process Flow formatter: DISPLAY only. Stages = System UI > Process Flow records of this table (sorted by Order);
+  // the current stage is the first whose Condition matches the SAVED record (a new record: its values at load).
+  // Changing State on the form does not move it until the record is saved and the form reloads.
   const renderFlow = () => {
-    if (!tb.flow) return null
-    const cur = dv[tb.flow.field]
-    const ci = tb.flow.steps.indexOf(cur)
+    const stages = flowStages(d, tbl)
+    const ci = flowCurrent(stages, derive(d, tbl, existing || loadVals))
     return (
       <div className="flow" data-tour="process-flow" data-tip="flow">
-        {tb.flow.steps.map((s, i) => (
-          <button key={s} type="button" data-tour={'flow-' + s.toLowerCase().replace(/[^a-z]+/g, '-')} className={'flow-step' + (i < ci ? ' done' : '') + (i === ci ? ' cur' : '')} onClick={() => setRaw(tb.flow.field, s)}>
-            {s}
-          </button>
+        {stages.map((s, i) => (
+          <span key={s.sys_id} data-tour={'flow-' + slug(s.label)} className={'flow-step' + (i < ci ? ' done' : '') + (i === ci ? ' cur' : '')} style={{ textAlign: 'center', cursor: 'default' }}>
+            {s.label}
+          </span>
         ))}
+        {!stages.length && <span className="muted small">Process Flow: ee table ki stages levu (System UI → Process Flow lo records create cheyyi).</span>}
       </div>
     )
   }
 
+  // Layout items in order. '.begin_split' … '.split' … '.end_split' = a 2-column area (left | right); everything else is full width.
   const renderItems = (items) => {
-    const sp = items.indexOf('--split--')
-    const en = items.indexOf('--end_split--')
     const nodes = []
     const flow = items.includes('#process_flow') ? <div key="flow">{renderFlow()}</div> : null
     const plain = items.filter((x) => x !== '#process_flow')
-    const sp2 = plain.indexOf('--split--')
-    const en2 = plain.indexOf('--end_split--')
-    if (sp2 < 0) {
-      plain.filter((x) => !x.startsWith('--')).forEach((n) => nodes.push(field(n, true)))
-    } else {
-      const left = plain.slice(0, sp2)
-      const right = plain.slice(sp2 + 1, en2 < 0 ? undefined : en2)
-      const rest = en2 < 0 ? [] : plain.slice(en2 + 1).filter((x) => !x.startsWith('--'))
-      for (let i = 0; i < Math.max(left.length, right.length); i++) {
-        nodes.push(left[i] ? field(left[i]) : <div key={'l' + i} className="frow-empty" />)
-        nodes.push(right[i] ? field(right[i]) : <div key={'r' + i} className="frow-empty" />)
+    let i = 0
+    while (i < plain.length) {
+      const it = plain[i]
+      if (it === '.begin_split') {
+        const left = []
+        const right = []
+        let side = left
+        i++
+        while (i < plain.length && plain[i] !== '.end_split') {
+          if (plain[i] === '.split') side = right
+          else if (!plain[i].startsWith('.')) side.push(plain[i])
+          i++
+        }
+        i++ // skip '.end_split'
+        for (let k = 0; k < Math.max(left.length, right.length); k++) {
+          nodes.push(left[k] ? field(left[k]) : <div key={'l' + nodes.length} className="frow-empty" />)
+          nodes.push(right[k] ? field(right[k]) : <div key={'r' + nodes.length} className="frow-empty" />)
+        }
+      } else {
+        if (!it.startsWith('.')) nodes.push(field(it, true))
+        i++
       }
-      rest.forEach((n) => nodes.push(field(n, true)))
     }
-    void sp
-    void en
     return (
       <>
         {flow}
@@ -279,7 +307,8 @@ export default function RecordForm({ ctx, route }) {
   const relTabs = isExisting ? tb.related || [] : []
   const parentDisp = displayOf(d, tbl, existing)
   const tabs = [...extra.map((s) => ({ kind: 'sec', s })), ...relTabs.map((r) => ({ kind: 'rel', r }))]
-  const cur = tabs[Math.min(tab, tabs.length - 1)]
+  const tabTitle = (tobj) => (tobj.kind === 'sec' ? tobj.s.name : tobj.r.title)
+  const cur = (typeof tab === 'string' && tabs.find((tobj) => tabTitle(tobj) === tab)) || tabs[Math.min(typeof tab === 'number' ? tab : 0, tabs.length - 1)]
 
   const renderRel = (r) => {
     if (r.dict) {
@@ -307,7 +336,7 @@ export default function RecordForm({ ctx, route }) {
                 </tr>
               ))}
               {!own.length && (
-                <tr><td colSpan="6" className="center nodata">Insert a new row... (New button click chesi columns add cheyyi)</td></tr>
+                <tr><td colSpan="6" className="center nodata">Insert a new row... (Ee table ki own columns levu{d.tables[tt]?.extends ? ' — parent columns inherit avtayi, "All columns" chudu' : ''}.)</td></tr>
               )}
             </tbody>
           </table>
@@ -361,7 +390,7 @@ export default function RecordForm({ ctx, route }) {
         <div className="rel-head">
           <b>{d.tables[ct].listTitle || d.tables[ct].label}</b>
           {!r.readonlyList && (
-            <button type="button" className="fb-btn" data-tour={'rel-new-' + ct} onClick={() => go({ name: 'form', table: ct, isNew: true, k: Date.now(), preset: { [r.field]: key }, backTo: { name: 'form', table: tbl, id } })}>
+            <button type="button" className="fb-btn" data-tour={'rel-new-' + ct} onClick={() => go({ name: 'form', table: ct, isNew: true, k: Date.now(), preset: { [r.field]: key }, backTo: { name: 'form', table: tbl, id, tab: r.title } })}>
               New
             </button>
           )}
@@ -387,6 +416,9 @@ export default function RecordForm({ ctx, route }) {
 
   // ---------- menu / buttons ----------
   const views = ['default', ...(d.rows.sys_ui_view || []).map((v) => v.name)]
+  // Insert / Insert and Stay copy the OPEN record, so they show on existing records only — and never on task tables
+  // (incident...). Tables and update sets are left out of the mock: copying them would clash on name.
+  const canInsertCopy = isExisting && !isTaskTable(d, tbl) && !['sys_db_object', 'sys_update_set'].includes(tbl)
   const menuItem = (key, label, fn) => (
     <button key={key} type="button" className="mi" data-tour={'menu-' + key} onClick={() => { setMenu(false); fn() }}>
       {label}
@@ -424,8 +456,8 @@ export default function RecordForm({ ctx, route }) {
           {menu && (
             <div className="form-menu" data-tour="form-menu">
               {menuItem('save', 'Save', save)}
-              {!isExisting && menuItem('insert', 'Insert', () => insert())}
-              {!isExisting && menuItem('insert-stay', 'Insert & Stay', () => insert('stay'))}
+              {canInsertCopy && menuItem('insert', 'Insert', () => insert(undefined, true))}
+              {canInsertCopy && menuItem('insert-stay', 'Insert and Stay', () => insert('stay', true))}
               {isExisting && menuItem('delete', 'Delete', del)}
               <div className="mi-h">View</div>
               {views.map((v) => menuItem('view-' + v, (v === view ? '✓ ' : '') + viewTitle(d, v), () => setView(v)))}
@@ -481,12 +513,17 @@ export default function RecordForm({ ctx, route }) {
 
         <div className="bottom-btns">{topButtons(true)}</div>
 
+        {/* There is no "Mark as Complete" in the PDI: you set State = Complete and click Update. Export to XML shows once the
+            SAVED state is Complete; Make This My Current Set only while it is In progress. */}
         {tbl === 'sys_update_set' && isExisting && (
           <div className="rel-links" data-tour="us-links">
             <b>Related Links</b>
-            <a className="lnk" data-tour="us-make-current" onClick={() => { mutate((n) => { n.currentSet = existing.name }); setInfo(`"${existing.name}" ippudu nee Current update set ✔`) }}>Make this my current set</a>
-            <a className="lnk" data-tour="us-complete" onClick={() => { mutate((n) => ops.updateRow(n, tbl, id, { state: 'Complete' })); setVals((p) => ({ ...p, state: 'Complete' })); setInfo('State = Complete. Ippudu ee set lo changes capture avvav.') }}>Mark as Complete</a>
-            <a className="lnk" data-tour="us-export" onClick={() => setInfo(`Export to XML: "${existing.name}.xml" download ayyindi (mock). Real lo idi XML file ga save avtundi.`)}>Export to XML</a>
+            {existing.state === 'In progress' && (
+              <a className="lnk" data-tour="us-make-current" onClick={() => { mutate((n) => { n.currentSet = existing.name }); setInfo(`"${existing.name}" ippudu nee Current update set ✔`) }}>Make This My Current Set</a>
+            )}
+            {existing.state === 'Complete' && (
+              <a className="lnk" data-tour="us-export" onClick={() => setInfo(`Export to XML: "${existing.name}.xml" download ayyindi (mock). Real lo idi XML file ga save avtundi.`)}>Export to XML</a>
+            )}
           </div>
         )}
       </div>

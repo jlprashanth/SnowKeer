@@ -1,6 +1,9 @@
 // Stage 2 · JavaScript (part 3): conditions, loops, functions — all ServiceNow scenarios.
 import { q, jx } from './lessonKit.js'
 
+// extra practice row for loop tests: a CLOSED, unassigned P1 that sorts before every other incident
+const OLD_P1 = { number: 'INC0010000', short_description: 'Old P1 outage (closed)', priority: '1', impact: '1', urgency: '1', state: '7', active: 'false', category: 'network' }
+
 /* 6 — Conditions */
 const conditions = {
   id: 'js-conditions',
@@ -46,10 +49,21 @@ else label = 'Low';`,
     {
       h: '✅ Truthy / falsy',
       body: [
-        'Condition lo boolean kakapoyina vaadochu: empty string "", 0, null, undefined = falsy; migatavi truthy. Anduke if (!gr.getValue("assigned_to")) = assigned_to empty ayithe.',
+        'Condition lo boolean kakapoyina vaadochu. Falsy: "" (empty string), 0, null, undefined, NaN, false. Migatavi truthy — "0", "false" laanti non-empty strings kuda truthy!',
+        'Nee PDI lo rendu special cases (check chesam): (1) empty array [] FALSY (normal JavaScript lo truthy) — array empty aa ani arr.length === 0 tho check chey. (2) GlideElement (gr.assigned_to) value batti: empty field falsy, value unte truthy, false boolean field falsy.',
+        '⚠️ Ee sandbox (browser) GlideElement ni falsy cheyyaledu — ikkada if (gr.assigned_to) eppudu true. Anduke safe habit: gr.assigned_to.nil() leka gs.nil(gr.assigned_to) — PDI lo, ikkada rendu chotla correct. getValue() kuda safe: empty field ki null (falsy) istundi.',
       ],
-      code: `if (!gr.getValue('assigned_to')) {
+      code: `if (gr.assigned_to.nil()) {            // ✅ safe — PDI lo, sandbox lo
   gs.info('Unassigned');
+}
+if (!gr.getValue('assigned_to')) {     // ✅ empty → null → falsy
+  gs.info('Unassigned');
+}
+// if (!gr.assigned_to) { ... }        // PDI lo pani chestundi, sandbox lo kaadu — .nil() vaadu
+
+var ids = [];
+if (ids.length === 0) {                // ✅ array empty check — length tho
+  gs.info('Records levu');
 }`,
     },
     {
@@ -57,18 +71,23 @@ else label = 'Low';`,
       body: [
         'if (x = 1) lo = assignment (marchestundi!), compare kaadu. Compare ki == leka === vaadu.',
         'getValue string. switch strict comparison (===) vaadutundi — case 1 vs "1" match avvavu. Anduke case \'1\' ani quotes lo rayali.',
+        'True/false field: getValue("active") "1" / "0" istundi — getValue("active") === "true" EPPUDU false! getValue("active") === "1" leka gr.active == true vaadu.',
       ],
       code: `var s = gr.getValue('state');   // '2'
 switch (s) {
   case 2: gs.info('number case'); break;      // match avvadu!
   case '2': gs.info('string case'); break;    // match avtundi
-}`,
+}
+
+if (gr.getValue('active') === 'true') { }    // ❌ eppudu false — '1' / '0' vastundi
+if (gr.getValue('active') === '1') { }       // ✅ active
+if (gr.active == true) { }                   // ✅ active (== tho)`,
     },
   ],
   quiz: [
-    q('switch lo break marchipothe emavtundi?', ['Next case code kuda run avtundi (fall-through)', 'Error vastundi, script aagipotundi', 'Default case matrame run avtundi', 'Emi kaadu, normal ga break avtundi'], 0, 'break lekunda next cases kuda run avtayi.'),
-    q('var s = "2"; switch (s) { case 2: ... } — case 2 match avtunda?', ['Avvadu (=== strict)', 'Avtundi', 'Error', 'Default avtundi'], 0, 'switch strict compare. "2" !== 2.'),
-    q('Edi falsy kaadu?', ['"0" (non-empty string)', '"" (empty string)', '0 (number zero)', 'null'], 0, '"0" non-empty string kabatti truthy.'),
+    q('switch lo break marchipothe emavtundi?', ['Next case code kuda run avtundi', 'Error vastundi, script aagipotundi', 'Default case matrame run avtundi', 'Emi kaadu, normal ga break avtundi'], 0, 'break lekunda next cases kuda run avtayi (fall-through).'),
+    q('var s = "2"; switch (s) { case 2: ... } — case 2 match avtunda?', ['Avvadu', 'Avtundi', 'Error vastundi', 'Rendu cases run avtayi'], 0, 'switch strict (===) compare chestundi — "2" !== 2, kabatti match avvadu. Cases quotes lo rayali.'),
+    q('Edi falsy kaadu?', ['"0" (string zero)', '"" (empty string)', '0 (number zero)', 'null (value ledu)'], 0, '"0" non-empty string kabatti truthy. (getValue("active") inactive ki "0" istundi — adi kuda truthy!)'),
     q('if (x = 1) — idi em chestundi?', ['x ki 1 assign chestundi (compare kaadu)', 'x == 1 check chestundi (compare)', 'Syntax Error istundi', 'x === 1 strict check chestundi'], 0, '= assignment. Compare ki == leka ===.'),
     q('Mundu true ayina else-if tarvata migilina branches ni?', ['Skip chestundi', 'Anni run chestundi', 'Error istundi', 'Malli check chestundi'], 0, 'if-else chain lo first match matrame run.'),
   ],
@@ -90,6 +109,13 @@ if (p === '1') {
 }`,
       explain: 'getValue string kabatti "1" tho === compare chesam.',
       tests: [{ label: 'Log: Page on-call', logs: ['Page on-call'] }],
+      variants: [
+        {
+          name: 'priority 3 ayithe',
+          scenario: { current: { table: 'incident', values: { priority: '3' } } },
+          tests: [{ label: 'Log: Normal queue', logs: ['Normal queue'] }],
+        },
+      ],
     }),
     jx('js-conditions', 2, 'Priority label (else if)', 'easy', {
       task: 'INC0010003 teesuko, priority getValue. else-if chain tho label set chey: "1" Critical, "2" High, "3" Moderate, migatha Low. label ni log chey.',
@@ -119,62 +145,28 @@ if (p === '1') {
 }
 
 gs.info(label);`,
-      explain: 'Priority 4 → Low (else). Mundu match ayina branch matrame run.',
+      explain: 'Priority 4 → Low (else). Mundu match ayina branch matrame run. p === 1 (number) ani rasthe ye branch match avvadu — anni "Low" avtayi!',
       tests: [{ label: 'Log: Low', logs: ['Low'] }],
-    }),
-    // ---- Medium+ ladder: one new idea at a time, building up to exercises 3 and 4 ----
-    jx('js-conditions', 5, 'Assigned aa? (empty = falsy)', 'medium+', {
-      task: 'INC0010006 teesuko (idi unassigned). if (gr.getValue("assigned_to")) tho check chey: undi ayithe "Assigned", lekapothe "Unassigned" ani log chey. 🧰 Vaade words: GlideRecord, get(), getValue(), if / else',
-      starter: `var gr = new GlideRecord('incident');
-gr.get('number', 'INC0010006');
-
-// Empty field = falsy:  if (gr.getValue('assigned_to')) { ...undi... } else { ...ledu... }
-// TODO: undi ayithe 'Assigned', lekapothe 'Unassigned' log chey
-`,
-      hint: [
-        'Value undaa ledaa check cheyyadaniki condition lo getValue ni direct ga pettochu — empty text ayithe false.',
-        'if (gr.getValue("assigned_to")) { ... } else { ... }',
-        'if (gr.getValue("assigned_to")) { gs.info("Assigned"); } else { gs.info("Unassigned"); }',
+      variants: [
+        {
+          name: 'priority 1',
+          scenario: { seed: { incident: [{ sys_id: 'inc3', priority: '1' }] } },
+          tests: [{ label: 'Log: Critical', logs: ['Critical'] }],
+        },
+        {
+          name: 'priority 2',
+          scenario: { seed: { incident: [{ sys_id: 'inc3', priority: '2' }] } },
+          tests: [{ label: 'Log: High', logs: ['High'] }],
+        },
+        {
+          name: 'priority 3',
+          scenario: { seed: { incident: [{ sys_id: 'inc3', priority: '3' }] } },
+          tests: [{ label: 'Log: Moderate', logs: ['Moderate'] }],
+        },
       ],
-      solution: `var gr = new GlideRecord('incident');
-gr.get('number', 'INC0010006');
-
-if (gr.getValue('assigned_to')) {
-  gs.info('Assigned');
-} else {
-  gs.info('Unassigned');
-}`,
-      explain: 'Empty string falsy kabatti if (getValue(...)) = "value undi". Exercise 4 lo idi main condition.',
-      tests: [{ label: 'Log: Unassigned', logs: ['Unassigned'] }],
     }),
-    jx('js-conditions', 6, 'Group fallback (else if)', 'medium+', {
-      task: 'INC0010004 teesuko (assigned_to ledu, group undi). assigned_to undi ayithe "Assigned to <name>"; lekapothe group undi ayithe "Assign to group <group>"; rendu ledu ayithe "Send to triage". Names ki getDisplayValue vaadu. 🧰 Vaade words: getValue(), getDisplayValue(), if / else if / else',
-      starter: `var gr = new GlideRecord('incident');
-gr.get('number', 'INC0010004');
-
-// TODO: if assigned_to undi -> 'Assigned to <name>'
-//       else if assignment_group undi -> 'Assign to group <group>'
-//       else -> 'Send to triage'
-`,
-      hint: [
-        'Moodu paths: assigned_to undi → ok; ledu but group undi → group ki pampu; rendu ledu → triage. Most specific condition mundu.',
-        'if (gr.getValue("assigned_to")) {...} else if (gr.getValue("assignment_group")) {...} else {...}. Peru kosam getDisplayValue.',
-        'gs.info("Assign to group " + gr.getDisplayValue("assignment_group"));',
-      ],
-      solution: `var gr = new GlideRecord('incident');
-gr.get('number', 'INC0010004');
-
-if (gr.getValue('assigned_to')) {
-  gs.info('Assigned to ' + gr.getDisplayValue('assigned_to'));
-} else if (gr.getValue('assignment_group')) {
-  gs.info('Assign to group ' + gr.getDisplayValue('assignment_group'));
-} else {
-  gs.info('Send to triage');
-}`,
-      explain: 'if / else if / else chain: mundu match ayina branch matrame run avtundi. Exercise 4 lo ide loop lo 3 incidents ki chestam.',
-      tests: [{ label: 'Log: Assign to group Database', logs: ['Assign to group Database'] }],
-    }),
-    jx('js-conditions', 7, 'Category tho team pick chey (switch)', 'medium+', {
+    // ---- Ladder (array order = doing order): 7 → 3 practise switch, 5 → 6 build up to 'Assignment decision (3 incidents)' ----
+    jx('js-conditions', 7, 'Category tho team pick chey (switch)', 'medium', {
       task: 'INC0010002 teesuko, category getValue. switch tho: "network" → "Network team", "database" → "DB team", default → "Service Desk". team ni log chey. break marchipoku! 🧰 Vaade words: getValue(), switch / case / break / default',
       starter: `var gr = new GlideRecord('incident');
 gr.get('number', 'INC0010002');
@@ -212,9 +204,21 @@ gs.info(team);`,
         { label: 'Log: Network team', logs: ['Network team'] },
         { label: 'team = Network team', expr: 'team', expect: 'Network team' },
       ],
+      variants: [
+        {
+          name: 'category database',
+          scenario: { seed: { incident: [{ sys_id: 'inc2', category: 'database' }] } },
+          tests: [{ label: 'Log: DB team', logs: ['DB team'] }],
+        },
+        {
+          name: 'category hardware (default)',
+          scenario: { seed: { incident: [{ sys_id: 'inc2', category: 'hardware' }] } },
+          tests: [{ label: 'Log: Service Desk', logs: ['Service Desk'] }],
+        },
+      ],
     }),
-    jx('js-conditions', 3, 'State message (switch)', 'medium', {
-      task: 'INC0010005 state teesuko (string). switch tho: "1" → New, "2" → In Progress, "3" → On Hold, "6" → Resolved - waiting for closure, default → Other. Message ni msg lo petti log chey. break marchipoku!',
+    jx('js-conditions', 3, 'State message (switch)', 'medium+', {
+      task: 'INC0010005 state teesuko (string) — practice data lo idi Closed incident. switch tho: "1" → New, "2" → In Progress, "3" → On Hold, "6" → Resolved - waiting for closure, "7" → Closed, default → Other. Message ni msg lo petti log chey. break marchipoku!',
       starter: `var gr = new GlideRecord('incident');
 gr.get('number', 'INC0010005');
 var state = gr.getValue('state');
@@ -227,7 +231,7 @@ gs.info(msg);
       hint: [
         'Oka value (state) ni chala options tho compare — switch. Prathi case lo msg set chesi break pettu, last lo default.',
         'switch (state) { case "1": msg = "New"; break; case "2": ... } — state string kabatti cases kuda quotes lo.',
-        "case '6': msg = 'Resolved - waiting for closure'; break;",
+        "case '6': msg = 'Resolved - waiting for closure'; break;   case '7': msg = 'Closed'; break;   default: msg = 'Other';",
       ],
       solution: `var gr = new GlideRecord('incident');
 gr.get('number', 'INC0010005');
@@ -247,13 +251,96 @@ switch (state) {
   case '6':
     msg = 'Resolved - waiting for closure';
     break;
+  case '7':
+    msg = 'Closed';
+    break;
   default:
     msg = 'Other';
 }
 
 gs.info(msg);`,
-      explain: 'switch strict compare kabatti cases quotes lo ("6"). break lekapothe fall-through.',
-      tests: [{ label: 'Log: Resolved - waiting for closure', logs: ['Resolved - waiting for closure'] }],
+      explain: 'switch strict compare kabatti cases quotes lo ("7"). break lekapothe fall-through — case "6" lo break marchipothe Resolved record ki kuda "Closed" vastundi. Nee PDI lo Resolved (6) incident inka active = true; Closed (7) ayyaka matrame active = false avtundi (check chesam) — INC0010005 Closed, anduke inactive.',
+      tests: [
+        { label: 'Log: Closed', logs: ['Closed'] },
+        { label: 'msg = Closed', expr: 'msg', expect: 'Closed' },
+      ],
+      variants: [
+        { name: 'state 1', scenario: { seed: { incident: [{ sys_id: 'inc5', state: '1', active: 'true' }] } }, tests: [{ label: 'Log: New', logs: ['New'] }] },
+        { name: 'state 2', scenario: { seed: { incident: [{ sys_id: 'inc5', state: '2', active: 'true' }] } }, tests: [{ label: 'Log: In Progress', logs: ['In Progress'] }] },
+        { name: 'state 3', scenario: { seed: { incident: [{ sys_id: 'inc5', state: '3', active: 'true' }] } }, tests: [{ label: 'Log: On Hold', logs: ['On Hold'] }] },
+        { name: 'state 6 (Resolved)', scenario: { seed: { incident: [{ sys_id: 'inc5', state: '6', active: 'true' }] } }, tests: [{ label: 'Log: Resolved - waiting for closure', logs: ['Resolved - waiting for closure'] }] },
+        { name: 'state 8 (Canceled → default)', scenario: { seed: { incident: [{ sys_id: 'inc5', state: '8' }] } }, tests: [{ label: 'Log: Other', logs: ['Other'] }] },
+      ],
+    }),
+    jx('js-conditions', 5, 'Assigned aa? (empty = falsy)', 'medium+', {
+      task: 'INC0010006 teesuko (idi unassigned). Assigned_to undaa ani check chey (getValue — empty ki null istundi — leka .nil()): undi ayithe "Assigned", lekapothe "Unassigned" ani log chey. 🧰 Vaade words: GlideRecord, get(), getValue(), nil(), if / else',
+      starter: `var gr = new GlideRecord('incident');
+gr.get('number', 'INC0010006');
+
+// getValue() empty field ki null istundi (falsy); value unte sys_id string (truthy)
+// TODO: assigned_to undi ayithe 'Assigned', lekapothe 'Unassigned' log chey
+`,
+      hint: [
+        'Value undaa ledaa check cheyyadaniki condition lo getValue ni direct ga pettochu — null ayithe false.',
+        'if (gr.getValue("assigned_to")) { ... } else { ... }   — leka if (gr.assigned_to.nil()) tho ulta order.',
+        'if (gr.getValue("assigned_to")) { gs.info("Assigned"); } else { gs.info("Unassigned"); }',
+      ],
+      solution: `var gr = new GlideRecord('incident');
+gr.get('number', 'INC0010006');
+
+if (gr.getValue('assigned_to')) {
+  gs.info('Assigned');
+} else {
+  gs.info('Unassigned');
+}`,
+      explain: 'Empty field ki getValue null istundi (falsy) → else. if (gr.assigned_to.nil()) kuda correct. (if (gr.assigned_to) nee PDI lo pani chestundi, kani ee sandbox lo eppudu true — anduke getValue / .nil() habit.) "Assignment decision (3 incidents)" lo idi main condition.',
+      tests: [{ label: 'Log: Unassigned', logs: ['Unassigned'] }],
+      variants: [
+        {
+          name: 'INC0010006 ki Beth assign ayithe',
+          scenario: { seed: { incident: [{ sys_id: 'inc6', assigned_to: 'u_beth' }] } },
+          tests: [{ label: 'Log: Assigned', logs: ['Assigned'] }],
+        },
+      ],
+    }),
+    jx('js-conditions', 6, 'Group fallback (else if)', 'medium+', {
+      task: 'INC0010004 teesuko (assigned_to ledu, group undi). assigned_to undi ayithe "Assigned to <name>"; lekapothe group undi ayithe "Assign to group <group>"; rendu ledu ayithe "Send to triage". Names ki getDisplayValue vaadu. 🧰 Vaade words: getValue(), getDisplayValue(), if / else if / else',
+      starter: `var gr = new GlideRecord('incident');
+gr.get('number', 'INC0010004');
+
+// TODO: if assigned_to undi -> 'Assigned to <name>'
+//       else if assignment_group undi -> 'Assign to group <group>'
+//       else -> 'Send to triage'
+`,
+      hint: [
+        'Moodu paths: assigned_to undi → ok; ledu but group undi → group ki pampu; rendu ledu → triage. Most specific condition mundu.',
+        'if (gr.getValue("assigned_to")) {...} else if (gr.getValue("assignment_group")) {...} else {...}. Peru kosam getDisplayValue.',
+        'gs.info("Assign to group " + gr.getDisplayValue("assignment_group"));',
+      ],
+      solution: `var gr = new GlideRecord('incident');
+gr.get('number', 'INC0010004');
+
+if (gr.getValue('assigned_to')) {
+  gs.info('Assigned to ' + gr.getDisplayValue('assigned_to'));
+} else if (gr.getValue('assignment_group')) {
+  gs.info('Assign to group ' + gr.getDisplayValue('assignment_group'));
+} else {
+  gs.info('Send to triage');
+}`,
+      explain: 'if / else if / else chain: mundu match ayina branch matrame run avtundi. "Assignment decision (3 incidents)" lo ide loop lo 3 incidents ki chestam.',
+      tests: [{ label: 'Log: Assign to group Database', logs: ['Assign to group Database'] }],
+      variants: [
+        {
+          name: 'INC0010004 ki Bud assign ayithe',
+          scenario: { seed: { incident: [{ sys_id: 'inc4', assigned_to: 'u_bud' }] } },
+          tests: [{ label: 'Log: Assigned to Bud Richman', logs: ['Assigned to Bud Richman'] }],
+        },
+        {
+          name: 'group kuda lekapothe',
+          scenario: { seed: { incident: [{ sys_id: 'inc4', assignment_group: '' }] } },
+          tests: [{ label: 'Log: Send to triage', logs: ['Send to triage'] }],
+        },
+      ],
     }),
     jx('js-conditions', 4, 'Assignment decision (3 incidents)', 'hard', {
       task: 'INC0010001, INC0010004, INC0010006 query chey (addQuery number IN ..., orderBy number). Prathi record ki: assigned_to undi ayithe "<number>: Already assigned to <name>"; assigned_to ledu but group undi ayithe "<number>: Assign to group <group>"; rendu ledu ayithe "<number>: Send to triage". (name = getDisplayValue)',
@@ -270,7 +357,7 @@ while (gr.next()) {
 }
 `,
       hint: [
-        'Records meeda loop (while gr.next()). Prathi record ki moodu paths — previous Medium+ exercises lo chesav: assigned → group → triage.',
+        'Records meeda loop (while gr.next()). Prathi record ki moodu paths — "Group fallback (else if)" lo chesav: assigned → group → triage.',
         'Most specific condition mundu: if (gr.getValue("assigned_to")) ... else if (gr.getValue("assignment_group")) ... else ...  Names ki getDisplayValue.',
         "if (gr.getValue('assigned_to')) { gs.info(number + ': Already assigned to ' + gr.getDisplayValue('assigned_to')); } else if (...)",
       ],
@@ -289,11 +376,23 @@ while (gr.next()) {
     gs.info(number + ': Send to triage');
   }
 }`,
-      explain: 'Empty field falsy kabatti if (gr.getValue(...)) = "value undi". Order important: most specific condition mundu.',
+      explain: 'Empty field ki getValue null (falsy) kabatti if (gr.getValue(...)) = "value undi". Order important: most specific condition mundu.',
       tests: [
         {
           label: 'Three decisions',
           logs: ['INC0010001: Already assigned to System Administrator', 'INC0010004: Assign to group Database', 'INC0010006: Send to triage'],
+        },
+      ],
+      variants: [
+        {
+          name: 'INC0010004 ki Beth, INC0010006 ki Network group',
+          scenario: { seed: { incident: [{ sys_id: 'inc4', assigned_to: 'u_beth' }, { sys_id: 'inc6', assignment_group: 'g_net' }] } },
+          tests: [
+            {
+              label: 'Three decisions (marina data)',
+              logs: ['INC0010001: Already assigned to System Administrator', 'INC0010004: Already assigned to Beth Anglin', 'INC0010006: Assign to group Network'],
+            },
+          ],
         },
       ],
     }),
@@ -339,6 +438,7 @@ for (var j = 0; j < groups.length; j++) {
       h: '🗝 for...in & forEach',
       body: [
         'for (var key in obj) = object keys meeda loop. array.forEach(function (item) { ... }) = array items meeda.',
+        '⚠️ for…of (for (var x of arr)) nee PDI Background Script lo (ES12 mode lekunda) SyntaxError (check chesam) — array ki normal for leka forEach vaadu.',
       ],
       code: `var counts = { Network: 2, Database: 3 };
 for (var team in counts) {
@@ -348,10 +448,11 @@ for (var team in counts) {
     {
       h: '⏭ break & continue',
       body: [
-        'break = loop ni aapestundi. continue = ee iteration skip chesi next ki veltundi. Records lo first match dorikaka aapadaniki break; resolved ones skip cheyyadaniki continue.',
+        'break = loop ni aapestundi. continue = ee iteration skip chesi next ki veltundi. Records lo first match dorikaka aapadaniki break; inactive / resolved ones skip cheyyadaniki continue.',
+        'Gurtu: true/false field ki getValue "1" / "0" istundi — getValue("active") === "false" ani rasthe eppudu match avvadu!',
       ],
       code: `while (gr.next()) {
-  if (gr.getValue('active') === 'false') continue;   // skip
+  if (gr.getValue('active') === '0') continue;       // inactive → skip
   if (gr.getValue('priority') === '1') {
     gs.info('Found: ' + gr.getValue('number'));
     break;                                           // stop
@@ -363,6 +464,7 @@ for (var team in counts) {
       body: [
         'Infinite loop: while (true) leka i++ marchipothe script aagadu (instance slow avtundi!). SnowKeer lo 3 sec tarvata aapestam, real instance lo transaction cancel avvali.',
         'Loop lo vere GlideRecord query chesthe slow (N+1 problem). Ideal ga okka query tho teesukovali.',
+        '⚠️ addQuery lo field peru tappu rasthe (e.g. "categry") error raadu — nee PDI aa condition ni IGNORE chesi ANNI records istundi (check chesam). Loop lo update() / deleteRecord() unte mundu getRowCount() chusi confirm chey.',
       ],
       code: `// getRowCount tho count teeskovachu — loop avasaram ledu
 gr.query();
@@ -385,8 +487,11 @@ gs.info(gr.getRowCount());`,
       solution: `for (var i = 1; i <= 3; i++) {
   gs.info('Retry ' + i);
 }`,
-      explain: 'for (start; condition; step). i++ prathi sari 1 penchutundi.',
-      tests: [{ label: 'Retry 1..3', logs: ['Retry 1', 'Retry 2', 'Retry 3'] }],
+      explain: 'for (start; condition; step). i++ prathi sari 1 penchutundi. i = 4 ayinappudu i <= 3 false — loop aagutundi.',
+      tests: [
+        { label: 'Retry 1..3', logs: ['Retry 1', 'Retry 2', 'Retry 3'] },
+        { label: 'for loop (var i) run ayyindi — loop tarvata i = 4', expr: 'i', expect: 4 },
+      ],
     }),
     jx('js-loops', 2, 'Active incidents count (while)', 'easy', {
       task: 'Active incidents query chesi, while (gr.next()) loop tho count++ chey. "Active incidents: 7" ani log chey. (Tarvata getRowCount() kuda same ani gamaninchu.)',
@@ -414,11 +519,25 @@ gs.info('Active incidents: ' + count);`,
       explain: 'Loop tho count chesam. Real ga ayithe gr.getRowCount() simple (leka GlideAggregate).',
       tests: [
         { label: 'Log: Active incidents: 7', logs: ['Active incidents: 7'] },
-        { label: 'count = getRowCount', expr: 'gr.getRowCount()', expect: 7 },
+        { label: 'count = 7 (getRowCount tho same)', expr: '[count, gr.getRowCount()]', expect: [7, 7] },
+      ],
+      variants: [
+        {
+          name: 'inko active + oka closed incident',
+          scenario: {
+            seed: {
+              incident: [
+                { number: 'INC0010009', short_description: 'Laptop battery swollen', state: '1', category: 'hardware' },
+                { number: 'INC0010010', short_description: 'Old ticket (closed)', state: '7', active: 'false' },
+              ],
+            },
+          },
+          tests: [{ label: 'Log: Active incidents: 8', logs: ['Active incidents: 8'] }],
+        },
       ],
     }),
-    // ---- Medium+ ladder: one new idea at a time, building up to exercises 3 and 4 ----
-    jx('js-loops', 5, 'Array meeda for loop (index)', 'medium+', {
+    // ---- Ladder (array order = doing order): one new idea at a time, building up to 'Workload per assignee' ----
+    jx('js-loops', 5, 'Array meeda for loop (index)', 'medium', {
       task: 'groups = ["Service Desk", "Network", "Database"] undi. for loop tho (i = 0 nundi groups.length varaku) prathi group ni "1. Service Desk", "2. Network", "3. Database" laaga log chey. 🧰 Vaade words: for, groups.length, groups[i]',
       starter: `var groups = ['Service Desk', 'Network', 'Database'];
 
@@ -435,8 +554,11 @@ gs.info('Active incidents: ' + count);`,
 for (var i = 0; i < groups.length; i++) {
   gs.info((i + 1) + '. ' + groups[i]);
 }`,
-      explain: 'Arrays index 0 nundi start; i < groups.length tho last item varaku velthundi. Exercise 1 lo number loop, ikkada array loop.',
-      tests: [{ label: 'Logs: 1. Service Desk, 2. Network, 3. Database', logs: ['1. Service Desk', '2. Network', '3. Database'] }],
+      explain: 'Arrays index 0 nundi start; i < groups.length tho last item varaku velthundi. "Retry 3 times (for)" lo number loop chesav, ikkada array index loop.',
+      tests: [
+        { label: 'Logs: 1. Service Desk, 2. Network, 3. Database', logs: ['1. Service Desk', '2. Network', '3. Database'] },
+        { label: 'for loop (var i) groups.length varaku — loop tarvata i = 3', expr: 'i', expect: 3 },
+      ],
     }),
     jx('js-loops', 6, 'P1 active count (while + addQuery)', 'medium+', {
       task: 'Active & priority 1 incidents query chey. while (gr.next()) tho count++ chey. "P1 active: 2" ani log chey. 🧰 Vaade words: GlideRecord, addActiveQuery(), addQuery(), query(), next()',
@@ -471,6 +593,20 @@ gs.info('P1 active: ' + count);`,
         { label: 'Log: P1 active: 2', logs: ['P1 active: 2'] },
         { label: 'count = 2', expr: 'count', expect: 2 },
       ],
+      variants: [
+        {
+          name: 'inko active P1 + oka closed P1',
+          scenario: {
+            seed: {
+              incident: [
+                { number: 'INC0010009', short_description: 'Core switch down', priority: '1', state: '2', category: 'network' },
+                { number: 'INC0010010', short_description: 'Old outage (closed)', priority: '1', state: '7', active: 'false' },
+              ],
+            },
+          },
+          tests: [{ label: 'Log: P1 active: 3', logs: ['P1 active: 3'] }],
+        },
+      ],
     }),
     jx('js-loops', 7, 'First P1 dorikaka aapu (break)', 'medium+', {
       task: 'Anni incidents (number tho order) loop chey. priority "1" ayithe "First P1: <number>" ani log chesi break chey — migilina records chudakunda aapali. 🧰 Vaade words: while (gr.next()), getValue(), break',
@@ -497,11 +633,19 @@ while (gr.next()) {
     break;
   }
 }`,
-      explain: 'break loop ni immediately aapestundi. break lekapothe INC0010008 kuda log avtundi. Exercise 3 lo continue tho kalipi vaadatham.',
+      explain: 'break loop ni immediately aapestundi. break lekapothe INC0010008 kuda log avtundi. "First unassigned P1 (continue & break)" lo continue tho kalipi vaadatham.',
       tests: [{ label: 'Log (okkate): First P1: INC0010002', logs: ['First P1: INC0010002'] }],
+      variants: [
+        {
+          name: 'INC0010001 kuda P1 ayithe',
+          scenario: { seed: { incident: [{ sys_id: 'inc1', priority: '1' }] } },
+          tests: [{ label: 'Log (okkate): First P1: INC0010001', logs: ['First P1: INC0010001'] }],
+        },
+      ],
     }),
-    jx('js-loops', 3, 'First unassigned P1 (continue & break)', 'medium', {
-      task: 'Anni incidents (number tho order) loop chey. active = "false" ayithe continue. priority "1" AND assigned_to empty ayithe "First unassigned P1: <number>" log chesi break chey.',
+    jx('js-loops', 3, 'First unassigned P1 (continue & break)', 'medium+', {
+      scenario: { seed: { incident: [OLD_P1] } },
+      task: 'Anni incidents (number tho order) loop chey. Inactive ayithe continue (true/false field ki getValue "1" / "0" istundi). priority "1" AND assigned_to empty ayithe "First unassigned P1: <number>" log chesi break chey. (Data lo INC0010000 = closed, unassigned P1 — adi skip avvali.)',
       starter: `var gr = new GlideRecord('incident');
 gr.orderBy('number');
 gr.query();
@@ -512,16 +656,16 @@ while (gr.next()) {
 }
 `,
       hint: [
-        'Loop lo rendu control keywords kavali: inactive ni skip cheyyadaniki oka keyword, match dorikaka aapadaniki inkoka keyword (previous Medium+ lo break chesav).',
-        'Mundu if (gr.getValue("active") === "false") { continue; }, tarvata priority "1" && assigned_to empty check.',
-        "if (gr.getValue('active') === 'false') continue;",
+        'Loop lo rendu control keywords kavali: inactive ni skip cheyyadaniki oka keyword, match dorikaka aapadaniki inkoka keyword ("First P1 dorikaka aapu" lo break chesav).',
+        'Inactive check: getValue("active") "0" istundi ("false" kaadu!) → if (gr.getValue("active") === "0") { continue; }. Tarvata priority "1" && assigned_to empty check.',
+        "if (gr.getValue('active') === '0') { continue; }   if (gr.getValue('priority') === '1' && !gr.getValue('assigned_to')) { gs.info('First unassigned P1: ' + gr.getValue('number')); break; }",
       ],
       solution: `var gr = new GlideRecord('incident');
 gr.orderBy('number');
 gr.query();
 
 while (gr.next()) {
-  if (gr.getValue('active') === 'false') {
+  if (gr.getValue('active') === '0') {
     continue;
   }
   if (gr.getValue('priority') === '1' && !gr.getValue('assigned_to')) {
@@ -529,24 +673,41 @@ while (gr.next()) {
     break;
   }
 }`,
-      explain: 'continue inactive ones skip chestundi, break first match tarvata loop aapestundi (INC0010002 dorikindi, INC0010008 daka velladu).',
-      tests: [{ label: 'Log: First unassigned P1: INC0010002', logs: ['First unassigned P1: INC0010002'] }],
+      explain: 'continue inactive ones skip chestundi (INC0010000 — closed P1), break first match tarvata loop aapestundi. getValue("active") === "false" ani rasthe eppudu match avvadu (PDI "0" istundi) — closed P1 ne pattukuntundi! gr.active == false kuda correct.',
+      tests: [{ label: 'Log: First unassigned P1: INC0010002 (closed INC0010000 skip)', logs: ['First unassigned P1: INC0010002'] }],
+      variants: [
+        {
+          name: 'INC0010008 kuda unassigned (break test)',
+          scenario: { seed: { incident: [OLD_P1, { sys_id: 'inc8', assigned_to: '' }] } },
+          tests: [{ label: 'Log (okkate): First unassigned P1: INC0010002', logs: ['First unassigned P1: INC0010002'] }],
+        },
+        {
+          name: 'INC0010002 assigned, INC0010008 unassigned',
+          scenario: { seed: { incident: [OLD_P1, { sys_id: 'inc2', assigned_to: 'u_abel' }, { sys_id: 'inc8', assigned_to: '' }] } },
+          tests: [{ label: 'Log: First unassigned P1: INC0010008', logs: ['First unassigned P1: INC0010008'] }],
+        },
+        {
+          name: 'INC0010002 P3 ayithe',
+          scenario: { seed: { incident: [OLD_P1, { sys_id: 'inc2', priority: '3' }, { sys_id: 'inc8', assigned_to: '' }] } },
+          tests: [{ label: 'Log: First unassigned P1: INC0010008', logs: ['First unassigned P1: INC0010008'] }],
+        },
+      ],
     }),
     jx('js-loops', 4, 'Workload per assignee (for...in)', 'hard', {
       task: 'Active incidents (number tho order) loop chey. Prathi incident ki assigned_to display value teesuko (empty ayithe "Unassigned"). counts object lo +1 chey. Tarvata for...in tho "<name>: <count>" log chey.',
       starter: `var counts = {};
 
 var gr = new GlideRecord('incident');
-// TODO: addActiveQuery, orderBy number, query
+// TODO: active incidents, number order, query
 
-// TODO: while loop: name = display value leka 'Unassigned'; counts[name] = (counts[name] || 0) + 1
+// TODO: while loop — prathi incident ki assignee peru (empty ayithe 'Unassigned'), counts lo aa peru count + 1
 
-// TODO: for (var name in counts) -> gs.info(name + ': ' + counts[name])
+// TODO: for...in tho prathi peru, count log chey ('<name>: <count>')
 `,
       hint: [
         'Rendu loops: (1) while (gr.next()) tho counts object build chey, (2) for...in tho counts print chey. Counter pattern: (counts[name] || 0) + 1.',
-        'name kosam display value teesuko; empty ayithe "Unassigned" ravali — || tho default pettochu.',
-        "var name = gr.getDisplayValue('assigned_to') || 'Unassigned';",
+        'Peru kosam getDisplayValue("assigned_to") — empty ayithe "" istundi (falsy), kabatti || "Unassigned" tho default pettochu.',
+        "var name = gr.getDisplayValue('assigned_to') || 'Unassigned';   counts[name] = (counts[name] || 0) + 1;   — tarvata for (var n in counts) { gs.info(n + ': ' + counts[n]); }",
       ],
       solution: `var counts = {};
 
@@ -563,8 +724,18 @@ while (gr.next()) {
 for (var n in counts) {
   gs.info(n + ': ' + counts[n]);
 }`,
-      explain: '|| tho default value ("Unassigned") — empty string falsy kabatti. Object counter + for...in = group-by laaga.',
-      tests: [{ label: 'Workload', logs: ['System Administrator: 3', 'Unassigned: 4'] }],
+      explain: '|| tho default value ("Unassigned") — getDisplayValue empty reference ki "" istundi (falsy; nee PDI lo check chesam). Object counter + for...in = group-by laaga.',
+      tests: [
+        { label: 'Workload', logs: ['System Administrator: 3', 'Unassigned: 4'] },
+        { label: 'counts object', expr: 'JSON.stringify(counts)', expect: '{"System Administrator":3,"Unassigned":4}' },
+      ],
+      variants: [
+        {
+          name: 'INC0010002 Beth ki assign ayithe',
+          scenario: { seed: { incident: [{ sys_id: 'inc2', assigned_to: 'u_beth' }] } },
+          tests: [{ label: 'Workload (Beth tho)', logs: ['System Administrator: 3', 'Beth Anglin: 1', 'Unassigned: 3'] }],
+        },
+      ],
     }),
   ],
 }
@@ -621,7 +792,7 @@ gs.info(getCount('network'));`,
       h: '🏛 Script Include (Class.create)',
       body: [
         'Real ServiceNow lo reusable server code "Script Include" lo untundi. Classic style: Class.create() + prototype lo methods. initialize = constructor. Dani nundi new MyUtils().method() tho call chestam.',
-        'Script Include peru = class peru exact ga undali.',
+        'Script Include peru = class peru exact ga undali. Methods lopala this = aa object (Objects lesson lo "this" card) — initialize lo this.x = ... save chesi, migatha methods lo this.x tho chaduvutam.',
       ],
       code: `var IncidentUtils = Class.create();
 IncidentUtils.prototype = {
@@ -644,6 +815,8 @@ gs.info(new IncidentUtils().getP1Count());`,
       body: [
         'Function ni call cheyyadam marchipokandi: getCount (reference) vs getCount("network") (call).',
         'Parameter ga vache values string leka number kavachu — Number(x) tho marchi compare chey (lesson 1 gotcha).',
+        'Default parameter value (function f(p = 1)) nee PDI Background Script lo (ES12 mode lekunda) SyntaxError (check chesam) — lopala p = p || 1 ani rayi.',
+        '⚠️ Typos: function peru tappu (getCont("network")) → ReferenceError: "getCont" is not defined. Kani METHOD peru tappu (gr.getvalue("priority")) ayithe nee PDI lo error RAADU — silent ga undefined vastundi (check chesam). Result undefined vachinappudu mundu spelling chudu. (Ee sandbox typo kanipinchali ani error chupistundi.)',
       ],
       code: `function isP1(p) {
   return Number(p) === 1;     // '1' kuda 1 kuda work avtayi
@@ -683,6 +856,7 @@ gs.info(isP1(1));     // true`,
       explain: 'Number(p) tho string/number rendu handle chesam. return tho value bayataki istam.',
       tests: [
         { label: 'getPriorityLabel(1)', expr: 'getPriorityLabel(1)', expect: '1 - Critical' },
+        { label: 'getPriorityLabel("2"), getPriorityLabel(3)', expr: "[getPriorityLabel('2'), getPriorityLabel(3)]", expect: ['2 - High', '3 - Moderate'] },
         { label: 'getPriorityLabel("4")', expr: "getPriorityLabel('4')", expect: '4 - Low' },
         { label: 'getPriorityLabel(9)', expr: 'getPriorityLabel(9)', expect: 'Unknown' },
       ],
@@ -697,14 +871,14 @@ gs.info(isP1(1));     // true`,
       solution: `function isActiveState(state) {
   return Number(state) <= 3;
 }`,
-      explain: 'Comparison ye boolean — direct ga return cheyochu (if/else avasaram ledu).',
+      explain: 'Comparison ye boolean — direct ga return cheyochu (if/else avasaram ledu). Gurtu: idi "pani inka jarugutunda?" ane mana sontha rule — record lo active FIELD kaadu. Nee PDI lo Resolved (6) incident ki active = true ne untundi; Closed (7) ayyaka matrame active = false (check chesam).',
       tests: [
         { label: 'states 1, "2", 3 → true', expr: "[isActiveState(1), isActiveState('2'), isActiveState(3)]", expect: [true, true, true] },
         { label: 'states 6, "7", 8 → false', expr: "[isActiveState(6), isActiveState('7'), isActiveState(8)]", expect: [false, false, false] },
       ],
     }),
-    // ---- Medium+ ladder: one new idea at a time, building up to exercises 3 and 4 ----
-    jx('js-functions', 5, 'formatIncident(number, desc) — rendu parameters', 'medium+', {
+    // ---- Ladder (array order = doing order): one new idea at a time, building up to 'IncidentUtils Script Include' ----
+    jx('js-functions', 5, 'formatIncident(number, desc) — rendu parameters', 'medium', {
       task: 'formatIncident(number, desc) function rayyi: "INC0010002 - VPN is down" laaga <number> - <desc> text return chey (log kaadu, return!). 🧰 Vaade words: function, parameters, return, + (text join)',
       starter: `function formatIncident(number, desc) {
   // TODO: number + ' - ' + desc return chey
@@ -722,6 +896,32 @@ gs.info(isP1(1));     // true`,
       tests: [
         { label: 'formatIncident("INC0010002", "VPN is down")', expr: "formatIncident('INC0010002', 'VPN is down')", expect: 'INC0010002 - VPN is down' },
         { label: 'formatIncident("INC1", "x")', expr: "formatIncident('INC1', 'x')", expect: 'INC1 - x' },
+      ],
+    }),
+    jx('js-functions', 3, 'getIncidentCount(category)', 'medium+', {
+      task: 'getIncidentCount(category) function: aa category lo ACTIVE incidents count return chey (GlideRecord, addActiveQuery, addQuery, getRowCount).',
+      starter: `function getIncidentCount(category) {
+  // TODO: GlideRecord query chesi count return chey
+}
+`,
+      hint: [
+        'Function lopala GlideRecord query set chey — category parameter ni filter ga vaadu. Count ni return cheyali (log kaadu).',
+        'gr.addActiveQuery(); gr.addQuery("category", category); gr.query(); — count kosam getRowCount().',
+        "var gr = new GlideRecord('incident'); gr.addActiveQuery(); gr.addQuery('category', category); gr.query(); return gr.getRowCount();",
+      ],
+      solution: `function getIncidentCount(category) {
+  var gr = new GlideRecord('incident');
+  gr.addActiveQuery();
+  gr.addQuery('category', category);
+  gr.query();
+  return gr.getRowCount();
+}`,
+      explain: 'Query logic function lo petti parameter tho reuse chesam. INC0010005 (inquiry) Closed — active = false — kabatti inquiry count 0.',
+      tests: [
+        { label: 'network → 2', expr: "getIncidentCount('network')", expect: 2 },
+        { label: 'database → 2', expr: "getIncidentCount('database')", expect: 2 },
+        { label: 'hardware → 1', expr: "getIncidentCount('hardware')", expect: 1 },
+        { label: 'inquiry → 0', expr: "getIncidentCount('inquiry')", expect: 0 },
       ],
     }),
     jx('js-functions', 6, 'getOwner(number) — GlideRecord + safe return', 'medium+', {
@@ -744,7 +944,7 @@ gs.info(isP1(1));     // true`,
   }
   return gr.getDisplayValue('assigned_to') || 'Unassigned';
 }`,
-      explain: 'Early return (guard) tho edge cases mundu handle chesam. get() record dorikite true istundi. Ide pattern exercise 4 (Script Include) lo vaadatham.',
+      explain: 'Early return (guard) tho edge cases mundu handle chesam. get() record dorikite true istundi. "IncidentUtils Script Include" lo ide pattern vaadatham.',
       tests: [
         { label: 'INC0010001 → System Administrator', expr: "getOwner('INC0010001')", expect: 'System Administrator' },
         { label: 'INC0010006 → Unassigned', expr: "getOwner('INC0010006')", expect: 'Unassigned' },
@@ -783,40 +983,15 @@ IncidentUtils.prototype = {
 
   type: 'IncidentUtils'
 };`,
-      explain: 'Script Include = class lo methods. Method lopala function laage GlideRecord vaadochu. Exercise 4 lo rendo method kuda add chestam.',
+      explain: 'Script Include = class lo methods. Method lopala function laage GlideRecord vaadochu. "IncidentUtils Script Include" lo rendo method kuda add chestam.',
       tests: [
         { label: 'isP1: INC0010008 true, INC0010003 false', expr: "[new IncidentUtils().isP1('INC0010008'), new IncidentUtils().isP1('INC0010003')]", expect: [true, false] },
         { label: 'unknown number → false', expr: "new IncidentUtils().isP1('INC9999999')", expect: false },
         { label: 'type', expr: 'new IncidentUtils().type', expect: 'IncidentUtils' },
       ],
     }),
-    jx('js-functions', 3, 'getIncidentCount(category)', 'medium', {
-      task: 'getIncidentCount(category) function: aa category lo ACTIVE incidents count return chey (GlideRecord, addActiveQuery, addQuery, getRowCount).',
-      starter: `function getIncidentCount(category) {
-  // TODO: GlideRecord query chesi count return chey
-}
-`,
-      hint: [
-        'Function lopala GlideRecord query set chey — category parameter ni filter ga vaadu. Count ni return cheyali (log kaadu).',
-        'gr.addActiveQuery(); gr.addQuery("category", category); gr.query(); — count kosam getRowCount().',
-        "var gr = new GlideRecord('incident'); gr.addActiveQuery(); gr.addQuery('category', category); gr.query(); return gr.getRowCount();",
-      ],
-      solution: `function getIncidentCount(category) {
-  var gr = new GlideRecord('incident');
-  gr.addActiveQuery();
-  gr.addQuery('category', category);
-  gr.query();
-  return gr.getRowCount();
-}`,
-      explain: 'Query logic function lo petti parameter tho reuse chesam. INC0010005 (inquiry) resolved/inactive kabatti inquiry count 0.',
-      tests: [
-        { label: 'network → 2', expr: "getIncidentCount('network')", expect: 2 },
-        { label: 'database → 2', expr: "getIncidentCount('database')", expect: 2 },
-        { label: 'inquiry → 0', expr: "getIncidentCount('inquiry')", expect: 0 },
-      ],
-    }),
     jx('js-functions', 4, 'IncidentUtils Script Include', 'hard', {
-      task: 'IncidentUtils ane Script Include style class (Class.create) rayyi. Methods: 1) isP1(number) → aa incident priority 1 aa true/false. 2) getOpenCountForGroup(groupName) → aa group (peru tho) ki assign ayina ACTIVE incidents count (mundu sys_user_group lo name tho sys_id teesuko, tarvata incident query). 3) type: "IncidentUtils".',
+      task: 'IncidentUtils ane Script Include style class (Class.create) rayyi. Methods: 1) isP1(number) → aa incident priority 1 aa true/false. 2) getOpenCountForGroup(groupName) → aa group (peru tho) ki assign ayina ACTIVE incidents count (mundu sys_user_group lo name tho sys_id teesuko, tarvata incident query — leka addQuery("assignment_group.name", groupName) dot-walk tho direct ga). 3) type: "IncidentUtils".',
       starter: `var IncidentUtils = Class.create();
 IncidentUtils.prototype = {
   initialize: function () {},
@@ -833,7 +1008,7 @@ IncidentUtils.prototype = {
 };
 `,
       hint: [
-        'isP1 laage Medium+ 7 lo chesav. getOpenCountForGroup kosam: mundu group peru nundi group record teesuko, tarvata aa group ki assign ayina active incidents count chey.',
+        'isP1 "Script Include lo okka method (isP1)" lo chesav. getOpenCountForGroup kosam: mundu group peru nundi group record teesuko, tarvata aa group ki assign ayina active incidents count chey.',
         'Incident lo assignment_group value = group sys_id. Kabatti mundu sys_user_group lo get("name", groupName) chesi sys_id teesuko; dorakakapothe 0 return chey.',
         "var g = new GlideRecord('sys_user_group'); g.get('name', groupName); g.getUniqueValue() = sys_id.",
       ],
@@ -863,7 +1038,7 @@ IncidentUtils.prototype = {
 
   type: 'IncidentUtils'
 };`,
-      explain: 'gr.get() true/false istundi — record dorikapothe safe ga return chesam. Reference field lo sys_id untundi kabatti group sys_id tho query chesam.',
+      explain: 'gr.get() true/false istundi — record dorikapothe safe ga return chesam. Reference field lo sys_id untundi kabatti group sys_id tho query chesam. (Dot-walk addQuery("assignment_group.name", groupName) kuda pani chestundi — okka query tho.)',
       tests: [
         { label: 'isP1: INC0010008 true, INC0010003 false', expr: "[new IncidentUtils().isP1('INC0010008'), new IncidentUtils().isP1('INC0010003')]", expect: [true, false] },
         { label: 'isP1: unknown number → false', expr: "new IncidentUtils().isP1('INC9999999')", expect: false },
