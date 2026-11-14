@@ -9,6 +9,37 @@ The friend is Telugu-speaking and uses a laptop.
 Do not invent a lesson list, start planning lessons, or write code/content for a stage until the titles are provided. Map one lesson to each
 title, in the course's order. Stage 1–3 titles are already in the code (Stage 3's list is at the bottom of this file); stages 4–6 are not known yet.
 
+## How to work here (every task, every model)
+1. **Read before you write.** Open the files you will change and one finished example of the same kind, and copy its shape exactly:
+   - Stage 2 coding lesson: `src/data/lessons-js-b.js`
+   - Stage 3 client-runner lesson: `src/data/lessons-cs-b.js`
+   - Server-runner (CRUD) and real-PDI (`mode: 'pdi'`) lessons: `src/data/lessons-cs-e.js`
+   - Stage 1 PDI cards: `src/data/exercises.js`
+   Don't invent a new data shape, helper or component when an existing one fits.
+2. **ServiceNow facts come from `docs/pdi-facts-brazil.md`, not memory.** If a fact isn't there, mark it ⚠️ (+ a `checks` recipe) or
+   📄 as described under "Rules for new content". Never state an unverified behaviour as certain.
+3. **Small steps.** Change one lesson (or one component) at a time, then run `npm run check`. Fix every failure before moving on; never
+   weaken or skip a check to make it pass. If a check doesn't cover new content (e.g. a new stage file), extend the check.
+4. **Done means:**
+   - `npm run check` all green
+   - `npm run build` passes
+   - UI changes looked at in the browser (`npm run dev`)
+   - the Stage plan table below and any counts in this file updated
+   Say plainly what you ran and what you didn't.
+5. **Never:**
+   - renumber or rename exercise / lesson ids (her progress is stored under them)
+   - sort exercises
+   - use syntax her PDI rejects in server code
+   - teach generic JavaScript
+   - write English-only learner text
+   - touch her real PDI without explicit permission and full cleanup
+6. **Git:** work on a branch, commit with a clear message, and ask before pushing. Merging/pushing to `main` deploys the live site
+   (GitHub Pages), so never push to `main` unless the user asks.
+7. **When unsure, ask the user** (missing lecture titles, unclear scope, a ServiceNow fact you can't verify). Short questions are fine;
+   guessing is not.
+8. `REVIEW-NOTES.md` is a one-off review list for the November 2026 audit branch; delete it once that branch is merged. The lasting
+   record is `docs/` (`docs/audit-2026-11/`, `docs/pdi-facts-brazil.md`).
+
 ## Rules for new content
 - **Language: Tenglish** — Telugu written in English letters, technical terms stay English. Casual, friendly tone
   (e.g. "Ippudu 'Submit' click cheyyi"). A Telugu-script toggle was deferred.
@@ -37,6 +68,19 @@ title, in the course's order. Stage 1–3 titles are already in the code (Stage 
 | 6 | ITSM and Now Assist | planned |
 
 For stages 4–6 the exact lecture titles are unknown: **ask the user to paste the Udemy section's lecture list and wait** before planning or writing anything (see the first section above).
+
+### Adding a new stage (after the titles are pasted)
+1. **Plan first.** Write one lesson per lecture title, in course order, with a lesson id prefix for the stage (e.g. `ss-` for Stage 4).
+   Show the plan to the user before writing content.
+2. **Lesson files:** `src/data/lessons-<prefix>*.js` exporting an array like `CS_LESSONS`. Same `jx` / `q` format, at least 3 learn
+   cards, 15 quiz questions, and a 7-exercise ladder per coding lesson. Real-PDI topics use `mode: 'pdi'` cards with steps and cleanup.
+3. **Stage entry:** add one `STAGES` entry in `src/data/stages.js` (key, num, icon, title, subtitle, `kind: 'code'`, lessons). Hub,
+   Hands-on Practice and App pick it up.
+4. **Glossary:** add an entry for every new API to a glossary file merged into `GLOSSARY_JS` (tag it with the stage).
+5. **Checks:** the checks only cover the lesson lists they import (`JS_LESSONS`, `CS_LESSONS`). Add the new list to check-js or
+   check-cs (pick by runner), and to check-quiz, check-glossary, check-page-terms and check-pdi-checks, so they test it too.
+6. **Finish:** run `npm run check` and `npm run build`, update the Stage plan table, and add the stage's lecture list at the bottom of
+   this file.
 
 ## Tech and architecture
 React 19 + Vite 5, plain JS/JSX, no router, no backend. Stage pages use the Astryx design-system theme
