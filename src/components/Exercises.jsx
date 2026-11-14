@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { LESSONS } from '../data/lessons.js'
 import { exercisesFor } from '../data/exercises.js'
 import { STAGES, lessonExercises, exerciseDone } from '../data/stages.js'
+import PdiCheck from './PdiCheck.jsx'
 
 // Exercises always show in the lesson file's ARRAY order (the order she should do them); the badge just shows the level.
 export const LEVEL = { easy: '🟢 Easy', medium: '🟡 Medium', 'medium+': '🟠 Medium+', hard: '🔴 Hard' }
@@ -53,6 +54,7 @@ export function Card({ e, done, onToggle }) {
           {e.cleanup && <div className="ex-cleanup"><b>🧹 Cleanup:</b> {e.cleanup}</div>}
         </div>
       )}
+      <PdiCheck ids={e.checks} />
 
       <label className="ex-done">
         <input type="checkbox" checked={done} onChange={() => onToggle(e.id)} /> Chesesaanu ✔

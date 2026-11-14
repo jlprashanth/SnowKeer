@@ -1,4 +1,8 @@
 import { GLOSSARY_GROUPS, GLOSSARY_JS, termsFor } from '../data/glossary-js.js'
+import PdiCheck from './PdiCheck.jsx'
+
+// check: true = ⚠️ (confirm in her PDI), 'docs' = 📄 (from the docs, not easy to test in a PDI)
+const MARK = { true: ['⚠️', 'PDI lo confirm chey'], docs: ['📄', 'Docs nunchi — PDI lo easy ga test cheyyalem'] }
 
 // Sub-box inside a learn card: "📘 Ee topic lo words" — term → meaning rows.
 // keys = glossary keys listed on the card, e.g. ['gs', 'GlideRecord', 'gr'].
@@ -11,10 +15,11 @@ export function TermBox({ keys, title = '📘 Ee topic lo words', collapsible = 
     <dl className="term-list">
       {items.map((t) => (
         <div className="term-row" key={t.term}>
-          <dt><code>{t.term}</code>{t.check && <span className="term-check" title="PDI lo confirm chey">⚠️</span>}</dt>
+          <dt><code>{t.term}</code>{t.check && <span className="term-check" title={(MARK[t.check] || MARK.true)[1]}>{(MARK[t.check] || MARK.true)[0]}</span>}</dt>
           <dd>
             {t.m}
             {t.ex && <pre className="term-ex">{t.ex}</pre>}
+            <PdiCheck ids={t.checks} />
           </dd>
         </div>
       ))}
@@ -43,7 +48,7 @@ export function GlossaryPanel({ stage = 2 }) {
   return (
     <details className="glossary">
       <summary>{stage >= 3 ? '📚 Full glossary — all words' : '📚 JavaScript part — words & abbreviations'} ({all.length})</summary>
-      <p className="muted small">Prathi word ki meaning + ServiceNow example. ⚠️ unna words PDI lo confirm chesuko.</p>
+      <p className="muted small">Prathi word ki meaning + ServiceNow example. ⚠️ unna words PDI lo confirm chesuko; 📄 = docs nunchi (test avasaram ledu).</p>
       {Object.entries(GLOSSARY_GROUPS).map(([gk, label]) => {
         const rows = all.filter((t) => t.g === gk)
         if (!rows.length) return null

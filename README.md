@@ -46,4 +46,5 @@ GitHub Pages. A failing check stops the deploy.
 ## Note
 
 This is an unofficial learning aid, not affiliated with ServiceNow or the course author. Key ServiceNow behaviours were
-checked in a Brazil PDI (`docs/pdi-facts-brazil.md`); anything marked ⚠️ in a lesson should still be confirmed in your own PDI.
+checked in a Brazil PDI (`docs/pdi-facts-brazil.md`); anything marked ⚠️ in a lesson should still be confirmed in your own PDI —
+most have a "🔍 PDI lo ela check cheyyali?" box with test steps and cleanup. 📄 marks facts from the docs that a PDI can't easily test.

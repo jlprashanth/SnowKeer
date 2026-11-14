@@ -657,6 +657,7 @@ gs.error('Update failed for ' + current.getValue('number'));`,
         'On chesaka oka field ni watch chesthe aa field ni e script / UI Policy marchindo form kinda panel lo chupistundi ⚠️ (field label right-click lo "watch" option, panel ela untundo PDI lo chudu). jslog() output ki F12 Console chalu.',
         '"Next Experience Developer Tools" = vere browser extension — install cheyyaku, ee course ki avasaram ledu.',
       ],
+      checks: ['field-watcher'],
     },
     {
       h: '🧠 Tips',
@@ -759,6 +760,7 @@ while (inc.next()) {
         'Ctrl+Space = suggestions list (macros kuda andulone vastayi — PDI lo tested). gs. / gr. type chesthe methods kuda suggest chestundo ⚠️ PDI lo try chesi chudu. Syntax errors line pakkana mark tho kanipistayi — save mundu chudu.',
         'Script Include / Business Rule form lo Script field daggara "Turn on ECMAScript 2021 (ES12) mode" toggle undi (nee PDI lo chusam) — aa OKKA script ki on chesthe let, class laanti kotha syntax allow (global scope lo kuda). Scripts - Background lo ee toggle ledu — akkada let / class SyntaxError (PDI lo tested). Ee course lo var tho rayi; toggle undi ani telisthe chalu.',
       ],
+      checks: ['monaco-suggest'],
     },
   ],
   quiz: [
@@ -826,7 +828,7 @@ const best = {
       body: [
         'DOM manipulation (document.getElementById, jQuery, window.) vaddu — upgrades lo break avtayi, Service Portal / Workspace lo pani cheyyavu.',
         'ℹ️ Brazil lo kotha Client Script form lo blue banner untundi: new client scripts strict mode lo run avtayi — direct DOM, jQuery, prototype, window disable. ("Isolate script" field tho per-script marchochu.) Ante DOM vaddu ane rule ippudu platform ye enforce chestundi.',
-        'Client lo GlideRecord vaddu (classic UI lo synchronous — browser aagutundi; Service Portal / Workspace lo support ledu ⚠️). Security ki client scripts avvu — ACLs / Business Rules vaadu. Same logic chala scripts lo copy cheyyaku.',
+        'Client lo GlideRecord vaddu (classic UI lo synchronous — browser aagutundi; Service Portal / Workspace lo support ledu — 📄 docs). Security ki client scripts avvu — ACLs / Business Rules vaadu. Same logic chala scripts lo copy cheyyaku.',
       ],
       code: `// 🚫 Bad
 document.getElementById('incident.short_description').disabled = true;
@@ -838,7 +840,7 @@ g_form.setReadOnly('short_description', true);`,
       h: '⏱️ Async gurtupettuko',
       body: [
         'getReference(field, callback) / GlideAjax getXMLAnswer answers LATER vastayi — nee function return ayyaka. Call kinda unna lines ki answer inka raadu; answer tho chese pani antha callback LOPALE (ee site lo kuda ila ne run avtundi).',
-        'Callback lekunda getReference(field) leda getXMLWait() = synchronous: answer vachhe varaku browser freeze; classic UI lo matrame (Service Portal / Workspace lo kaadu ⚠️). onSubmit async answer kosam wait cheyyadu ⚠️.',
+        'Callback lekunda getReference(field) leda getXMLWait() = synchronous: answer vachhe varaku browser freeze; classic UI lo matrame (Service Portal / Workspace lo kaadu — 📄 docs). onSubmit async answer kosam wait cheyyadu ⚠️ (PDI lo check: kinda 🔍 box).',
       ],
       code: `// 🚫 Bad — name inka raaledu
 var name = '';
@@ -851,6 +853,7 @@ g_form.setValue('description', 'Caller: ' + name);   // '' !
 g_form.getReference('caller_id', function (caller) {
   g_form.setValue('description', 'Caller: ' + caller.name);
 });`,
+      checks: ['async-submit'],
     },
   ],
   quiz: [
@@ -903,7 +906,7 @@ g_form.getReference('caller_id', function (caller) {
     jx('cs-best', 5, 'Callback lekunda getReference vaddu', 'medium+', {
       scenario: { form: { values: { caller_id: 'u_bud' } } },
       client: CHG('caller_id', 'u_abel', 'u_bud'),
-      task: 'Ee onChange (caller_id) lo getReference callback LEKUNDA undi = synchronous call: nee PDI classic UI lo record vachhe varaku browser freeze (Service Portal / Workspace lo assalu support ledu ⚠️). Callback form ki marchi, callback lopala jslog("Caller: <name>") chey. 🧰 Vaade words: g_form.getReference(), callback function, jslog()',
+      task: 'Ee onChange (caller_id) lo getReference callback LEKUNDA undi = synchronous call: nee PDI classic UI lo record vachhe varaku browser freeze (Service Portal / Workspace lo assalu support ledu — 📄 docs). Callback form ki marchi, callback lopala jslog("Caller: <name>") chey. 🧰 Vaade words: g_form.getReference(), callback function, jslog()',
       starter: "function onChange(control, oldValue, newValue, isLoading, isTemplate) {\n  if (isLoading || newValue === '') {\n    return;\n  }\n  // 🚫 Bad: callback lekunda. Rendo argument ga function pampi, log ni aa function LOPALIKI teesuko.\n  var caller = g_form.getReference('caller_id');\n  jslog('Caller: ' + caller.name);\n}",
       hint: [
         'getReference ki rendo argument ga oka function ivvali — record ready ayinappudu adi call avtundi, record parameter ga vastundi.',
@@ -1014,7 +1017,7 @@ const uipages = {
     {
       h: '⏱️ Jelly phase 1 vs phase 2',
       body: [
-        'Jelly rendu passes lo render avtundi (rendu server lone): phase 1 = ${ } + j: / g: tags (mundu run; result cache avvochu ⚠️ PDI lo confirm chesuko), phase 2 = $[ ] + j2: / g2: tags (prathi request ki run). Skeleton lo xmlns:j2="null" xmlns:g2="null" anduke untayi.',
+        'Jelly rendu passes lo render avtundi (rendu server lone): phase 1 = ${ } + j: / g: tags (mundu run; result cache avvochu — 📄 docs, PDI lo easy ga test cheyyalem), phase 2 = $[ ] + j2: / g2: tags (prathi request ki run). Skeleton lo xmlns:j2="null" xmlns:g2="null" anduke untayi.',
         'Simple rule: user / time batti marey values ki phase 2 ($[ ], g2:evaluate) safe; static text ki phase 1. Nee PDI lo 227 out-of-box UI Pages $[ ] (phase 2) vaadutayi (chusam).',
       ],
       code: `<p>Phase 1: \${gs.getUserDisplayName()}</p>

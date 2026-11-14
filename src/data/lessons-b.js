@@ -178,7 +178,7 @@ const processFlow = {
     click('f-back', 'Back ‹ click cheyyi — incident list ki.'),
     click('list-open-first', 'Top lo unna incident (State = New) open cheyyi.'),
     type('f-state', 'Ee record "New" stage lo undi. Ippudu State ni "In Progress" ki marchu.', eq('2'), '2', { hint: 'State dropdown lo In Progress select cheyyi.', okText: 'Ippudu bar chudu — Next click cheyyi.' }),
-    info('Highlight inka "New" lone undi! Formatter display matrame — record SAVE ayyi form reload ayinappude stage marutundi. ⚠️ PDI lo kuda ila ne undo confirm chesuko.', 'process-flow'),
+    info('Highlight inka "New" lone undi! Formatter display matrame — record SAVE ayyi form reload ayinappude stage marutundi. ⚠️ PDI lo kuda ila ne undo confirm chesuko.', 'process-flow', { checks: ['process-flow-save'] }),
     click('f-menu', '☰ menu click cheyyi.'),
     click('menu-save', '"Save" click cheyyi — save ayyi form lone untav.'),
     info('Ippudu "In Progress" highlight ✅ Gurtu pettuko: bar State ni marchadu — State marchi save chesthe bar follow avtundi. Stages = Process Flow records (System UI → Process Flow); form lo chupinchadaniki Form Layout lo "Process Flow" formatter (nee PDI lo aa table ki Formatter record kuda undali — System UI → Formatters).', 'process-flow'),

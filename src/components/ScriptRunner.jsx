@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import CodeEditor from './CodeEditor.jsx'
+import PdiCheck from './PdiCheck.jsx'
 import { brazilSyntaxWarnings } from '../js/esCheck.js'
 // ?worker&inline → classic (non-module) worker embedded as a Blob: works on older browsers, no separate file to fail loading
 import RunnerWorker from '../js/runner.worker.js?worker&inline'
@@ -188,6 +189,7 @@ export default function ScriptRunner({ exercise, starter, done, onPass, scenario
           <b>Solution:</b>
           <pre className="code-sample">{exercise.solution}</pre>
           <div>{exercise.explain}</div>
+          <PdiCheck ids={exercise.checks} />
           <button className="btn small" onClick={() => setCode(exercise.solution)}>Editor lo pettu</button>
         </div>
       )}

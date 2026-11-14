@@ -19,7 +19,12 @@ title, in the course's order. Stage 1–3 titles are already in the code (Stage 
 - **Never create or modify things in the user's real PDI** without reversing them; never enter credentials on the developer site.
 - ServiceNow behaviour must match her **Brazil PDI**. Check `docs/pdi-facts-brazil.md` first (verified in her PDI with read-only
   Background Scripts, 2026-11-14 — several memory-based claims turned out wrong, e.g. priority 3/3 is 4 there, `let` fails but
-  arrow functions work). Anything not verified gets "⚠️ PDI lo confirm chesuko" in the text so the friend can confirm it.
+  arrow functions work). Anything not verified gets "⚠️ PDI lo confirm chesuko" in the text so the friend can confirm it, and —
+  when she can test it — `checks: ['key']` on that item (learn card, quiz `q()` 5th argument, exercise, glossary entry, guided step)
+  pointing to a recipe in `src/data/pdi-checks.js` (steps / what she should see / cleanup; test scripts only touch a "pdi check"
+  incident). `PdiCheck.jsx` shows it as a closed "🔍 PDI lo ela check cheyyali?" box under the item. Facts only the docs can settle
+  (Service Portal / Workspace limits, Jelly caching …) say "📄 docs nunchi — PDI lo easy ga test cheyyalem" instead (glossary: `check: 'docs'`).
+  When an exercise step itself shows the answer (an option name, an error text), the ⚠️ alone is enough.
 
 ## Stage plan and status
 | Stage | Topic | Status |
@@ -94,6 +99,8 @@ Hub has progress save/load to a JSON file). Run with `npm run dev`; build with `
 - `node dev-tools/check-exercises.mjs` — Stage 1 exercise data sanity (ids, lessonIds, prerequisite notes on Practice Task exercises).
 - `node dev-tools/check-glossary.mjs` — Stage 2 + Stage 3: every card `terms` key exists, and every `obj.method(` / bare call used in lesson code, hints and solutions has a glossary entry. Run after adding code to any Stage 2/3 lesson.
 - `node dev-tools/check-page-terms.mjs` — floating glossary panel: client calls (`g_form.x()`) resolve to their own entries (never the server `getValue`), hints/solutions never add terms to a page (no spoilers), Stage 2 pages never list Stage 3-only entries.
+- `node dev-tools/check-pdi-checks.mjs` — "🔍 PDI lo ela check cheyyali?" recipes: every `checks` key exists and sits next to a ⚠️, every recipe is
+  linked and has steps / see / cleanup, recipe scripts avoid syntax her PDI rejects. `--list` prints the ⚠️ confirm notes that have no box.
 - `dev-tools/test-driver.js` — auto-plays Stage 1 guided lessons (sets `window.__run`). Not loaded by the app: with the dev server running,
   load it in the page (e.g. `await import('/dev-tools/test-driver.js')` in the console), then `await __run('<lessonId>')`. It does not play
   the quiz. Re-run it after engine changes. (Load path verified 2026-11-14: all 18 lessons reach the quiz.)
@@ -101,7 +108,7 @@ Hub has progress save/load to a JSON file). Run with `npm run dev`; build with `
 
 ## Glossary (Stage 2 + Stage 3)
 - Entries live in `src/data/glossary-js.js` (Stage 2), `src/data/glossary-cs.js` (Stage 3 client lessons) and `src/data/glossary-cs-ui.js`
-  (Stage 3 UI Actions, CRUD, debugging, macros, UI Pages / Macros); Stage 3 entries are tagged `s: 3`; all merged into `GLOSSARY_JS`. Fields: `g` group, `m` meaning (Tenglish), `ex` example, `check: true` = shows ⚠️ "confirm in your PDI".
+  (Stage 3 UI Actions, CRUD, debugging, macros, UI Pages / Macros); Stage 3 entries are tagged `s: 3`; all merged into `GLOSSARY_JS`. Fields: `g` group, `m` meaning (Tenglish), `ex` example, `check: true` = shows ⚠️ "confirm in your PDI", `check: 'docs'` = 📄 (from the docs, not easy to test), `checks: ['key']` = how-to-check box (`pdi-checks.js`).
 - Key naming: GlideRecord/GlideElement methods and JS words are bare (`getValue`, `var`); `gs.*` are `gs.info`; JS methods are `trim()`; client objects are exact (`g_form.setMandatory()`); two-word terms are phrases (`UI Action`).
 - `src/data/glossary-scan.js` decides which terms a lesson page uses (shared by the panel and the checks). `LessonGlossary.jsx` is the floating 📘 button on every Stage 2/3 lesson (hidden on the Quiz tab). Per-card sub-boxes (`terms: [...]` on a learn card) are still used on `js-basics`.
 - New API in a lesson → add its glossary entry (the check fails until you do). Never let a client method (`g_form.x`) fall back to a server entry.

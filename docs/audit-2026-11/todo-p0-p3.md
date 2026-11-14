@@ -56,7 +56,9 @@
 | Language and typos | ✅ |
 
 ## Still open
-- 63 "⚠️ PDI lo confirm chesuko" notes (list editing, `g_form.submit` re-run, UI Policy order, table-delete side effects, PDI reclaim
-  timing, SN Utils, some navigation details). Listed in REVIEW-NOTES.md section 5.
+- The unverified "⚠️ PDI lo confirm chesuko" facts (list editing, `g_form.submit` re-run, UI Policy order, table-delete side effects,
+  PDI reclaim timing, SN Utils, some navigation details). Listed in REVIEW-NOTES.md section 5. Since 2026-11-14 the testable ones have
+  "🔍 PDI lo ela check cheyyali?" steps for the learner, and docs-only ones say 📄 (change-logs/pdi-check-steps.md). Still open
+  until someone runs the steps.
 - Real `npm run build` and a browser click-through with React 19 / Astryx / CodeMirror (click-test list in REVIEW-NOTES.md).
 - Stages 4–6 (needs the Udemy lecture titles).

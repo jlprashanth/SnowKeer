@@ -1,6 +1,7 @@
 // Stage 2 glossary — every ServiceNow abbreviation, GlideRecord/GlideElement/gs method and JS word used in the JavaScript part.
 // Each term is written ONCE here. Learn cards reference terms by key: learn card { terms: ['gs', 'GlideRecord'] } shows them in a sub-box.
-// Fields: g = group, m = meaning (Tenglish), ex = ServiceNow example, check = true means "PDI lo confirm chey" (uncertain).
+// Fields: g = group, m = meaning (Tenglish), ex = ServiceNow example, check = true means "PDI lo confirm chey" (uncertain, ⚠️)
+// or 'docs' (📄 from the docs, not easy to test in a PDI), checks = ['key'] → "🔍 PDI lo ela check cheyyali?" steps (pdi-checks.js).
 import { GLOSSARY_CS, GLOSSARY_GROUPS_CS } from './glossary-cs.js'
 import { GLOSSARY_CS_UI } from './glossary-cs-ui.js'
 
@@ -58,7 +59,7 @@ const GLOSSARY_STAGE2 = {
   getUniqueValue: { g: 'grm', m: 'Record yokka sys_id (unique id) istundi.', ex: 'var id = gr.getUniqueValue();' },
   getTableName: { g: 'grm', m: 'Ee record yokka table peru istundi (incident, problem...).', ex: 'gs.info(gr.getTableName());' },
   setAbortAction: { g: 'grm', m: 'Business Rule lo save ni cancel chestundi (abort). Validation fail ayinappudu vaadutaru.', ex: "if (current.short_description.nil()) { current.setAbortAction(true); }" },
-  setWorkflow: { g: 'grm', m: 'setWorkflow(false) = ee update / insert ki Business Rules run avvavu — skip. (Workflows, notifications kuda skip avtayi ani docs — ⚠️ PDI lo confirm chesuko.) Bulk data fix lo vaadatharu; jagratta — rules lo unna validations kuda skip avtayi.', ex: 'gr.setWorkflow(false);\ngr.update();' },
+  setWorkflow: { g: 'grm', m: 'setWorkflow(false) = ee update / insert ki Business Rules run avvavu — skip. (Workflows, notifications kuda skip avtayi ani 📄 docs — PDI lo easy ga test cheyyalem.) Bulk data fix lo vaadatharu; jagratta — rules lo unna validations kuda skip avtayi.', ex: 'gr.setWorkflow(false);\ngr.update();' },
   isValidRecord: { g: 'grm', m: 'Record valid ga load ayindha ani check chestundi (true/false). get() tarvata vaadali.', ex: "if (gr.isValidRecord()) { ... }" },
   isValidField: { g: 'grm', m: 'Table lo ee field undha ani check chestundi.', ex: "gr.isValidField('priority');" },
 

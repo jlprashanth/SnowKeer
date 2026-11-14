@@ -33,5 +33,7 @@ How the work ran:
    - Stages 1–3 were clicked through in a browser harness (React 18 with stand-ins for the Astryx theme, CodeMirror and the Web Worker).
    - All 18 Stage 1 lessons auto-play to their quiz.
    - Not run: the real `npm run build` (npm was broken on the work PC).
+6. **How-to-check steps (later on 2026-11-14):** the ⚠️ facts she can test got "🔍 PDI lo ela check cheyyali?" boxes, and the
+   docs-only ones were reworded to 📄. See `change-logs/pdi-check-steps.md`. `npm run check` now runs 8 scripts.
 
 The change logs are kept as written during the work. Some line numbers have moved since, and some "requests" in them were handled afterwards (see todo-p0-p3.md).

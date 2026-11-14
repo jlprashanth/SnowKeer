@@ -285,6 +285,16 @@
 .glossary > summary { cursor: pointer; font-weight: 600; color: #1e4566; }
 .glossary-group h4 { margin: 14px 0 6px; color: #3b4a54; }
 @media (max-width: 560px) { .term-row { grid-template-columns: 1fr; gap: 2px; } }
+/* "🔍 PDI lo ela check cheyyali?" box under a ⚠️ fact (PdiCheck.jsx): closed by default */
+.pdi-check { background: #fffaf0; border: 1px solid #f0d98a; border-left: 4px solid #d9a400; border-radius: 6px; padding: 8px 12px; margin: 10px 0; font-size: 14px; line-height: 1.5; text-align: left; }
+.pdi-check > summary { cursor: pointer; font-weight: 600; color: #6b4e00; }
+.pdi-check > summary:hover { text-decoration: underline; }
+.pdi-check[open] > summary { margin-bottom: 8px; }
+.pdi-check-steps { margin: 0 0 8px; padding-left: 22px; }
+.pdi-check-steps li { margin: 4px 0; }
+.bubble .pdi-check { font-size: 13px; }
+:root[data-theme="dark"] .app.themed .pdi-check { background: var(--tint-warn); border-color: var(--tint-warn-line); }
+:root[data-theme="dark"] .app.themed .pdi-check > summary { color: inherit; }
 :root[data-theme="dark"] .app.themed .term-box { background: var(--surface); border-color: var(--line); }
 :root[data-theme="dark"] .app.themed .term-row dt code { background: var(--bg); }
 :root[data-theme="dark"] .app.themed .glossary { background: var(--surface); border-color: var(--line); }

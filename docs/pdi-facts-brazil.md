@@ -150,6 +150,8 @@ If content disagrees with this file, the content is wrong for her PDI.
     and phase-2 `$[ ]`; OOB macros read attributes as `${jvar_<attr>}`; Caller has `ref_contributions=user_show_incidents`.
 
 ## STILL not tested in the PDI (keep ⚠️ "PDI lo confirm chesuko" in content)
+Step-by-step tests the learner can run for most of these are in `src/data/pdi-checks.js` (shown in the app as "🔍 PDI lo ela check
+cheyyali?" boxes). If she runs one, add the result here as a numbered fact and drop the ⚠️ / box from the content.
 - PDI: hibernates after a few hours idle (data kept); reclaimed and WIPED after ~10 days without a login (developer-portal policy,
   community sources — not visible inside the PDI).
 - GlideAjax answers can't stop an onSubmit (follows from #39); `g_form.submit()` re-running onSubmit scripts; getXMLWait being

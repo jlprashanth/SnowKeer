@@ -4,6 +4,7 @@ import ScriptRunner from './ScriptRunner.jsx'
 import { Card as PdiCard, LEVEL, SolvedTag } from './Exercises.jsx'
 import { TermBox } from './TermBox.jsx'
 import LessonGlossary from './LessonGlossary.jsx'
+import PdiCheck from './PdiCheck.jsx'
 import { cardTermKeys } from '../data/glossary-scan.js'
 
 // openExerciseId (deep link from Hands-on Practice / hub "Continue"): start on the Code tab with that exercise open and scrolled into view
@@ -43,6 +44,7 @@ export default function JsLesson({ lesson, progress, onBack, backLabel = '← Co
               {c.body.map((p, j) => <p key={j}>{p}</p>)}
               <TermBox keys={cardTermKeys(c, lesson.stage)} collapsible />
               {c.code && <pre className="code-sample">{c.code}</pre>}
+              <PdiCheck ids={c.checks} />
             </div>
           ))}
           {!pdi && <div className="learn-card">

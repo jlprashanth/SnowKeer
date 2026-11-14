@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { exercisesFor } from '../data/exercises.js'
+import PdiCheck from './PdiCheck.jsx'
 
 // Shuffle each question's options once per quiz run (the data always lists the right answer in a fixed slot).
 function shuffleQuiz(quiz) {
@@ -94,6 +95,7 @@ export default function Quiz({ lesson, onFinish, finishLabel = 'Course ki back',
         <div className={'why ' + (picked === q.answer ? 'ok' : 'no')}>
           {picked === q.answer ? '✅ Correct! ' : '❌ Kaadu. '}
           {q.why}
+          <PdiCheck ids={q.checks} />
         </div>
       )}
       {answered && (

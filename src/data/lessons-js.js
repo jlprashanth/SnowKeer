@@ -167,6 +167,7 @@ gs.info(gr.assigned_to.nil());        // true (empty aa? — safe check)`,
 //  |   |   ServiceNow tool (class) — table tho matladataniki
 //  |   JavaScript word: "kotha object create chey"
 //  nuvvu pettina peru (variable)`,
+      checks: ['monaco-suggest'],
     },
   ],
   quiz: [

@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
 const dir = path.dirname(fileURLToPath(import.meta.url))
-const CHECKS = ['check-mock', 'check-js', 'check-cs', 'check-quiz', 'check-exercises', 'check-glossary', 'check-page-terms']
+const CHECKS = ['check-mock', 'check-js', 'check-cs', 'check-quiz', 'check-exercises', 'check-glossary', 'check-page-terms', 'check-pdi-checks']
 const failed = []
 for (const c of CHECKS) {
   const r = spawnSync(process.execPath, [path.join(dir, c + '.mjs')], { encoding: 'utf8' })

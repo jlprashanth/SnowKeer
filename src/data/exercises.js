@@ -338,6 +338,7 @@ export const EXERCISES = [
       'Record lo Level = Easy pettu → ☰ → Save: bar lo Easy highlight. Level = Hard chesi malli Save → Hard highlight. (Level form lo lekapothe Form Layout lo add chey.)',
     ],
     answer: 'Form top lo Easy → Medium → Hard bar; saved Level ki match ayye stage highlight. Order = stages order, Condition = e stage current. Bar ki moodu kavali: stage records, aa table ki Formatter record (process_flow.xml), Form Layout lo formatter. Bar display-only — Level ni marchadu, record value ni chupistundi anthe. (⚠️ Highlight save chesaka form reload ayyaka matrame marutundi ani anukuntunnam — PDI lo confirm chesuko.)',
+    checks: ['process-flow-save'],
     cleanup: 'Ee order lo chey: (1) Practice Task Form Layout lo "Process Flow" formatter ◀ tho teesi Save. (2) System UI → Formatters lo Table = Practice Task (u_practice_task), Formatter process_flow.xml unna "Process Flow" record delete chey. (3) System UI → Process Flow lo Table = Practice Task unna 3 records (Easy, Medium, Hard) delete chey.',
   }),
 
@@ -599,6 +600,7 @@ export const EXERCISES = [
     ],
     answer: 'Short description fill chesi unnappudu Category Hardware → read-only, Category marchagaane normal ("Reverse if false"). Empty ga unte read-only avvadu — mandatory wins (⚠️ UI Policy lo kuda ide rule — PDI lo confirm chesuko). UI Policy client-side (form) matrame.',
     cleanup: 'UI Policies list lo "Hardware readonly" open chesi Delete (lekapothe incident forms anni ee rule follow avtayi).',
+    checks: ['uipolicy-empty-mandatory'],
   }),
   ex('ui-policies', 2, 'Field ni hide chey (Visible = false)', 'medium', {
     scenario: 'Prerequisite: Practice Task table + records. Done = true ayithe "Topic" field form lo kanipinchakunda hide chese UI Policy create chey.',
@@ -684,6 +686,7 @@ export const EXERCISES = [
       'Final check: All filter lo "practice", "My Tools" type chesi chudu — emi raakudadu.',
     ],
     answer: 'Navigator lo Practice / My Tools menus levu, Tables lo u_practice_* levu, hari.test & Practice Team levu, OOB settings (Priority Data Lookup, incident form) original laaga unnayi. Child ni mundu delete chesthe parent delete easy — lekapothe parent ki child tables unnayi ani delete aagipotundi. ⚠️ Table delete tho daani ACLs (System Security → Access Control, Name u_practice…) kuda potayo PDI lo confirm chesuko — migilina avi harmless (table ledu kabatti).',
+    checks: ['table-delete'],
   }), lessonId: 'data-policies' },
 ]
 

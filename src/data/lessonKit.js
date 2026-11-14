@@ -32,7 +32,8 @@ export const goTo = (filterText, modId, what) => [
   click(modId, `Ippudu highlight chesina module click cheyyi.`),
 ]
 
-export const q = (qs, options, answer, why) => ({ q: qs, options, answer, why })
+// checks = ['key'] → "🔍 PDI lo ela check cheyyali?" box under the explanation (recipes in pdi-checks.js)
+export const q = (qs, options, answer, why, checks) => ({ q: qs, options, answer, why, checks })
 
 // Stage 2 coding exercise (runs in the browser sandbox). tests: { label, logs:[..] } | { label, expr, expect }
 export const jx = (lessonId, n, title, level, o) => ({ id: `${lessonId}-${n}`, lessonId, title, level, hint: '', scenario: undefined, ...o })

@@ -41,6 +41,7 @@ const ua1 = {
         'Mukhyamaina fields (Brazil labels): Name (button meeda text), Table, Action name (unique id), Active, Show insert / Show update, Client, Form button / Form context menu / Form link, List banner button / List choice / List context menu, Condition (button eppudu kanipinchali), Onclick (Client tick chesthe), Script.',
         'Client untick chesthe script SERVER lo run avtundi — current (aa record), gs, action vaadochu. Roles: nee PDI default UI Action form lo "Requires role" related list kanipinchaledu (akkada UI Action Visibility, Versions … unnayi) — roles field / related list vere view lo undochu ⚠️ PDI lo chudu. Sure way: Condition lo gs.hasRole("itil") ("UI Actions — Part 4" lo).',
       ],
+      checks: ['requires-role'],
     },
     {
       h: '🖧 Server-side UI Action script',
@@ -60,10 +61,11 @@ action.setRedirectURL(current);`,
     {
       h: '⚠️ Gurtupettukovali',
       body: [
-        'Click chesinappudu form values current lo untayi — kani record automatic ga save avvadu: script lo current.update() pilichinappude save avtundi. ⚠️ Nee PDI lo oka test UI Action tho confirm chesuko (tarvata aa UI Action delete chey!).',
+        'Click chesinappudu form values current lo untayi — kani record automatic ga save avvadu: script lo current.update() pilichinappude save avtundi. ⚠️ Nee PDI lo oka test UI Action tho confirm chesuko — steps kinda 🔍 box lo (tarvata aa UI Action delete chey!).',
         'Priority nee PDI lo read-only — Data Lookup impact × urgency chusi pedutundi (e.g. impact 2 + urgency 1 → 2 - High). Script lo priority direct ga set cheyyaku; impact / urgency marchu.',
         'Ee site lo current = practice table lo unna NIJAMAINA record (e.g. INC0010001). update() marchipothe tests table nunchi fresh ga chadivi fail avtayi — real PDI laage.',
       ],
+      checks: ['ui-action-no-autosave'],
     },
     {
       h: '🔍 Empty / true-false checks (PDI lo tested)',
@@ -585,6 +587,7 @@ const ua4 = {
       code: `current.active == true && current.state != 6
 gs.hasRole('itil') && current.state < 6
 current.priority == 1 && current.assigned_to.nil()`,
+      checks: ['requires-role'],
     },
     {
       h: '🔍 Condition lo true / empty checks',
@@ -602,14 +605,14 @@ current.getValue('assigned_to') == ''    // ❌ empty ki getValue null`,
       body: [
         'Form lo ekkada: Form button (form header lo button), Form context menu (form header right-click / form title pakkana ☰ menu), Form link (form kinda "Related Links"). Order = buttons order, Hint = mouse hover tooltip, Active = on / off.',
         'List lo: List banner button, List choice, List context menu ("UI Actions on the Table List" lesson).',
-        'Show insert = kotha (inka save avvani) record form lo kanipistundi; Show update = existing record form lo. Existing record ki matrame kavali ante Show update tick, Show insert untick. (UI Action form lo "Isolate script" checkbox kuda undi — client UI Action ki Client Script laage strict mode ani anukuntunnam ⚠️ PDI lo confirm chesuko.)',
+        'Show insert = kotha (inka save avvani) record form lo kanipistundi; Show update = existing record form lo. Existing record ki matrame kavali ante Show update tick, Show insert untick. (UI Action form lo "Isolate script" checkbox kuda undi — client UI Action ki kuda Client Script laage strict mode (DOM / window ledu) ani 📄 docs; PDI lo easy ga test cheyyalem.)',
       ],
     },
   ],
   quiz: [
     q('Condition lo emi rastam?', ['Oka line JavaScript expression (true/false)', 'Pedda multi-line function with loops', 'SQL query (SELECT ... WHERE ...)', 'Table peru mariyu view peru list'], 0, 'One-line expression — true ayithe button kanipistundi.'),
     q('Condition ekkada evaluate avtundi?', ['Server lo, form load time', 'Browser lo live ga prathi click ki', 'Email lo', 'List lo'], 0, 'Server lo form load time lo — g_form ledu.'),
-    q('Role unnavaalake button chupinchali?', ['Condition lo gs.hasRole("itil")', 'Order field lo role number pettadam', 'Hint field lo role peru rayadam', 'Onclick field lo role peru rayadam'], 0, 'Condition lo gs.hasRole("itil") — sure way (admin ki ellappudu true, kabatti non-admin ga impersonate chesi test). "Requires role" related list nee PDI default UI Action form lo ledu — vere view lo undochu ⚠️ PDI lo chudu.'),
+    q('Role unnavaalake button chupinchali?', ['Condition lo gs.hasRole("itil")', 'Order field lo role number pettadam', 'Hint field lo role peru rayadam', 'Onclick field lo role peru rayadam'], 0, 'Condition lo gs.hasRole("itil") — sure way (admin ki ellappudu true, kabatti non-admin ga impersonate chesi test). "Requires role" related list nee PDI default UI Action form lo ledu — vere view lo undochu ⚠️ PDI lo chudu.', ['requires-role']),
     q('Existing record lo matrame button?', ['Show update tick, Show insert untick', 'Show insert tick, Show update untick', 'Client tick cheyyadam', 'Order 0 pettadam'], 0, 'Show update = saved record form; Show insert = kotha record form.'),
     q('Nee PDI lo current.getValue("active") == "true" em istundi (active incident)?', ['false — getValue "1" istundi', 'true — getValue "true" istundi', 'Error vastundi, script aagutundi', 'null — active field ledu kabatti'], 0, 'PDI lo getValue true/false field ki "1" / "0" istundi — "1" == "true" false. current.active == true vaadu.'),
   ],
@@ -770,6 +773,7 @@ const ua5 = {
 // select chesina PRATHI record ki ee script okasari run avtundi
 current.urgency = 1;
 current.update();`,
+      checks: ['list-choice-per-record'],
     },
     {
       h: '🖱️ Client list action: g_list.getChecked()',

@@ -81,6 +81,12 @@ Everything verified is now in `docs/pdi-facts-brazil.md` (items 38–53). Highli
 
 ## 5. Items still marked ⚠️ (confirm in her PDI) and the UI notes
 
+**Added later on 2026-11-14:** the ⚠️ facts she can test now have a closed "🔍 PDI lo ela check cheyyali?" box under them: 15
+recipes in `src/data/pdi-checks.js` (steps, what she should see, cleanup), linked from 35 places. Docs-only facts (Portal / Workspace
+limits, Jelly caching, Isolate script, `hasRoles`, `getAnswer`, `setWorkflow` notifications) now say "📄 docs nunchi" instead of
+"confirm". The ⚠️ notes with no box are the ones where the exercise step itself shows the answer, plus the developer portal and SN Utils
+ones. Details: `docs/audit-2026-11/change-logs/pdi-check-steps.md`.
+
 ### Stage 1 (guided lessons, real-PDI exercises, extra quiz)
 - lessons-a.js:20 — admin password reset from the developer portal (portal, not PDI).
 - lessons-a.js:21, exercises.js:26, quiz-extra-s1.js:10, :11, InfoPages.jsx:74 — hibernate / reclaim timings (⏸).
@@ -156,3 +162,9 @@ Everything verified is now in `docs/pdi-facts-brazil.md` (items 38–53). Highli
 6. A PDI-mode Stage 3 lesson (e.g. SN Utils): finish the quiz → tip points to the PDI Practice tab.
 7. Dark mode: hero buttons/notice, the 👀 pill, the quiz best-score box, the load modal.
 8. Narrow window: the hero button label is longer now (title + "· Stage N"); check it wraps OK.
+9. "🔍 PDI lo ela check cheyyali?" boxes (only server-rendered here — the browser extension was offline): Stage 3 "onSubmit Client
+   Scripts & Use Cases" → Learn → "⏳ onSubmit + GlideAjax" card has two closed boxes; open one (steps, code, 👀, 🧹). Same lesson's
+   quiz: Q6 and Q7 show a box under the explanation. Code tab → "Duplicate check (GlideAjax + malli submit)" → open the solution → box
+   under the explanation. Stage 1 "Save, Submit, Update, Insert & Stay" tour, step 3 bubble → open the box: the bubble scrolls instead
+   of running off screen. Hands-on Practice → Stage 1 → Data Policies → Final cleanup card has a box. Glossary 📘 →
+   `g_form.submit()` has a box, `ga.getXMLWait()` shows 📄. Dark mode: the box is readable.

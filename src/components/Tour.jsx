@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import PdiCheck from './PdiCheck.jsx'
 
 const PAD = 6
 const BUBBLE_W = 360
@@ -80,10 +81,10 @@ export default function Tour({ lesson, stepIdx, onAdvance }) {
   // info steps block everything, unless allowHover (so she can hover the highlighted thing)
   const holeOpen = hole && (step.type !== 'info' || step.allowHover)
 
-  // bubble placement
+  // bubble placement (maxHeight: an opened 🔍 PDI-check box scrolls inside the bubble instead of running off screen)
   let bubbleStyle
   if (!hole) {
-    bubbleStyle = { top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }
+    bubbleStyle = { top: '50%', left: '50%', transform: 'translate(-50%,-50%)', maxHeight: '90vh' }
   } else {
     const H = 230
     let top
@@ -95,7 +96,7 @@ export default function Tour({ lesson, stepIdx, onAdvance }) {
     if (top < hole.y + hole.h && top + H > hole.y) {
       left = hole.x + hole.w + 16 + BUBBLE_W < vw ? hole.x + hole.w + 16 : Math.max(12, hole.x - BUBBLE_W - 16)
     }
-    bubbleStyle = { top, left }
+    bubbleStyle = { top, left, maxHeight: vh - top - 10 }
   }
 
   const needsNext = step.type === 'info' || (step.type === 'input' && valid)
@@ -122,6 +123,7 @@ export default function Tour({ lesson, stepIdx, onAdvance }) {
           Step {stepIdx + 1} / {total}
         </div>
         <div className="bubble-text">{step.text}</div>
+        <PdiCheck ids={step.checks} />
         {showHint && step.hint && <div className="bubble-hint">👉 {step.hint}</div>}
         {step.type === 'input' && valid && step.okText && <div className="bubble-ok">{step.okText}</div>}
         {step.type === 'click' && <div className="bubble-action">👆 Highlight chesina daggara click cheyyi</div>}

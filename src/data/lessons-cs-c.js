@@ -652,7 +652,7 @@ const onsubmit = {
         'onSubmit verdict (false = aagu) function RETURN ayina ventane teesukuntundi. getXMLAnswer callback answer tarvata vastundi — appatiki save already jarigipoyindi. Callback lopala "return false" rasina emi aagadu. Mana runner kuda ilane chestundi. (getXMLAnswer async ani nee PDI lo verified — callback tarvata run ayindi. "Save aagadu" ane mukka andulonchi vastundi, direct ga test cheyyaledu — ⚠️ PDI lo confirm chesuko.)',
         'Safe pattern 1 — mundee validate chey: field marinappudu (onChange) GlideAjax pilichi result ni g_scratchpad lo (leda hidden field lo) pettu. onSubmit lo aa result chadivi sync ga return false.',
         'Safe pattern 2 — aapu, adugu, malli submit: var action = g_form.getActionName() (Submit = "sysverb_insert" — PDI lo verified; Update = "sysverb_update") gurtupettuko, GlideAjax pilu, return false. Callback lo OK ayithe g_scratchpad lo flag petti g_form.submit(action). g_form.submit() onSubmit ni MALLI run chestundi — anduke function top lo flag check (lekapothe loop). (Ee re-run docs / community nunchi — ⚠️ PDI lo confirm chesuko.)',
-        'ga.getXMLWait() (synchronous) kuda undi — kani answer vachhe varaku browser FREEZE avtundi, classic UI lo matrame pani chestundi (Service Portal / Workspace lo kaadu). Best practice kaadu. (Method nee PDI lo undi — verified; Service Portal / Workspace lo pani cheyyadu ane mukka docs nunchi — ⚠️ PDI lo confirm chesuko.)',
+        'ga.getXMLWait() (synchronous) kuda undi — kani answer vachhe varaku browser FREEZE avtundi, classic UI lo matrame pani chestundi (Service Portal / Workspace lo kaadu). Best practice kaadu. (Method nee PDI lo undi — verified; Service Portal / Workspace lo pani cheyyadu ane mukka 📄 docs nunchi — PDI lo easy ga test cheyyalem.)',
       ],
       code: `function onSubmit() {
   if (g_scratchpad.callerChecked) {      // round 2: g_form.submit() valla malli vachindi
@@ -672,6 +672,7 @@ const onsubmit = {
   });
   return false;                          // ippatiki aagu — answer vachaka decide
 }`,
+      checks: ['async-submit', 'submit-rerun'],
     },
   ],
   quiz: [
@@ -805,7 +806,8 @@ const onsubmit = {
         "ga.getXMLAnswer(function (answer) { if (answer) { g_form.addErrorMessage('Already open: ' + answer); return; } g_scratchpad.dupChecked = true; g_form.submit(action); });",
       ],
       solution: "function onSubmit() {\n  if (g_scratchpad.dupChecked) {\n    return true;\n  }\n  var action = g_form.getActionName();\n  var ga = new GlideAjax('DupCheckAjax');\n  ga.addParam('sysparm_name', 'findOpenDuplicate');\n  ga.addParam('sysparm_short', g_form.getValue('short_description'));\n  ga.getXMLAnswer(function (answer) {\n    if (answer) {\n      g_form.addErrorMessage('Already open: ' + answer);\n      return;\n    }\n    g_scratchpad.dupChecked = true;\n    g_form.submit(action);\n  });\n  return false;\n}",
-      explain: 'onSubmit verdict return ayinappude decide avtundi; GlideAjax answer tarvata vastundi. Anduke: ippatiki return false → answer OK ayithe g_form.submit(action). action ni getActionName() tho gurtupettukovali — Submit (sysverb_insert, PDI lo verified), Update (sysverb_update), leda custom button — ade button malli "click" avtundi. g_form.submit() valla onSubmit MALLI run avtundi; flag (g_scratchpad.dupChecked) lekapothe malli GlideAjax → malli return false → loop. getXMLWait() tho kuda cheyyochu kani browser freeze + Service Portal / Workspace lo pani cheyyadu. ⚠️ Ee re-run behaviour mariyu getXMLWait Portal / Workspace limit docs / community nunchi — PDI lo confirm chesuko.',
+      explain: 'onSubmit verdict return ayinappude decide avtundi; GlideAjax answer tarvata vastundi. Anduke: ippatiki return false → answer OK ayithe g_form.submit(action). action ni getActionName() tho gurtupettukovali — Submit (sysverb_insert, PDI lo verified), Update (sysverb_update), leda custom button — ade button malli "click" avtundi. g_form.submit() valla onSubmit MALLI run avtundi; flag (g_scratchpad.dupChecked) lekapothe malli GlideAjax → malli return false → loop. getXMLWait() tho kuda cheyyochu kani browser freeze + Service Portal / Workspace lo pani cheyyadu (📄 docs). ⚠️ Ee re-run behaviour docs / community nunchi — PDI lo confirm chesuko.',
+      checks: ['submit-rerun'],
       tests: [
         { label: 'ippatiki save aagindi (return false)', expr: '__submit', expect: false },
         { label: 'GlideAjax DupCheckAjax.findOpenDuplicate', expr: CALLS, expect: ['DupCheckAjax.findOpenDuplicate'] },
@@ -1064,8 +1066,9 @@ const oncell = {
       body: [
         'List lo cell edit chesinappudu form ledu — kabatti onChange Client Scripts, UI Policies (form logic) RUN AVVAVU. Client side lo list edit ki check kavali ante onCellEdit matrame.',
         'Server side rules list edit lo kuda pani chestayi: Data Policy (data level mandatory / read-only), Business Rule, ACL. Important rules ni server lo pettu — onCellEdit UX kosam matrame.',
-        '⚠️ Docs / community nunchi — nee PDI lo test chey: incident list lo state ni Resolved ki list-edit chesi chudu — OOB Data Policy "Make close info mandatory when resolved or closed" aapestundo, UI Policy lu run avvavo confirm chesuko (tarvata marpu venakki tippu).',
+        '⚠️ Docs / community nunchi — nee PDI lo test chey: oka test incident State ni list lo On Hold ki, tarvata Resolved ki edit chesi chudu — UI Policy lu run avvavo, OOB Data Policy "Make close info mandatory when resolved or closed" aapestundo confirm chesuko (full steps kinda 🔍 box lo).',
       ],
+      checks: ['list-edit'],
     },
   ],
   quiz: [
@@ -1128,7 +1131,7 @@ const oncell = {
         "if (newValue == '5') { alert('Priority 5 list nunchi set cheyyaku'); callback(false); return; } callback(true);",
       ],
       solution: "function onCellEdit(sysIDs, table, oldValues, newValue, callback) {\n  if (newValue == '5') {\n    alert('Priority 5 list nunchi set cheyyaku');\n    callback(false);\n    return;\n  }\n  callback(true);\n}",
-      explain: 'Early return pattern: problem case lo callback(false) + return, chivara callback(true). Ila prathi path lo callback okka sari matrame. (Ee practice runner lo return marchipothe last callback(true) gelustundi; real list lo rendu sarlu pilavadam behaviour ⚠️ PDI lo confirm chesuko — ellappudu okkasari pilavadame safe.)',
+      explain: 'Early return pattern: problem case lo callback(false) + return, chivara callback(true). Ila prathi path lo callback okka sari matrame. (Ee practice runner lo return marchipothe last callback(true) gelustundi. Real list lo rendu sarlu pilisthe em avtundo guarantee ledu — test cheyyakkarledu, ellappudu okkasari pilavu.)',
       tests: [
         { label: 'blocked', expr: '__submit', expect: false },
         { label: 'alert', logs: ['Priority 5 list nunchi set cheyyaku'] },
@@ -1179,7 +1182,8 @@ const oncell = {
         "if (newValue == '1' && !g_user.hasRole('itil')) { alert('P1 set cheyyadaniki itil role kavali'); callback(false); return; } callback(true);",
       ],
       solution: "function onCellEdit(sysIDs, table, oldValues, newValue, callback) {\n  if (newValue == '1' && !g_user.hasRole('itil')) {\n    alert('P1 set cheyyadaniki itil role kavali');\n    callback(false);\n    return;\n  }\n  callback(true);\n}",
-      explain: 'g_user list scripts lo kuda available. List edit lo onChange / UI Policies run avvavu — anduke list ki separate ga onCellEdit (leda server lo ACL / Data Policy) kavali. (List edit behaviour docs nunchi — ⚠️ "List editing lo em run avtundi" card lo test cheppinattu PDI lo confirm chesuko.)',
+      explain: 'g_user list scripts lo kuda available. List edit lo onChange / UI Policies run avvavu — anduke list ki separate ga onCellEdit (leda server lo ACL / Data Policy) kavali. (List edit behaviour docs nunchi — ⚠️ kinda 🔍 steps tho PDI lo confirm chesuko.)',
+      checks: ['list-edit'],
       tests: [
         { label: 'blocked', expr: '__submit', expect: false },
         { label: 'alert', logs: ['P1 set cheyyadaniki itil role kavali'] },

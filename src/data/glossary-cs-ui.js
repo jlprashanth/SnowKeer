@@ -1,6 +1,7 @@
 // Stage 3 glossary, part 2 — words from the UI Action, CRUD, debugging, macro, best-practice and UI Page / UI Macro lessons
 // (lessons-cs-d.js, lessons-cs-e.js). Same format as glossary-cs.js; every entry is marked s: 3. Merged into GLOSSARY_JS in glossary-js.js.
-// Group keys come from GLOSSARY_GROUPS (glossary-js.js: Stage 2 groups + GLOSSARY_GROUPS_CS). check: true = "PDI lo confirm chey".
+// Group keys come from GLOSSARY_GROUPS (glossary-js.js: Stage 2 groups + GLOSSARY_GROUPS_CS). check: true = "PDI lo confirm chey"
+// (checks: ['key'] adds the how-to-check steps from pdi-checks.js).
 // Facts follow her Brazil PDI (scratchpad pdi-facts.md); anything not tested there carries check: true.
 
 const s3 = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, { ...v, s: 3 }]))
@@ -20,7 +21,7 @@ export const GLOSSARY_CS_UI = s3({
   groupBy: { g: 'grm', m: 'GlideAggregate results ni oka field batti groups chestundi (category wise count). Prathi group ki okasari next(); group value getValue(field) tho.', ex: "agg.groupBy('category');" },
 
   // ---------- UI Actions ----------
-  'Requires role': { g: 'ui', m: 'UI Action ni oka role unnavaariki matrame chupinche setting. Nee PDI default UI Action form lo ee related list kanipinchaledu (akkada UI Action Visibility, Versions … unnayi) — roles field / related list vere view lo undochu, PDI lo chudu. Sure way: Condition lo gs.hasRole("itil"). Admin ki anni roles untayi kabatti non-admin user ni impersonate chesi test chey.', ex: "Condition: gs.hasRole('itil') && current.active == true", check: true },
+  'Requires role': { g: 'ui', m: 'UI Action ni oka role unnavaariki matrame chupinche setting. Nee PDI default UI Action form lo ee related list kanipinchaledu (akkada UI Action Visibility, Versions … unnayi) — roles field / related list vere view lo undochu, PDI lo chudu. Sure way: Condition lo gs.hasRole("itil"). Admin ki anni roles untayi kabatti non-admin user ni impersonate chesi test chey.', ex: "Condition: gs.hasRole('itil') && current.active == true", check: true, checks: ['requires-role'] },
   'Data Lookup': { g: 'ui', m: 'Incident Priority ni impact × urgency nunchi auto set chese rule (System Policy → Data Lookup Definitions). Nee PDI lo priority form lo read-only — marchali ante impact / urgency marchu (3 / 3 → 4 - Low, 1 / 1 → 1 - Critical).', ex: "g_form.setValue('urgency', '1');   // priority Data Lookup marchutundi" },
 
   // ---------- UI Pages / dialogs ----------
@@ -41,5 +42,5 @@ export const GLOSSARY_CS_UI = s3({
   'Session Debug': { g: 'ui', m: 'System Diagnostics → Session Debug: ee session lo run ayina Business Rules, logs laantivi form kinda chupistundi (Debug Business Rule, Debug Log …). Pani ayyaka off chey.', ex: 'System Diagnostics → Session Debug → Debug Business Rule' },
   'Script Tracer': { g: 'ui', m: 'System Diagnostics → Script Tracer: oka transaction (form save laanti) lo e scripts run ayyayo, fields ela marayo trace chestundi.', ex: 'System Diagnostics → Script Tracer', check: true },
   'Debug UI Macro': { g: 'ui', m: 'System Diagnostics → Debug UI Macro: page lo e UI Macros render ayyayo debug info chupistundi. Off: Disable UI Macro Debug.', ex: 'System Diagnostics → Debug UI Macro', check: true },
-  'Field Watcher': { g: 'ui', m: 'Form field value ni e script / UI Policy marchindo chupinche classic UI debug tool. Brazil lo MODULE ledu, Preferences lo kuda ledu — classic form ☰ menu (form title pakkana, leda header right-click) → "Enable Field Watcher" (ee location PDI lo tested). On chesaka panel lo em chupistundo PDI lo chudu.', ex: 'Incident form ☰ → Enable Field Watcher', check: true },
+  'Field Watcher': { g: 'ui', m: 'Form field value ni e script / UI Policy marchindo chupinche classic UI debug tool. Brazil lo MODULE ledu, Preferences lo kuda ledu — classic form ☰ menu (form title pakkana, leda header right-click) → "Enable Field Watcher" (ee location PDI lo tested). On chesaka panel lo em chupistundo PDI lo chudu.', ex: 'Incident form ☰ → Enable Field Watcher', check: true, checks: ['field-watcher'] },
 })

@@ -27,7 +27,7 @@ const filters = {
     info('Lists lo chala records untayi — filter tho kavalsinavi matrame chupinchochu. Ee lesson lo Incident list ni filter chestam. Next click cheyyi.'),
     info('Ippudu breadcrumb lo "All" undi — filter ledu, anni records (7).', 'crumbs'),
     click('list-filter-btn', 'Funnel icon (⛉) click cheyyi — condition builder open avtundi.'),
-    info('Idi Filter condition builder. "AND" / "OR" tho conditions add chestam, "Run" tho apply chestam. (Nee PDI lo filter open chesthe oka khaali condition row already untundi, prathi row pakkana AND / OR buttons untayi ⚠️ confirm chesuko.)', 'filter-panel'),
+    info('Idi Filter condition builder. "AND" / "OR" tho conditions add chestam, "Run" tho apply chestam. (Nee PDI lo filter open chesthe oka khaali condition row already untundi, prathi row pakkana AND / OR buttons untayi ⚠️ confirm chesuko.)', 'filter-panel', { checks: ['filter-panel'] }),
     click('fb-add', '"AND" click cheyyi — first condition row add avtundi.'),
     type('fb-field-0', 'Field dropdown lo "Priority" select cheyyi.', eq('priority'), 'priority', { hint: 'Priority select cheyyi.' }),
     type('fb-value-0', 'Value lo "1 - Critical" select cheyyi. (Operator "is" already undi.)', eq('1'), '1', { hint: '1 - Critical select cheyyi.' }),
@@ -65,7 +65,7 @@ const saveSubmit = {
   steps: [
     info('Forms lo chala save options untayi: Submit, Save, Update, Insert, Insert and Stay. Confusing ga untayi — ippudu practice tho clear chesukundam. Idi Training Request (custom table, task table kaadu) form. Next click cheyyi.'),
     type('f-u_course_name', 'Mundu "Course name" lo "Kubernetes" ani rayyi.', has('kube'), 'Kubernetes'),
-    click('f-menu', 'Form ☰ menu click cheyyi. (Kotha record menu lo Insert options levu — avi existing record copy chese options, taruvatha chustam. ⚠️ PDI lo confirm chesuko.)'),
+    { ...click('f-menu', 'Form ☰ menu click cheyyi. (Kotha record menu lo Insert options levu — avi existing record copy chese options, taruvatha chustam. ⚠️ PDI lo confirm chesuko.)'), checks: ['new-record-menu'] },
     click('menu-save', '"Save" click cheyyi. Save = record save chesi, form lone untav.'),
     info('Chusava! Record save ayyindi kani nuvvu form lone unnav. Paina title lo ippudu record number (TRQ...) undi, button "Submit" badulu "Update" ayyindi — ante idi ippudu existing record.', 'form-ok'),
     type('f-u_status', 'Status ni "Ongoing" ki marchu.', eq('ongoing'), 'ongoing', { hint: 'Status lo Ongoing select cheyyi.' }),
