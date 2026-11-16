@@ -1,9 +1,10 @@
 // Lesson glossary panel check — run: node dev-tools/check-page-terms.mjs
 // 1) client calls (g_form / g_user / g_list) resolve to their OWN entries, never to the server entry of the same method name
 // 2) exercise hint / solution text never adds a term to the page list (no spoilers)
-// 3) Stage 2 pages never list Stage 3-only entries; every page term is a real glossary key; prints the count per lesson
+// 3) a page never lists an entry from a LATER stage (Stage 2 page → no s: 3 / s: 4, Stage 3 page → no s: 4); every page term is a real glossary key; prints the count per lesson
 import { JS_LESSONS } from '../src/data/lessons-js.js'
 import { CS_LESSONS } from '../src/data/lessons-cs.js'
+import { SS_LESSONS } from '../src/data/lessons-ss.js'
 import { scanCalls, pageTermKeys, cardTermKeys } from '../src/data/glossary-scan.js'
 import { GLOSSARY_JS } from '../src/data/glossary-js.js'
 
@@ -40,7 +41,7 @@ for (const k of ['g_form.setMandatory()', 'g_form.flash()', 'addNullQuery', 'g_f
 const hand = cardTermKeys({ terms: ['GlideAjax', 'nope-not-a-key'], body: [], code: '' }, 3)
 if (hand.join() !== 'GlideAjax') fail('hand-written card.terms should win and drop unknown keys')
 let cardBoxes = 0
-for (const l of [...JS_LESSONS, ...CS_LESSONS]) {
+for (const l of [...JS_LESSONS, ...CS_LESSONS, ...SS_LESSONS]) {
   for (const c of l.learn) {
     const keys = cardTermKeys(c, l.stage)
     if (keys.length) cardBoxes++
@@ -49,19 +50,19 @@ for (const l of [...JS_LESSONS, ...CS_LESSONS]) {
     for (const k of keys) {
       if (!GLOSSARY_JS[k]) fail(`${l.id}: card key "${k}" is not in glossary`)
       if (!c.terms && GLOSSARY_JS[k]?.g === 'js') fail(`${l.id}: auto card box lists a plain JS word "${k}"`)
-      if ((l.stage || 2) < 3 && GLOSSARY_JS[k]?.s) fail(`${l.id}: Stage 2 card lists Stage 3-only entry "${k}"`)
+      if (GLOSSARY_JS[k]?.s > (l.stage || 2)) fail(`${l.id}: Stage ${l.stage || 2} card lists Stage ${GLOSSARY_JS[k].s}-only entry "${k}"`)
     }
   }
 }
 console.log(`card sub-boxes: ${cardBoxes}`)
 
-// 3) Stage 2 pages leave out Stage 3-only entries; every key is real; print counts
+// 3) pages leave out later-stage entries; every key is real; print counts
 const report = []
-for (const l of [...JS_LESSONS, ...CS_LESSONS]) {
+for (const l of [...JS_LESSONS, ...CS_LESSONS, ...SS_LESSONS]) {
   const keys = pageTermKeys(l)
   for (const k of keys) {
     if (!GLOSSARY_JS[k]) fail(`${l.id}: page key "${k}" is not in glossary`)
-    else if ((l.stage || 2) < 3 && GLOSSARY_JS[k].s) fail(`${l.id}: Stage 2 page lists Stage 3-only entry "${k}"`)
+    else if (GLOSSARY_JS[k].s > (l.stage || 2)) fail(`${l.id}: Stage ${l.stage || 2} page lists Stage ${GLOSSARY_JS[k].s}-only entry "${k}"`)
   }
   report.push(`${l.id.padEnd(14)} ${String(keys.length).padStart(3)} terms${keys.length === 0 ? '  (empty: shows the "full glossary" hint)' : ''}`)
 }

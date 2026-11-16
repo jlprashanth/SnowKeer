@@ -255,4 +255,102 @@ action.setRedirectURL(current);`,
     see: 'Oka khaali condition row already untundi, prathi row pakkana AND / OR buttons untayi → lesson correct. Veru ga unte note chesko.',
     cleanup: 'Run cheyyakunda filter close chey; emi maraledu.',
   },
+
+  // ---------- Stage 4 (server scripting) — all read-only Background Scripts / list checks ----------
+  'copy-query': {
+    title: 'List filter nunchi "Copy query" ekkada?',
+    steps: [
+      'All filter lo incident.list type chesi Enter.',
+      'Filter (funnel) lo Active = true, Priority = 1 - Critical pettu → Run.',
+      'List paina breadcrumb (filter text, e.g. "All > Active = true > Priority = 1 - Critical") lo chivari condition meeda right-click chey.',
+    ],
+    see: 'Menu lo "Copy query" option undi, click chesthe active=true^priority=1 laanti text clipboard ki vastundi → lesson correct. Option peru vere ga unte (leda ledu ante) note chesko — list header ☰ menu lo kuda chudu.',
+    cleanup: 'Filter ni alage vadileyochu leda breadcrumb lo "All" click chey; emi save avvaledu.',
+  },
+
+  'ga-having': {
+    title: 'GlideAggregate addHaving() pani chestunda?',
+    steps: [
+      {
+        t: 'All → System Definition → Scripts - Background. Idi paste chesi Run Script (read-only — em marchadu):',
+        code: `var ga = new GlideAggregate('incident');
+ga.addAggregate('COUNT');
+ga.groupBy('category');
+ga.addHaving('COUNT', '>', '1');
+ga.query();
+while (ga.next()) {
+  gs.info(ga.getValue('category') + ' = ' + ga.getAggregate('COUNT'));
+}`,
+      },
+    ],
+    see: 'Output lo 2 leda ekkuva incidents unna categories MATRAME (prathi line lo count >= 2) → lesson correct. Count 1 unna categories kuda vaste leda error vaste — addHaving ee release lo vere laaga pani chestundi, note chesko.',
+    cleanup: 'Read-only script — emi maraledu.',
+  },
+
+  'gs-dates-tz': {
+    title: 'gs.daysAgoStart() / gs.beginningOfToday() — ae time zone?',
+    steps: [
+      'Profile (top-right) → Preferences leda nee user record lo Time zone chudu (e.g. Asia/Kolkata, America/Los_Angeles, System).',
+      {
+        t: 'Scripts - Background lo idi Run Script (read-only):',
+        code: `gs.info('beginningOfToday: ' + gs.beginningOfToday());
+gs.info('daysAgoStart(0): ' + gs.daysAgoStart(0));
+gs.info('now UTC:         ' + new GlideDateTime().getValue());
+gs.info('now display:     ' + new GlideDateTime().getDisplayValue());`,
+      },
+    ],
+    see: 'beginningOfToday / daysAgoStart(0) lo time 00:00:00 kakapothe (e.g. 18:30:00) — adi nee time zone midnight ni UTC lo chupistundi; 00:00:00 ayithe UTC midnight. Ee result ni note chesko: "last 7 days" filter boundary nee zone batti marutundi ani lesson cheptundi.',
+    cleanup: 'Read-only script — emi maraledu.',
+  },
+
+  'gdt-display-tz': {
+    title: 'getValue() vs getDisplayValue() — nee PDI lo teda',
+    steps: [
+      'Nee user record lo Time zone, Date format chudu (Profile → Preferences leda User Administration → Users → nee user).',
+      {
+        t: 'Scripts - Background lo idi Run Script (read-only):',
+        code: `var gdt = new GlideDateTime();
+gs.info('getValue (UTC):  ' + gdt.getValue());
+gs.info('getDisplayValue: ' + gdt.getDisplayValue());`,
+      },
+    ],
+    see: 'getValue "yyyy-MM-dd HH:mm:ss" UTC lo; getDisplayValue nee time zone offset tho (IST ayithe +5:30) mariyu nee date format lo → lesson correct. Rendu same unte nee time zone UTC / GMT — adi kuda correct, just teda kanipinchadu.',
+    cleanup: 'Read-only script — emi maraledu.',
+  },
+
+  'duration-format': {
+    title: 'GlideDuration getDurationValue() / getDisplayValue() text',
+    steps: [
+      {
+        t: 'Scripts - Background lo idi Run Script (read-only):',
+        code: `var a = new GlideDuration('2 12:00:00');
+var b = new GlideDuration(5400000);
+gs.info('a value: ' + a.getDurationValue() + ' | display: ' + a.getDisplayValue());
+gs.info('b value: ' + b.getDurationValue() + ' | display: ' + b.getDisplayValue());
+gs.info('b ms: ' + b.getNumericValue());`,
+      },
+    ],
+    see: 'a: "2 12:00:00" mariyu "2 Days 12 Hours" laanti text; b: "01:30:00" mariyu "1 Hour 30 Minutes"; b ms 5400000 → lesson correct. Text konchem vere unte (e.g. "2d 12h") note chesko — numbers (getNumericValue) maaravu.',
+    cleanup: 'Read-only script — emi maraledu.',
+  },
+
+  'schedule-8to5': {
+    title: 'Schedules list & GlideSchedule isInSchedule()',
+    steps: [
+      'All filter lo cmn_schedule.list type chesi Enter (leda All → System Scheduler → Schedules → Schedules).',
+      '"8-5 weekdays" (leda daaniki daggara peru) record ni right-click → Copy sys_id. Record open chesi Time zone field chudu.',
+      {
+        t: 'Scripts - Background lo idi paste chesi, PASTE_SYS_ID badulu copy chesina sys_id pettu, Run Script (read-only):',
+        code: `var sched = new GlideSchedule('PASTE_SYS_ID');
+gs.info('Name: ' + sched.getName());
+var now = new GlideDateTime();
+gs.info('Now (display): ' + now.getDisplayValue() + ' in schedule? ' + sched.isInSchedule(now));
+var start = new GlideDateTime();
+start.addDaysUTC(-1);
+gs.info('Working time last 24h (hours): ' + (sched.duration(start, now).getNumericValue() / 3600000));`,
+      },
+    ],
+    see: 'Name lo schedule peru, "in schedule?" ippudu working hours (schedule time zone lo) ayithe true, kakapothe false; last 24h working time 9 hours daggara (weekday) → lesson correct. Module path / schedule peru vere unte note chesko.',
+    cleanup: 'Read-only — emi maraledu (schedule record ni edit cheyyaku).',
+  },
 }

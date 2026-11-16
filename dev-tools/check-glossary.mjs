@@ -1,8 +1,9 @@
-// Stage 2 + Stage 3 glossary check — run: node dev-tools/check-glossary.mjs
+// Stage 2 + Stage 3 + Stage 4 glossary check — run: node dev-tools/check-glossary.mjs
 // 1) every card `terms` key must exist in GLOSSARY_JS
 // 2) every method / gs.* / ServiceNow word used in Stage 2 learn code, hints and solutions must have a glossary entry
 import { JS_LESSONS } from '../src/data/lessons-js.js'
 import { CS_LESSONS } from '../src/data/lessons-cs.js'
+import { SS_LESSONS } from '../src/data/lessons-ss.js'
 import { GLOSSARY_JS } from '../src/data/glossary-js.js'
 import { scanCalls } from '../src/data/glossary-scan.js'
 
@@ -23,7 +24,7 @@ const note = (lesson, word) => {
   missing.get(word).add(lesson)
 }
 
-for (const l of [...JS_LESSONS, ...CS_LESSONS]) {
+for (const l of [...JS_LESSONS, ...CS_LESSONS, ...SS_LESSONS]) {
   for (const c of l.learn || []) {
     for (const k of c.terms || []) if (!known.has(k)) fail(`${l.id}: card "${c.h}" terms key "${k}" not in glossary`)
   }
@@ -52,5 +53,5 @@ for (const [word, lessons] of [...missing].sort()) {
   bad++
 }
 
-console.log(bad ? `\n${bad} issue(s)` : `OK — ${Object.keys(GLOSSARY_JS).length} glossary terms cover all Stage 2 + Stage 3 card terms and method calls`)
+console.log(bad ? `\n${bad} issue(s)` : `OK — ${Object.keys(GLOSSARY_JS).length} glossary terms cover all Stage 2–4 card terms and method calls`)
 process.exit(bad ? 1 : 0)

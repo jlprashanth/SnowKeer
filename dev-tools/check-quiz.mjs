@@ -1,11 +1,12 @@
 // Quiz sanity for ALL stages — run: node dev-tools/check-quiz.mjs
 // Per question: 3–5 options, unique options, valid answer index, an explanation, no newline, no duplicate question in a lesson.
-// Per lesson: Stage 1 at least 8 questions, Stage 2 exactly 20, Stage 3 at least 15.
+// Per lesson: Stage 1 at least 8 questions, Stage 2 exactly 20, Stage 3 and Stage 4 at least 15.
 // Guessability: the right option must not be MUCH longer than the others (ratio > 1.6 and 20+ chars fails), and in each stage
 // the right option may be the single longest in at most 40% of questions (options are shuffled on screen, length is not).
 import { LESSONS } from '../src/data/lessons.js'
 import { JS_LESSONS } from '../src/data/lessons-js.js'
 import { CS_LESSONS } from '../src/data/lessons-cs.js'
+import { SS_LESSONS } from '../src/data/lessons-ss.js'
 
 let bad = 0
 const fail = (m) => { bad++; console.log('✗', m) }
@@ -13,6 +14,7 @@ const STAGES = [
   { name: 'Stage 1', lessons: LESSONS, min: 8, max: Infinity },
   { name: 'Stage 2', lessons: JS_LESSONS, min: 20, max: 20 },
   { name: 'Stage 3', lessons: CS_LESSONS, min: 15, max: Infinity },
+  { name: 'Stage 4', lessons: SS_LESSONS, min: 15, max: Infinity },
 ]
 for (const s of STAGES) {
   let total = 0

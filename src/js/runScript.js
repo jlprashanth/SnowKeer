@@ -1,6 +1,7 @@
 // Runs a learner's script against the mock ServiceNow API and checks the exercise's tests.
 // Pure function: used inside the Web Worker (browser) and in node (dev-tools/check-js.mjs).
-import { GlideRecord, GlideAggregate, makeGs, makeRecord, freshDb, seedDb } from './snowMock.js'
+import { GlideRecord, GlideAggregate, GlideRecordSecure, makeGs, makeRecord, freshDb, seedDb, ADMIN } from './snowMock.js'
+import { GlideDateTime, GlideDate, GlideDuration, GlideSchedule } from './dateMock.js'
 import { makeClient } from './clientMock.js'
 
 // ServiceNow's Class.create() — the classic Script Include pattern
@@ -14,6 +15,22 @@ const Class = {
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b)
 const str = (v) => (v === undefined || v === null ? '' : String(v))
+
+// Server context for one run (Stage 4): who the script runs as, sandbox ACLs, queued events, gs messages, extra properties.
+// scenario.runAs = { sys_id: 'u_abel', roles: ['itil'] } (names / email come from sys_user), scenario.acl (see GlideRecord._allowed),
+// scenario.props = { 'x.y': 'value' } for gs.getProperty. Tests read it as __x.{events, messages, user}.
+function makeCtx(scenario, db) {
+  let user = ADMIN
+  if (scenario.runAs) {
+    const row = db.sys_user.find((r) => r.sys_id === scenario.runAs.sys_id) || {}
+    user = { sys_id: scenario.runAs.sys_id, user_name: row.user_name || scenario.runAs.sys_id, name: row.name || scenario.runAs.sys_id, email: row.email || '', roles: scenario.runAs.roles || [], groups: scenario.runAs.groups || [] }
+  }
+  const ctx = { user, acl: scenario.acl, props: scenario.props, events: [], messages: [] }
+  db._ctx = ctx
+  return ctx
+}
+// the extra server globals every server run gets (Background Script / Business Rule / Script Include alike)
+const SERVER_GLOBALS = ['GlideRecordSecure', 'GlideDateTime', 'GlideDate', 'GlideDuration', 'GlideSchedule']
 
 // The PDI (Brazil, global scope) does NOT throw when you call a method that doesn't exist — it quietly returns undefined.
 // The browser throws; we keep the error (so a typo is visible) but say how the PDI behaves.
@@ -90,11 +107,15 @@ function runOnce({ code, scenario = {}, tests = [], client }) {
   const db = freshDb()
   seedDb(db, scenario.seed)
   const log = (level, msg) => { logs.push({ level, msg }) }
-  const gs = makeGs(logs)
+  const ctx = makeCtx(scenario, db)
+  const gs = makeGs(logs, ctx)
   class GR extends GlideRecord {
     constructor(table) { super(table, db, log) }
   }
   class GA extends GlideAggregate {
+    constructor(table) { super(table, db, log) }
+  }
+  class GRS extends GlideRecordSecure {
     constructor(table) { super(table, db, log) }
   }
   const mk = (s) => (s ? makeRecord(s.table || 'incident', s.values, db, log) : undefined)
@@ -114,8 +135,8 @@ function runOnce({ code, scenario = {}, tests = [], client }) {
     // eslint-disable-next-line no-new-func
     // `window` is hidden (undefined) like on the server — the UI Action pattern `if (typeof window == 'undefined') serverFn();`
     // must work even when the runner falls back to running on the page itself
-    const fn = new Function('gs', 'GlideRecord', 'GlideAggregate', 'current', 'previous', 'Class', 'action', 'AbstractAjaxProcessor', '__ext', 'callAjax', 'fetch', 'XMLHttpRequest', 'importScripts', 'window', 'Object.extendsObject = __ext;' + body)
-    evaluate = fn(gs, GR, GA, current, previous, Class, action, AbstractAjaxProcessor, extendsObject, callAjax)
+    const fn = new Function('gs', 'GlideRecord', 'GlideAggregate', 'current', 'previous', 'Class', 'action', 'AbstractAjaxProcessor', '__ext', 'callAjax', 'fetch', 'XMLHttpRequest', 'importScripts', 'window', '__x', ...SERVER_GLOBALS, 'Object.extendsObject = __ext;' + body)
+    evaluate = fn(gs, GR, GA, current, previous, Class, action, AbstractAjaxProcessor, extendsObject, callAjax, undefined, undefined, undefined, undefined, ctx, GRS, GlideDateTime, GlideDate, GlideDuration, GlideSchedule)
   } catch (e) {
     error = errOf(e)
   }
@@ -157,15 +178,16 @@ export function runClientScript({ code, scenario = {}, tests = [], client = {} }
 
   // Script Include for GlideAjax: server code + AbstractAjaxProcessor
   const makeServer = (si, params) => {
-    const gs = makeGs(logs)
+    const gs = makeGs(logs, db._ctx || makeCtx({}, db))
     const log = (level, msg) => { logs.push({ level, msg }) }
     class GR extends GlideRecord { constructor(t) { super(t, db, log) } }
     class GA extends GlideAggregate { constructor(t) { super(t, db, log) } }
+    class GRS extends GlideRecordSecure { constructor(t) { super(t, db, log) } }
     const AbstractAjaxProcessor = makeAjaxBase()
     // eslint-disable-next-line no-new-func
     // the platform builds the processor with the request: new MyAjax(request, responseXML, gc) → initialize() stores it
-    const fn = new Function('gs', 'GlideRecord', 'GlideAggregate', 'Class', 'AbstractAjaxProcessor', 'extendsObject', '__req', `Object.extendsObject = extendsObject;\n${si.code}\n;return new ${si.name}(__req);`)
-    const inst = fn(gs, GR, GA, Class, AbstractAjaxProcessor, extendsObject, { params })
+    const fn = new Function('gs', 'GlideRecord', 'GlideAggregate', 'Class', 'AbstractAjaxProcessor', 'extendsObject', '__req', ...SERVER_GLOBALS, `Object.extendsObject = extendsObject;\n${si.code}\n;return new ${si.name}(__req);`)
+    const inst = fn(gs, GR, GA, Class, AbstractAjaxProcessor, extendsObject, { params }, GRS, GlideDateTime, GlideDate, GlideDuration, GlideSchedule)
     return dispatchAjax(inst, si.name)
   }
 

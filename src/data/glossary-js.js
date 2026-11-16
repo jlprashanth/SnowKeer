@@ -4,6 +4,7 @@
 // or 'docs' (📄 from the docs, not easy to test in a PDI), checks = ['key'] → "🔍 PDI lo ela check cheyyali?" steps (pdi-checks.js).
 import { GLOSSARY_CS, GLOSSARY_GROUPS_CS } from './glossary-cs.js'
 import { GLOSSARY_CS_UI } from './glossary-cs-ui.js'
+import { GLOSSARY_SS, GLOSSARY_GROUPS_SS } from './glossary-ss.js'
 
 export const GLOSSARY_GROUPS = {
   sn: 'ServiceNow abbreviations & objects',
@@ -13,6 +14,7 @@ export const GLOSSARY_GROUPS = {
   js: 'JavaScript words',
   jsm: 'JavaScript methods',
   ...GLOSSARY_GROUPS_CS, // Stage 3 groups (their entries carry s: 3)
+  ...GLOSSARY_GROUPS_SS, // Stage 4 groups (their entries carry s: 4)
 }
 
 const GLOSSARY_STAGE2 = {
@@ -118,8 +120,8 @@ const GLOSSARY_STAGE2 = {
   'Math.min() / max()': { g: 'jsm', m: 'Numbers lo chinnadi / peddadi istundi. Priority min/max kosam.', ex: 'Math.min(3, 1, 2);  // 1' },
 }
 
-// Stage 2 entries + Stage 3 entries (Stage 3 ones carry s: 3 so the Stage 2 hub glossary can leave them out)
-export const GLOSSARY_JS = { ...GLOSSARY_STAGE2, ...GLOSSARY_CS, ...GLOSSARY_CS_UI }
+// Stage 2 entries + Stage 3 entries (s: 3) + Stage 4 entries (s: 4) — an earlier stage's glossary leaves later-stage ones out
+export const GLOSSARY_JS = { ...GLOSSARY_STAGE2, ...GLOSSARY_CS, ...GLOSSARY_CS_UI, ...GLOSSARY_SS }
 
 // Find glossary entries for a list of keys (keeps only the keys that exist, so a typo never crashes a page)
 export function termsFor(keys = []) {

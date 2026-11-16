@@ -32,7 +32,7 @@ title, in the course's order. Stage 1–3 titles are already in the code (Stage 
 | 1 | Introduction (18 lessons: account, users, UI tour, tables, forms, views, dictionary, update sets, UI/data policies...) | DONE — 471 guided mock steps (all 18 auto-play to the quiz with `dev-tools/test-driver.js`), 9–10 quiz questions per lesson (extra ones in `quiz-extra-s1.js`), 54 real-PDI exercises in doing order (shared practice items are deleted only by the Final cleanup card, `table-creation-4`, filed under Data Policies) |
 | 2 | JavaScript, ServiceNow style (8 lessons) | DONE — 46 learn cards, 20 quiz questions per lesson, 56 coding exercises (ladder with Medium+ and 3-tier hints; 37 with variants); facts aligned to her Brazil PDI on 2026-11-14; awaiting friend feedback on step size |
 | 3 | Client scripting & UI (26 lectures, titles below) | DONE — all 26 lectures in `src/data/lessons-cs*.js`: 95 learn cards (≥ 3 per lesson), 15 quiz questions per lesson, 173 exercises (146 coded on the client / server runner, 115 with variants; 27 real-PDI cards in the 6 `mode: 'pdi'` lessons) |
-| 4 | Server Side ServiceNow Scripting (32 lectures, titles below) | planned — lecture list known, nothing written yet |
+| 4 | Server Side ServiceNow Scripting (32 lectures, titles below) | IN PROGRESS — lectures 1–6 written (`src/data/lessons-ss*.js`, prefix `ss-`): 25 learn cards, 15 quiz questions per lesson, 42 server-runner exercises (all with variants); lectures 7–32 not started |
 | 5 | Service Catalog and Flow Designer | planned |
 | 6 | ITSM and Now Assist | planned |
 
@@ -97,7 +97,8 @@ Hub has progress save/load to a JSON file). Run with `npm run dev`; build with `
   than the others, and may be the longest in at most 40% of a stage's questions (options are shuffled on screen, length is not).
   `audit-quiz.mjs` / `audit-quiz2.mjs` are optional reports, not gates.
 - `node dev-tools/check-exercises.mjs` — Stage 1 exercise data sanity (ids, lessonIds, prerequisite notes on Practice Task exercises).
-- `node dev-tools/check-glossary.mjs` — Stage 2 + Stage 3: every card `terms` key exists, and every `obj.method(` / bare call used in lesson code, hints and solutions has a glossary entry. Run after adding code to any Stage 2/3 lesson.
+- `node dev-tools/check-ss.mjs` — Stage 4: same rules as check-cs (solutions pass incl. variants, starters fail, PDI syntax, level order).
+- `node dev-tools/check-glossary.mjs` — Stages 2–4: every card `terms` key exists, and every `obj.method(` / bare call used in lesson code, hints and solutions has a glossary entry. Run after adding code to any Stage 2/3 lesson.
 - `node dev-tools/check-page-terms.mjs` — floating glossary panel: client calls (`g_form.x()`) resolve to their own entries (never the server `getValue`), hints/solutions never add terms to a page (no spoilers), Stage 2 pages never list Stage 3-only entries.
 - `node dev-tools/check-pdi-checks.mjs` — "🔍 PDI lo ela check cheyyali?" recipes: every `checks` key exists and sits next to a ⚠️, every recipe is
   linked and has steps / see / cleanup, recipe scripts avoid syntax her PDI rejects. `--list` prints the ⚠️ confirm notes that have no box.
@@ -106,10 +107,13 @@ Hub has progress save/load to a JSON file). Run with `npm run dev`; build with `
   the quiz. Re-run it after engine changes. (Load path verified 2026-11-14: all 18 lessons reach the quiz.)
 - `npm run build` must pass. For UI changes, also check in a real browser (Claude in Chrome) — start `npx vite --port 5199`.
 
-## Glossary (Stage 2 + Stage 3)
+## Glossary (Stages 2–4)
 - Entries live in `src/data/glossary-js.js` (Stage 2), `src/data/glossary-cs.js` (Stage 3 client lessons) and `src/data/glossary-cs-ui.js`
-  (Stage 3 UI Actions, CRUD, debugging, macros, UI Pages / Macros); Stage 3 entries are tagged `s: 3`; all merged into `GLOSSARY_JS`. Fields: `g` group, `m` meaning (Tenglish), `ex` example, `check: true` = shows ⚠️ "confirm in your PDI", `check: 'docs'` = 📄 (from the docs, not easy to test), `checks: ['key']` = how-to-check box (`pdi-checks.js`).
-- Key naming: GlideRecord/GlideElement methods and JS words are bare (`getValue`, `var`); `gs.*` are `gs.info`; JS methods are `trim()`; client objects are exact (`g_form.setMandatory()`); two-word terms are phrases (`UI Action`).
+  (Stage 3 UI Actions, CRUD, debugging, macros, UI Pages / Macros) and `src/data/glossary-ss.js` (Stage 4); Stage 3 entries are tagged `s: 3`, Stage 4 `s: 4`
+  (a page / full glossary shows only entries of its own stage or earlier — `inStage()` in glossary-scan.js); all merged into `GLOSSARY_JS`. Fields: `g` group, `m` meaning (Tenglish), `ex` example, `check: true` = shows ⚠️ "confirm in your PDI", `check: 'docs'` = 📄 (from the docs, not easy to test), `checks: ['key']` = how-to-check box (`pdi-checks.js`).
+- Key naming: GlideRecord/GlideElement methods and JS words are bare (`getValue`, `var`); `gs.*` are `gs.info`; JS methods are `trim()`; client objects are exact (`g_form.setMandatory()`); date classes are keyed by class (`GlideDateTime.getValue()`, `GlideDuration.getDayPart()`,
+  `GlideSchedule.add()`) — the scanner types a variable from `new GlideDateTime(` / `GlideDateTime.subtract(` / `sched.duration(` or the names
+  gdt… / dur / sched, so they never fall back to the GlideRecord entry; two-word terms are phrases (`UI Action`).
 - `src/data/glossary-scan.js` decides which terms a lesson page uses (shared by the panel and the checks). `LessonGlossary.jsx` is the floating 📘 button on every Stage 2/3 lesson (hidden on the Quiz tab). Per-card sub-boxes (`terms: [...]` on a learn card) are still used on `js-basics`.
 - New API in a lesson → add its glossary entry (the check fails until you do). Never let a client method (`g_form.x`) fall back to a server entry.
 
@@ -146,5 +150,17 @@ load; `scenario.seed` adds practice rows. Verified API details (gsftSubmit patte
 22 Import Sets · 23 Import Sets part 2 · 24 Import Sets Continuation & Transform Scripts · 25 Transform Script Objects and Variables · 26 Data Sources ·
 27 SLA Definitions & Scripting material · 28 Access Control List (ACL), Requirements & Material · 29 Script Includes & Advanced Reference Qualifiers ·
 30 Fix Scripts, Background Scripts & Relationships (Related Lists) · 31 About Related Lists · 32 Server Side Scripting Best Practices.
-Status: not started. Lesson ids will use prefix `ss-`. Lectures 1–2 overlap Stage 2 / Stage 3 L9–10 (GlideRecord CRUD): keep them short, focus on what is new
-(GlideRecordSecure etc.). Verify GlideDateTime / GlideSchedule / GlideRecordSecure behaviour in her Brazil PDI (read-only Background Scripts) before writing lessons.
+Status: lectures 1–6 written (batch 1, branch `claude/cloud-environment-setup-y77qvb`); 7–32 to do, in batches (7–9 Business Rules, 10–18 jobs + email,
+19–26 reporting + import, 27–32 SLA / ACL / Script Includes / rest). Lectures 1–2 overlap Stage 2 / Stage 3 L9–10: kept short, exercises on what is new
+(operators, encoded query, dot-walk, display values; GlideRecordSecure + canRead/canWrite/canDelete). Ask the user whether a lecture is missing between
+15 "Email Scripts" and 16 "Email Properties" (the screenshots were cut there) before batch 10–18.
+Files: `lessons-ss.js` (1–3 + SS_LESSONS), `lessons-ss-b.js` (4–6), `quiz-extra-ss.js`, `glossary-ss.js`; check `node dev-tools/check-ss.mjs`. All coded lessons
+use the SERVER runner (`server: true`). New mock pieces: `src/js/dateMock.js` (GlideDateTime / GlideDate / GlideDuration / GlideSchedule, gs date helpers,
+`javascript:gs.daysAgoStart(7)` values in queries) and, in snowMock.js, GlideRecordSecure + ACLs, a running user, addHaving, more gs (getProperty, eventQueue,
+tableExists, generateGUID). Sandbox facts the lessons state: clock fixed at 2026-11-12 10:00:00 UTC (Thursday); the sandbox user's time zone is IST, so
+getDisplayValue = UTC + 5:30; practice schedule `sch_8to5` = Mon–Fri 08–17 UTC, no holidays. Incident data gained sys_created_on, resolved_at (INC0010005),
+reassignment_count. Server scenario keys: `runAs: { sys_id, roles }` (default admin — passes every role / ACL check, like her PDI), `acl: { incident: { read |
+write | create | delete: { roles, cond } } }` (cond = encoded query, ME = running user), `props` (gs.getProperty); tests can read `__x.events`
+(gs.eventQueue) and `__x.messages` (gs.addInfoMessage / addErrorMessage). Not verified in her PDI (content carries ⚠️ + recipes gdt-display-tz, gs-dates-tz,
+duration-format, schedule-8to5, ga-having, copy-query): display time zone / format, gs date helpers' time zone, GlideDuration text, GlideSchedule, addHaving;
+GlideRecordSecure deny behaviour is marked 📄 docs (admin can't see it).

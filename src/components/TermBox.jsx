@@ -42,9 +42,9 @@ export function TermBox({ keys, title = '📘 Ee topic lo words', collapsible = 
 }
 
 // Full glossary: every term grouped by kind. stage 2 (hub, Stage 2 lessons) = JavaScript part only;
-// stage 3 (Stage 3 lessons) = everything, including the client-side words.
+// stage 3 (Stage 3 lessons) adds the client-side words; stage 4 adds the server-side (Stage 4) words.
 export function GlossaryPanel({ stage = 2 }) {
-  const all = termsFor(Object.keys(GLOSSARY_JS)).filter((t) => stage >= 3 || !t.s)
+  const all = termsFor(Object.keys(GLOSSARY_JS)).filter((t) => !t.s || t.s <= stage)
   return (
     <details className="glossary">
       <summary>{stage >= 3 ? '📚 Full glossary — all words' : '📚 JavaScript part — words & abbreviations'} ({all.length})</summary>

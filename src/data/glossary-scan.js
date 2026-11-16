@@ -3,6 +3,8 @@
 import { GLOSSARY_JS } from './glossary-js.js'
 
 const KNOWN = new Set(Object.keys(GLOSSARY_JS))
+// an entry belongs to a stage's glossary when it has no stage tag (Stage 2) or its tag is that stage or an earlier one
+export const inStage = (e, stage) => !!e && (!e.s || e.s <= stage)
 
 // Client objects (g_form, g_user, g_list, g_scratchpad) have their OWN entries ('g_form.getValue()' ...).
 // A call like g_form.getValue() must never fall back to the server getValue entry — different API, different behaviour.
@@ -16,11 +18,38 @@ const PROSE_SAFE = /_|^on[A-Z]|^[A-Z]/
 const ownNames = (text) =>
   new Set([...text.matchAll(/function\s+(\w+)|(\w+)\s*:\s*function/g)].map((m) => m[1] || m[2]))
 
+// Stage 4 date objects have their OWN entries ('GlideDateTime.getValue()' …) — a GlideDateTime's getValue() is not the
+// GlideRecord one. A variable is typed by how the code makes it: `var x = new GlideDateTime(...)`, `= GlideDateTime.subtract(`
+// (a GlideDuration), `= sched.duration(` / `= sched.add(` on a GlideSchedule, `= …getGlideObject()`, `= gdt.getDate()`.
+const DATE_CLASSES = ['GlideDateTime', 'GlideDuration', 'GlideSchedule', 'GlideDate']
+// Naming convention used in lesson prose (no `new` nearby): gdt… = GlideDateTime, dur = GlideDuration, sched = GlideSchedule.
+const DATE_NAMES = [[/^gdt\w*$/, 'GlideDateTime'], [/^dur$/, 'GlideDuration'], [/^sched$/, 'GlideSchedule']]
+function dateVars(text) {
+  const vars = new Map()
+  for (const m of text.matchAll(/\b([A-Za-z_]\w*)\.\w+\s*\(/g)) {
+    const hit = DATE_NAMES.find(([re]) => re.test(m[1]))
+    if (hit) vars.set(m[1], hit[1])
+  }
+  for (const m of text.matchAll(/\b([A-Za-z_]\w*)\s*=\s*new\s+(GlideDateTime|GlideDuration|GlideSchedule|GlideDate)\b/g)) vars.set(m[1], m[2])
+  for (const m of text.matchAll(/\b([A-Za-z_]\w*)\s*=\s*GlideDateTime\.subtract\(/g)) vars.set(m[1], 'GlideDuration')
+  for (const m of text.matchAll(/\b([A-Za-z_]\w*)\s*=\s*[\w.]+\.getGlideObject\(/g)) vars.set(m[1], 'GlideDateTime')
+  // second pass: results of methods on variables we already know
+  for (const m of text.matchAll(/\b([A-Za-z_]\w*)\s*=\s*([A-Za-z_]\w*)\.(duration|add|subtract|getDate|getLocalDate)\(/g)) {
+    const cls = vars.get(m[2])
+    if (!cls) continue
+    if (cls === 'GlideSchedule') vars.set(m[1], m[3] === 'duration' ? 'GlideDuration' : 'GlideDateTime')
+    else if (cls === 'GlideDuration' && m[3] !== 'getDate') vars.set(m[1], 'GlideDuration')
+    else if (cls === 'GlideDateTime' && /^getDate|^getLocalDate/.test(m[3])) vars.set(m[1], 'GlideDate')
+  }
+  return vars
+}
+
 // Returns { keys: Set of glossary keys found, unknown: Set of calls with no glossary entry }
 export function scanCalls(text) {
   const keys = new Set()
   const unknown = new Set()
   const own = ownNames(text)
+  const dvars = dateVars(text)
 
   // obj.method(  e.g. gs.info(  gr.getValue(  Object.keys(  g_form.setVisible(  ga.addParam(
   for (const m of text.matchAll(/\b([A-Za-z_]\w*)\.([A-Za-z_]\w*)\s*\(/g)) {
@@ -31,6 +60,14 @@ export function scanCalls(text) {
       if (KNOWN.has(obj)) keys.add(obj)
       if (KNOWN.has(`${obj}.${meth}()`)) keys.add(`${obj}.${meth}()`)
       else unknown.add(`${obj}.${meth}()`)
+      continue
+    }
+    // date object (a typed variable, or a static call like GlideDateTime.subtract()): its own entry only
+    const cls = DATE_CLASSES.includes(obj) ? obj : dvars.get(obj)
+    if (cls) {
+      if (KNOWN.has(cls)) keys.add(cls)
+      if (KNOWN.has(`${cls}.${meth}()`)) keys.add(`${cls}.${meth}()`)
+      else unknown.add(`${cls}.${meth}()`)
       continue
     }
     // GlideRecord/GlideElement entries are stored as bare names (getValue, query), so try the bare name too.
@@ -93,9 +130,9 @@ export function pageTermKeys(lesson) {
   for (const k of scanCalls(codeText + '\n' + proseText).keys) out.add(k)
   for (const k of scanWords(codeText, proseText)) out.add(k)
   for (const k of scanPhrases(codeText + '\n' + proseText)) out.add(k)
-  // Stage 3-only entries (s: 3) are not in the Stage 2 full glossary, so Stage 2 pages leave them out too
+  // later-stage entries (s: 3, s: 4) are not in an earlier stage's full glossary, so its pages leave them out too
   const stage = lesson.stage || 2
-  return [...out].filter((k) => stage >= 3 || !GLOSSARY_JS[k]?.s)
+  return [...out].filter((k) => inStage(GLOSSARY_JS[k], stage))
 }
 
 // Terms for ONE learn card (the "📘 Ee topic lo words" sub-box).
@@ -112,7 +149,7 @@ export function cardTermKeys(card, stage = 2, max = 6) {
   for (const k of scanPhrases(code + '\n' + prose)) found.add(k)
   const keys = [...found].filter((k) => {
     const e = GLOSSARY_JS[k]
-    return e && e.g !== 'js' && (stage >= 3 || !e.s)
+    return e && e.g !== 'js' && inStage(e, stage)
   })
   // an overview entry (g_form, gs) is dropped when the card already shows that object's own methods (g_form.setValue(), gs.info)
   const specific = keys.filter((k) => !keys.some((o) => o !== k && o.startsWith(k + '.')))

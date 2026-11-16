@@ -7,6 +7,7 @@ import { LESSONS } from '../src/data/lessons.js'
 import { EXERCISES } from '../src/data/exercises.js'
 import { JS_LESSONS } from '../src/data/lessons-js.js'
 import { CS_LESSONS } from '../src/data/lessons-cs.js'
+import { SS_LESSONS } from '../src/data/lessons-ss.js'
 import { GLOSSARY_JS } from '../src/data/glossary-js.js'
 import { brazilSyntaxWarnings } from '../src/js/esCheck.js'
 
@@ -21,7 +22,7 @@ for (const l of LESSONS) {
   l.quiz.forEach((x, i) => items.push([`${l.id} quiz ${i + 1}`, x, x.why]))
 }
 for (const e of EXERCISES) items.push([e.id, e, txt(e.scenario, e.hint, e.steps, e.answer, e.cleanup)])
-for (const l of [...JS_LESSONS, ...CS_LESSONS]) {
+for (const l of [...JS_LESSONS, ...CS_LESSONS, ...SS_LESSONS]) {
   l.learn.forEach((c, i) => items.push([`${l.id} card ${i + 1} (${c.h})`, c, txt(c.body)]))
   l.quiz.forEach((x, i) => items.push([`${l.id} quiz ${i + 1}`, x, x.why]))
   l.exercises.forEach((e) => items.push([e.id, e, txt(e.task, e.scenario, e.hint, e.steps, e.answer, e.cleanup, e.explain)]))

@@ -7,6 +7,7 @@
 import { LESSONS } from './lessons.js'
 import { JS_LESSONS } from './lessons-js.js'
 import { CS_LESSONS } from './lessons-cs.js'
+import { SS_LESSONS } from './lessons-ss.js'
 import { exercisesFor } from './exercises.js'
 
 export const STAGES = [
@@ -40,6 +41,17 @@ export const STAGES = [
     lessons: CS_LESSONS,
     intro:
       'Client scripts browser lo run avtayi. Ikkada code rasi Run cheste kinda unna mock Incident form lo marpulu live ga kanipistayi. Course lo 26 lectures anni ikkada unnayi. Konni lessons lo code ikkade run avtundi, konni (SN Utils, debugging, macros, UI Pages, UI Macros) nee real PDI lo cheyyali.',
+  },
+  {
+    key: 's4',
+    num: 4,
+    icon: '⚙️',
+    title: 'Server scripting',
+    subtitle: 'GlideRecord deeper, GlideAggregate, gs, dates — server lo run ayye code',
+    kind: 'code',
+    lessons: SS_LESSONS,
+    intro:
+      'Server scripts instance lo run avtayi — Business Rules, Script Includes, Scheduled Jobs, Background Scripts. Ikkada code rasi Run cheste mock incident data meeda run avtundi (em save avvadu). Course section lo 32 lectures — ippudu modati 6 (GlideRecord, GlideRecordSecure, GlideAggregate, GlideSystem, GlideDateTime, GlideDuration / GlideSchedule) ready; migilinavi tarvata.',
   },
 ]
 

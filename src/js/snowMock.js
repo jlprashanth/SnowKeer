@@ -2,8 +2,11 @@
 // real-looking scripts in the browser. Pure ES module: used by the Web Worker and by node tests.
 // Behaviour follows her Brazil PDI (checked with Background Scripts on 2026-11-14) — the notes say where.
 import { CHOICES, SCHEMA, freshDb } from './snowData.js'
+import { GlideDateTime, GS_DATES, resolveJsValue } from './dateMock.js'
 
 const NOW = '2026-11-12 10:00:00'
+// the user scripts run as when the scenario names no runAs: the PDI admin (admin passes every role / ACL check)
+export const ADMIN = { sys_id: 'u_admin', user_name: 'admin', name: 'System Administrator', email: 'admin@example.com', roles: ['admin'] }
 const str = (v) => (v === undefined || v === null ? '' : String(v))
 const isBool = (table, f) => SCHEMA[table]?.fields[f] === 'boolean'
 // true/false fields are stored as 'true' / 'false' (what gr.active.toString() shows); getValue() turns them into '1' / '0'
@@ -72,6 +75,8 @@ class GlideElement {
   getValue() { return this._gr.getValue(this._name) }
   setValue(v) { this._gr.setValue(this._name, v) }
   nil() { return this._v === '' }
+  // date-time field → a GlideDateTime holding the field's (UTC) value
+  getGlideObject() { return this._type === 'glide_date_time' ? new GlideDateTime(this._v) : null }
   // changes()/changesTo()/changesFrom() compare against `previous` (set by runScript for current/previous scenarios)
   _prev() { const p = this._gr._previous; return p ? str(p._row?.[this._name]) : null }
   changes() { const p = this._prev(); return p !== null && p !== this._v }
@@ -153,7 +158,7 @@ function parseEncoded(q) {
       if (k >= 0 && (i < 0 || k < i || (k === i && o.length > op.length))) { op = o; i = k }
     }
     if (!op) continue
-    const cond = { field: body.slice(0, i), op, value: body.slice(i + op.length) }
+    const cond = { field: body.slice(0, i), op, value: resolveJsValue(body.slice(i + op.length)) }
     const groups = sets[sets.length - 1]
     if (isOr && groups.length) groups[groups.length - 1].push(cond)
     else groups.push([cond])
@@ -166,7 +171,7 @@ const condOf = (field, a, b) => {
   let value = a
   if (b !== undefined) { op = WORD[String(a).toUpperCase()] || String(a).toUpperCase(); value = b }
   if (Array.isArray(value)) value = value.join(',')
-  return { field, op, value: str(value) }
+  return { field, op, value: str(resolveJsValue(value)) }
 }
 
 /* ---------------------------- GlideRecord ---------------------------- */
@@ -334,10 +339,26 @@ export class GlideRecord {
   isValidField(f) { return f in SCHEMA[this._table].fields }
   isValidRecord() { return !!this._row && !!this._row.sys_id && this._db[this._table].some((r) => r.sys_id === this._row.sys_id) }
   isNewRecord() { return !!this._isNew }
-  canCreate() { return true }
-  canRead() { return true }
-  canWrite() { return true }
-  canDelete() { return true }
+  // ACLs (sandbox): scenario.acl = { incident: { read: { roles: ['itil'], cond: 'caller_id=ME' }, write: …, create: …, delete: … } }
+  // checked for the user in scenario.runAs (default admin — admin passes every check, like her PDI). No rule = allowed.
+  // ME in cond = the running user's sys_id.
+  _allowed(op, row) {
+    const ctx = this._db._ctx || {}
+    const user = ctx.user || ADMIN
+    if ((user.roles || []).includes('admin')) return true
+    const rule = ctx.acl && ctx.acl[this._table] && ctx.acl[this._table][op]
+    if (!rule) return true
+    if (rule.roles && rule.roles.length && !rule.roles.some((r) => (user.roles || []).includes(r))) return false
+    if (rule.cond && row) {
+      const p = parseEncoded(String(rule.cond).split('ME').join(user.sys_id))
+      if (!matches(this._db, this._table, row, p.sets[0])) return false
+    }
+    return true
+  }
+  canCreate() { return this._allowed('create', this._row || {}) }
+  canRead() { return this._allowed('read', this._row) }
+  canWrite() { return this._allowed('write', this._row) }
+  canDelete() { return this._allowed('delete', this._row) }
   changes() {
     const p = this._previous
     return !!p && !!this._row && Object.keys(this._row).some((k) => str(this._row[k]) !== str(p._row?.[k]))
@@ -426,6 +447,10 @@ export class GlideAggregate extends GlideRecord {
   }
   addAggregate(agg, field) { this._aggs.push({ agg: String(agg).toUpperCase(), field: field || '' }) }
   groupBy(f) { this._groupBy.push(f) }
+  // addHaving('COUNT', '>', '1') — keep only groups whose aggregate passes (a SQL HAVING)
+  addHaving(agg, op, value) { this._having = (this._having || []).concat([{ agg: String(agg).toUpperCase(), op: String(op), value: Number(value) }]) }
+  // orderByAggregate('COUNT') — groups sorted by that aggregate, smallest first (sandbox; ⚠️ not verified in her PDI)
+  orderByAggregate(agg, field) { this._aggOrder = { agg: String(agg).toUpperCase(), field: field || '' } }
   query() {
     const groups = new Map()
     for (const r of this._matching()) {
@@ -435,6 +460,10 @@ export class GlideAggregate extends GlideRecord {
     }
     if (!this._groupBy.length && !groups.size) groups.set('[]', [])
     this._out = [...groups.entries()].map(([k, rows]) => ({ key: JSON.parse(k), rows }))
+    const val = (g, agg, field) => { this._out.push(g); const i = this._out.length - 1; this._gi = i; const v = Number(this.getAggregate(agg, field)); this._out.pop(); return v }
+    const cmp = { '>': (a, b) => a > b, '<': (a, b) => a < b, '>=': (a, b) => a >= b, '<=': (a, b) => a <= b, '=': (a, b) => a === b, '!=': (a, b) => a !== b }
+    for (const h of this._having || []) this._out = this._out.filter((g) => (cmp[h.op] || (() => true))(val(g, h.agg, ''), h.value))
+    if (this._aggOrder) { const o = this._aggOrder; this._out = this._out.map((g) => [g, val(g, o.agg, o.field)]).sort((a, b) => a[1] - b[1]).map((x) => x[0]) }
     this._gi = -1
   }
   next() {
@@ -466,31 +495,89 @@ export class GlideAggregate extends GlideRecord {
   }
 }
 
+/* ---------------------------- GlideRecordSecure ---------------------------- */
+// GlideRecord that checks ACLs for the running user (scenario.runAs + scenario.acl): rows the user can't read are skipped
+// silently, insert / update / delete that the ACL denies do nothing (insert / update return null, deleteRecord false).
+// ⚠️ exact return values / log text not verified in her PDI.
+export class GlideRecordSecure extends GlideRecord {
+  _matching() { return super._matching().filter((r) => this._allowed('read', r)) }
+  get(a, b) {
+    const ok = super.get(a, b)
+    if (ok && !this._allowed('read', this._row)) { this._row = null; this._ids = []; return false }
+    return ok
+  }
+  _deny(op) {
+    this._log('sys', `🔒 Security restricted: ${op} on ${this._table} denied (user ki ACL permission ledu) — GlideRecordSecure em cheyyaledu.`)
+    return null
+  }
+  insert() {
+    if (!this._row) this.initialize()
+    if (!this._allowed('create', this._row)) return this._deny('create')
+    return super.insert()
+  }
+  update() {
+    if (!this._row) return null
+    const saved = this._db[this._table].find((r) => r.sys_id === this._row.sys_id)
+    if (!saved) return this.insert()
+    if (!this._allowed('write', saved)) return this._deny('write')
+    return super.update()
+  }
+  deleteRecord() {
+    if (!this._row) return false
+    if (!this._allowed('delete', this._row)) { this._deny('delete'); return false }
+    return super.deleteRecord()
+  }
+  updateMultiple() {
+    const before = new Set(this._db[this._table].filter((r) => !this._allowed('write', r)).map((r) => r.sys_id))
+    for (const r of this._matching()) if (!before.has(r.sys_id)) Object.assign(r, this._pending)
+  }
+  deleteMultiple() {
+    const ids = new Set(this._matching().filter((r) => this._allowed('delete', r)).map((r) => r.sys_id))
+    this._db[this._table] = this._db[this._table].filter((r) => !ids.has(r.sys_id))
+  }
+}
+
 /* ---------------------------- gs ---------------------------- */
-export function makeGs(logs) {
+export function makeGs(logs, ctx) {
   // PDI: gs.info(null) prints "null", gs.info(undefined) prints "undefined"; {0} {1} are replaced by the extra arguments
   const s = (v) => (v === undefined ? 'undefined' : v === null ? 'null' : String(v))
   const fmt = (msg, args) => args.reduce((acc, a, i) => acc.split(`{${i}}`).join(s(a)), s(msg))
   const log = (level) => (msg, ...args) => { logs.push({ level, msg: fmt(msg, args) }) }
-  const PROPS = { 'glide.product.name': 'ServiceNow', 'glide.ui.session_timeout': '30', 'glide.buildname': 'Brazil' }
+  const PROPS = { 'glide.product.name': 'ServiceNow', 'glide.ui.session_timeout': '30', 'glide.buildname': 'Brazil', ...((ctx && ctx.props) || {}) }
+  const c = ctx || {}
+  // the running user: scenario.runAs, else the PDI admin. PDI: admin passes EVERY hasRole() check (even a role that does not exist)
+  const u = c.user || ADMIN
+  const has = (r) => (u.roles || []).includes('admin') || (u.roles || []).includes(String(r))
+  const first = String(u.name).split(' ')[0]
+  const last = String(u.name).split(' ').slice(1).join(' ')
+  let guid = 0
   return {
     info: log('info'), warn: log('warn'), error: log('error'), debug: log('debug'), print: log('info'),
     log: (msg) => { logs.push({ level: 'info', msg: s(msg) }) },
-    addInfoMessage: log('ui'), addErrorMessage: log('ui-error'),
+    addInfoMessage: (m) => { log('ui')(m); if (c.messages) c.messages.push({ type: 'info', text: s(m) }) },
+    addErrorMessage: (m) => { log('ui-error')(m); if (c.messages) c.messages.push({ type: 'error', text: s(m) }) },
     getMessage: (key, args) => fmt(key, [].concat(args === undefined ? [] : args)),
-    getUserID: () => 'u_admin', getUserName: () => 'admin', getUserDisplayName: () => 'System Administrator',
-    // PDI: the practice user is admin, and admin passes EVERY hasRole() check (even a role that does not exist)
-    hasRole: () => true,
+    getUserID: () => u.sys_id, getUserName: () => u.user_name, getUserDisplayName: () => u.name,
+    hasRole: (r) => has(r),
     nil: (x) => x === undefined || x === null || str(x) === '',
-    nowDateTime: () => NOW, now: () => NOW.slice(0, 10),
+    ...GS_DATES,
     getProperty: (n, d) => (n in PROPS ? PROPS[n] : d === undefined ? null : d),
     isInteractive: () => false,
-    eventQueue: (name) => { logs.push({ level: 'sys', msg: `[event queued: ${name}]` }) },
-    // minimal GlideUser: the practice user is "System Administrator" (u_admin)
+    tableExists: (t) => !!SCHEMA[String(t)],
+    // sandbox: predictable 32-character ids so tests repeat (a real one is random)
+    generateGUID: () => 'f'.repeat(24) + String(++guid).padStart(8, '0'),
+    // gs.eventQueue('name', gr, parm1, parm2) — the sandbox only records it (__x.events); in the PDI the event lands in the
+    // Event Log (sysevent) and fires Notifications / Script Actions registered for that name
+    eventQueue: (name, gr, p1, p2) => {
+      logs.push({ level: 'sys', msg: `[event queued: ${name}]` })
+      if (c.events) c.events.push({ name: s(name), instance: gr && gr.getUniqueValue ? gr.getUniqueValue() : null, table: gr && gr.getTableName ? gr.getTableName() : null, parm1: p1 === undefined ? null : s(p1), parm2: p2 === undefined ? null : s(p2) })
+    },
+    // minimal GlideUser for the running user
     getUser: () => ({
-      getID: () => 'u_admin', getName: () => 'admin', getFullName: () => 'System Administrator', getDisplayName: () => 'System Administrator',
-      getFirstName: () => 'System', getLastName: () => 'Administrator', getEmail: () => 'admin@example.com',
-      hasRole: () => true,
+      getID: () => u.sys_id, getName: () => u.user_name, getFullName: () => u.name, getDisplayName: () => u.name,
+      getFirstName: () => first, getLastName: () => last, getEmail: () => u.email || '',
+      hasRole: (r) => has(r), getRoles: () => (u.roles || []).slice(),
+      isMemberOf: (g) => (u.groups || []).includes(String(g)),
     }),
   }
 }

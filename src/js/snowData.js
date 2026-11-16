@@ -43,6 +43,8 @@ export const SCHEMA = {
       state: 'integer', priority: 'integer', impact: 'integer', urgency: 'integer', category: 'string',
       assignment_group: 'reference', assigned_to: 'reference', caller_id: 'reference', active: 'boolean', opened_at: 'glide_date_time',
       hold_reason: 'integer', close_code: 'string', close_notes: 'string', work_notes: 'journal', comments: 'journal',
+      // Stage 4 (dates, aggregates): when it was created / resolved, how many times it changed group
+      sys_created_on: 'glide_date_time', resolved_at: 'glide_date_time', reassignment_count: 'integer',
     },
     refs: { assignment_group: 'sys_user_group', assigned_to: 'sys_user', caller_id: 'sys_user' },
   },
@@ -56,17 +58,19 @@ export const SCHEMA = {
 const inc = (n, short, o) => ({
   sys_id: 'inc' + n, number: 'INC00100' + String(n).padStart(2, '0'), short_description: short, description: '',
   state: '1', priority: '3', impact: '3', urgency: '3', category: 'inquiry', assignment_group: '', assigned_to: '', caller_id: 'u_abel',
-  active: 'true', opened_at: '2026-11-02 09:00:00', hold_reason: '', close_code: '', close_notes: '', work_notes: '', comments: '', ...o,
+  active: 'true', opened_at: '2026-11-02 09:00:00', hold_reason: '', close_code: '', close_notes: '', work_notes: '', comments: '',
+  resolved_at: '', reassignment_count: '0', ...o,
+  sys_created_on: (o && o.opened_at) || '2026-11-02 09:00:00',
 })
 
 export const INCIDENTS = [
-  inc(1, 'Email is not syncing on my laptop', { state: '2', priority: '3', impact: '2', urgency: '2', category: 'software', assignment_group: 'g_desk', assigned_to: 'u_admin', opened_at: '2026-11-02 09:14:00' }),
+  inc(1, 'Email is not syncing on my laptop', { state: '2', priority: '3', impact: '2', urgency: '2', category: 'software', assignment_group: 'g_desk', assigned_to: 'u_admin', opened_at: '2026-11-02 09:14:00', reassignment_count: '1' }),
   inc(2, 'VPN keeps disconnecting every 10 minutes', { state: '1', priority: '1', impact: '1', urgency: '1', category: 'network', assignment_group: 'g_net', caller_id: 'u_bud', opened_at: '2026-11-03 11:40:00' }),
   inc(3, 'Printer on 3rd floor is jammed', { state: '3', priority: '4', category: 'hardware', hold_reason: '4', assignment_group: 'g_hw', assigned_to: 'u_admin', caller_id: 'u_beth', opened_at: '2026-11-03 15:05:00' }),
-  inc(4, 'Reports are taking 5 minutes to load', { state: '2', priority: '2', impact: '1', urgency: '2', category: 'database', assignment_group: 'g_db', caller_id: 'u_fred', opened_at: '2026-11-04 08:22:00' }),
-  inc(5, 'How do I reset my password?', { state: '7', priority: '4', category: 'inquiry', close_code: 'Resolved by caller', close_notes: 'Sent the password reset link; caller confirmed login works.', assignment_group: 'g_desk', assigned_to: 'u_admin', active: 'false', opened_at: '2026-11-04 10:31:00' }),
+  inc(4, 'Reports are taking 5 minutes to load', { state: '2', priority: '2', impact: '1', urgency: '2', category: 'database', assignment_group: 'g_db', caller_id: 'u_fred', opened_at: '2026-11-04 08:22:00', reassignment_count: '3' }),
+  inc(5, 'How do I reset my password?', { state: '7', priority: '4', category: 'inquiry', close_code: 'Resolved by caller', close_notes: 'Sent the password reset link; caller confirmed login works.', assignment_group: 'g_desk', assigned_to: 'u_admin', active: 'false', opened_at: '2026-11-04 10:31:00', resolved_at: '2026-11-04 12:01:00' }),
   inc(6, 'Excel crashes when opening large files', { state: '1', priority: '4', impact: '2', urgency: '3', category: 'software', opened_at: '2026-11-05 13:48:00' }),
-  inc(7, 'Network drive not accessible from Hyderabad office', { state: '1', priority: '2', impact: '2', urgency: '1', category: 'network', assignment_group: 'g_net', caller_id: 'u_bud', opened_at: '2026-11-06 09:55:00' }),
+  inc(7, 'Network drive not accessible from Hyderabad office', { state: '1', priority: '2', impact: '2', urgency: '1', category: 'network', assignment_group: 'g_net', caller_id: 'u_bud', opened_at: '2026-11-06 09:55:00', reassignment_count: '2' }),
   inc(8, 'Database backup job failed overnight', { state: '2', priority: '1', impact: '1', urgency: '1', category: 'database', assignment_group: 'g_db', assigned_to: 'u_admin', caller_id: 'u_fred', opened_at: '2026-11-07 06:10:00' }),
 ]
 
