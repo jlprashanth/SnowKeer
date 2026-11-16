@@ -73,11 +73,11 @@ Whatever the setting: one lesson per request, and `npm run check` + `npm run bui
 | 1 | Introduction (18 lessons: account, users, UI tour, tables, forms, views, dictionary, update sets, UI/data policies...) | DONE — 471 guided mock steps (all 18 auto-play to the quiz with `dev-tools/test-driver.js`), 9–10 quiz questions per lesson (extra ones in `quiz-extra-s1.js`), 54 real-PDI exercises in doing order (shared practice items are deleted only by the Final cleanup card, `table-creation-4`, filed under Data Policies) |
 | 2 | JavaScript, ServiceNow style (8 lessons) | DONE — 46 learn cards, 20 quiz questions per lesson, 56 coding exercises (ladder with Medium+ and 3-tier hints; 37 with variants); facts aligned to her Brazil PDI on 2026-11-14; awaiting friend feedback on step size |
 | 3 | Client scripting & UI (26 lectures, titles below) | DONE — all 26 lectures in `src/data/lessons-cs*.js`: 95 learn cards (≥ 3 per lesson), 15 quiz questions per lesson, 173 exercises (146 coded on the client / server runner, 115 with variants; 27 real-PDI cards in the 6 `mode: 'pdi'` lessons) |
-| 4 | Server scripting (Business Rules, Script Includes, GlideRecord deeper, GlideAggregate, scheduled jobs) | planned |
+| 4 | Server Side ServiceNow Scripting (32 lectures, titles below) | planned — lecture list known, nothing written yet |
 | 5 | Service Catalog and Flow Designer | planned |
 | 6 | ITSM and Now Assist | planned |
 
-For stages 4–6 the exact lecture titles are unknown: **ask the user to paste the Udemy section's lecture list and wait** before planning or writing anything (see the first section above).
+For stages 5–6 the exact lecture titles are unknown: **ask the user to paste the Udemy section's lecture list and wait** before planning or writing anything (see the first section above).
 
 ### Adding a new stage (after the titles are pasted)
 1. **Plan first.** Write one lesson per lecture title, in course order, with a lesson id prefix for the stage (e.g. `ss-` for Stage 4).
@@ -190,3 +190,15 @@ dispatches through `getName()` like the real AbstractAjaxProcessor (so a Script 
 Client tests can read `__x.ajaxCalls`, `__x.formSubmits`, `__x.syncGetReference`, `__x.listRefreshes`; `client.trigger.isLoading` simulates a form
 load; `scenario.seed` adds practice rows. Verified API details (gsftSubmit pattern, onCellEdit, g_list, labels, module locations) are in
 `docs/pdi-facts-brazil.md`; anything else gets ⚠️ for her to confirm in her PDI.
+
+## Stage 4 — Udemy lecture list (32, course order; user-pasted, no durations)
+1 What are CRUD Operations & GlideRecord Create & Read Operations · 2 GlideRecord Read, Update, Delete operations & GlideRecordSecure ·
+3 GlideAggregate API · 4 GlideSystem · 5 GlideDateTime · 6 GlideDateTime Continuation, GlideSchedule, GlideDuration ·
+7 Business Rules Introduction & Before Business Rules · 8 After & Async Business Rules Continuation · 9 Display & Before Query Business Rules Continuation ·
+10 Scheduled Jobs · 11 Scheduled Jobs Continuation · 12 Scheduled Jobs Use Cases · 13 Email Notifications · 14 Email Notifications using events · 15 Email Scripts ·
+16 Email Properties · 17 Inbound Email Actions · 18 Script Actions · 19 Data Visualizations and Dashboards · 20 Database Views · 21 Metric Definitions ·
+22 Import Sets · 23 Import Sets part 2 · 24 Import Sets Continuation & Transform Scripts · 25 Transform Script Objects and Variables · 26 Data Sources ·
+27 SLA Definitions & Scripting material · 28 Access Control List (ACL), Requirements & Material · 29 Script Includes & Advanced Reference Qualifiers ·
+30 Fix Scripts, Background Scripts & Relationships (Related Lists) · 31 About Related Lists · 32 Server Side Scripting Best Practices.
+Status: not started. Lesson ids will use prefix `ss-`. Lectures 1–2 overlap Stage 2 / Stage 3 L9–10 (GlideRecord CRUD): keep them short, focus on what is new
+(GlideRecordSecure etc.). Verify GlideDateTime / GlideSchedule / GlideRecordSecure behaviour in her Brazil PDI (read-only Background Scripts) before writing lessons.
