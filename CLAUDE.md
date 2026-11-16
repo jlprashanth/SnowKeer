@@ -7,7 +7,8 @@ The friend is Telugu-speaking and uses a laptop.
 ## FIRST: get the lecture titles before building anything
 **Before developing any new stage or lesson, ask the user to paste the Udemy lecture titles (and durations) for that section, and wait for them.**
 Do not invent a lesson list, start planning lessons, or write code/content for a stage until the titles are provided. Map one lesson to each
-title, in the course's order. Stage 1–3 titles are already in the code (Stage 3's list is at the bottom of this file); stages 4–6 are not known yet.
+title, in the course's order. Stage 1–3 titles are already in the code; Stage 3's and Stage 4's lists are at the bottom of this file (Stage 4: 32 lectures, user-pasted);
+stages 5–6 are not known yet.
 
 ## Rules for new content
 - **Language: Tenglish** — Telugu written in English letters, technical terms stay English. Casual, friendly tone
@@ -32,7 +33,7 @@ title, in the course's order. Stage 1–3 titles are already in the code (Stage 
 | 1 | Introduction (18 lessons: account, users, UI tour, tables, forms, views, dictionary, update sets, UI/data policies...) | DONE — 471 guided mock steps (all 18 auto-play to the quiz with `dev-tools/test-driver.js`), 9–10 quiz questions per lesson (extra ones in `quiz-extra-s1.js`), 54 real-PDI exercises in doing order (shared practice items are deleted only by the Final cleanup card, `table-creation-4`, filed under Data Policies) |
 | 2 | JavaScript, ServiceNow style (8 lessons) | DONE — 46 learn cards, 20 quiz questions per lesson, 56 coding exercises (ladder with Medium+ and 3-tier hints; 37 with variants); facts aligned to her Brazil PDI on 2026-11-14; awaiting friend feedback on step size |
 | 3 | Client scripting & UI (26 lectures, titles below) | DONE — all 26 lectures in `src/data/lessons-cs*.js`: 95 learn cards (≥ 3 per lesson), 15 quiz questions per lesson, 173 exercises (146 coded on the client / server runner, 115 with variants; 27 real-PDI cards in the 6 `mode: 'pdi'` lessons) |
-| 4 | Server Side ServiceNow Scripting (32 lectures, titles below) | IN PROGRESS — lectures 1–6 written (`src/data/lessons-ss*.js`, prefix `ss-`): 25 learn cards, 15 quiz questions per lesson, 42 server-runner exercises (all with variants); lectures 7–32 not started |
+| 4 | Server Side ServiceNow Scripting (32 lectures, titles below) | IN PROGRESS — lectures 1–6 written (`src/data/lessons-ss*.js`, prefix `ss-`): 24 learn cards, 15 quiz questions per lesson, 42 server-runner exercises (all with variants); lectures 7–32 not started |
 | 5 | Service Catalog and Flow Designer | planned |
 | 6 | ITSM and Now Assist | planned |
 
