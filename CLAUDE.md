@@ -7,7 +7,7 @@ The friend is Telugu-speaking and uses a laptop.
 ## FIRST: get the lecture titles before building anything
 **Before developing any new stage or lesson, ask the user to paste the Udemy lecture titles (and durations) for that section, and wait for them.**
 Do not invent a lesson list, start planning lessons, or write code/content for a stage until the titles are provided. Map one lesson to each
-title, in the course's order. Stage 1–3 titles are already in the code (Stage 3's list is at the bottom of this file); stages 4–6 are not known yet.
+title, in the course's order. Stage 1–3 titles are already in the code; Stage 3's and Stage 4's lists are at the bottom of this file; stages 5–6 are not known yet.
 
 ## How to work here (every task, every model)
 1. **Read before you write.** Open the files you will change and one finished example of the same kind, and copy its shape exactly:
