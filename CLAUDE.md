@@ -37,16 +37,15 @@ title, in the course's order. Stage 1–3 titles are already in the code (Stage 
    (GitHub Pages), so never push to `main` unless the user asks.
 7. **When unsure, ask the user** (missing lecture titles, unclear scope, a ServiceNow fact you can't verify). Short questions are fine;
    guessing is not.
-8. `REVIEW-NOTES.md` is a one-off review list for the November 2026 audit branch; delete it once that branch is merged. The lasting
-   record is `docs/` (`docs/audit-2026-11/`, `docs/pdi-facts-brazil.md`).
 
 ## Which model / effort to use
 The user picks the model; Claude can't switch itself. If the task needs more than the current setting, say so at the start, before working.
 | Task | Suggested |
 |---|---|
 | Typo / wording fix, one quiz question, one glossary entry, small CSS tweak | Sonnet 5.5 medium (or Opus 5.5 medium) |
-| New exercises or quiz questions in an existing lesson, small UI change, fixing a failing check | Opus 5.5 medium |
-| New lesson or new stage (planning, ServiceNow facts, extending checks), mock / runner changes in `src/js/`, anything that touches her PDI | Opus 5.5 high |
+| Building one planned lesson, or adding exercises / quiz questions to an existing one, when no new mock / runner support is needed | Sonnet 5.5 medium |
+| Small UI change, fixing a failing check | Opus 5.5 medium |
+| Planning a new stage, mock / runner changes in `src/js/`, anything that runs on her real PDI | Opus 5.5 high |
 | A review of a whole stage, or a bug nobody can explain | Opus 5.5 high (or max for a full audit) |
 
 Whatever the setting: one lesson per request, and `npm run check` + `npm run build` must pass before merging.
